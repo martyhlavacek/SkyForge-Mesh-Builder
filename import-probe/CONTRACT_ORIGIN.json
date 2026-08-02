@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "skyforge.import-probe-contract-origin.v1",
+  "producerCommit": "28bbe06e058dcce03ba652dc89fefda8b6fda691",
+  "producerSourceBindingSha256": "80b5d1cf259d51ec35d6e9c685bdd9525e358082dac69ebc8c2ab375f5d54763",
+  "contractProfile": "skyforge.vmp-content-digest.v1",
+  "vmpPackageVersion": "1.0.0",
+  "copiedAtReleaseBuild": true,
+  "runtimeProducerImportPermitted": false
+}

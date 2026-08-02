@@ -1,0 +1,39 @@
+{
+  "blenderPath": "/Applications/Blender.app/Contents/MacOS/Blender",
+  "openai": {
+    "stages": {
+      "beautyExplore": {
+        "model": "gpt-image-2",
+        "quality": "low",
+        "size": "1536x1024",
+        "candidateCount": 2
+      },
+      "beautyRefine": {
+        "model": "gpt-image-2",
+        "quality": "medium",
+        "size": "1536x1024",
+        "candidateCount": 1
+      },
+      "authorityDraft": {
+        "model": "gpt-image-2",
+        "quality": "low",
+        "size": "1024x1024",
+        "candidateCount": 2
+      },
+      "authorityFinal": {
+        "model": "gpt-image-2",
+        "quality": "low",
+        "size": "1024x1024",
+        "candidateCount": 1
+      }
+    },
+    "budget": {
+      "perRequestUsdMax": 0.05,
+      "perAssetUsdMax": 0.5,
+      "perSessionUsdMax": 2.0,
+      "confirmationThresholdUsd": 0.02
+    }
+  },
+  "importProbeRoot": "/absolute/path/to/SkyForge_Sprite_Foundry_Import_Probe_v0.1.1",
+  "importProbePython": "/absolute/path/to/import-probe-venv/bin/python"
+}

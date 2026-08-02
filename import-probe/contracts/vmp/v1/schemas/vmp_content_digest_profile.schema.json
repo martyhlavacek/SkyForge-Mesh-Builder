@@ -1,0 +1,82 @@
+{
+  "$id": "https://skyforge.local/contracts/vmp/v1/vmp_content_digest_profile.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "canonicalization": {
+      "const": "RFC8785-JCS",
+      "minLength": 1,
+      "type": "string"
+    },
+    "hashAlgorithm": {
+      "const": "sha256",
+      "minLength": 1,
+      "type": "string"
+    },
+    "includedManifestFields": {
+      "const": [
+        "schemaVersion",
+        "packageVersion",
+        "assetId",
+        "assetVersion",
+        "craftProfileId",
+        "producer.foundry",
+        "producer.sidecarVersion",
+        "producer.providerId",
+        "producer.providerModel",
+        "producer.identityModel",
+        "contracts.coordinateContract",
+        "contracts.assetRoleContract",
+        "contracts.frameContract",
+        "contracts.materialContract",
+        "contracts.minimumSpriteFoundryImporter",
+        "source.authoritySetSha256",
+        "source.providerEvidencePackageSha256",
+        "supersession.supersedesPackageContentDigest",
+        "supersession.reasonCode",
+        "contentIndex"
+      ],
+      "type": "array"
+    },
+    "optionalFieldEncoding": {
+      "additionalProperties": false,
+      "properties": {
+        "absent": {
+          "const": "omitted",
+          "minLength": 1,
+          "type": "string"
+        },
+        "explicitNull": {
+          "const": "prohibited",
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "absent",
+        "explicitNull"
+      ],
+      "type": "object"
+    },
+    "profileVersion": {
+      "const": "skyforge.vmp-content-digest.v1",
+      "minLength": 1,
+      "type": "string"
+    },
+    "unknownFieldPolicy": {
+      "const": "excluded",
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "profileVersion",
+    "canonicalization",
+    "hashAlgorithm",
+    "includedManifestFields",
+    "unknownFieldPolicy",
+    "optionalFieldEncoding"
+  ],
+  "title": "SkyForge VMP v1 semantic digest profile",
+  "type": "object"
+}

@@ -1,0 +1,83 @@
+{
+  "executedSeparately": true,
+  "totals": {
+    "tests": 70,
+    "passed": 70,
+    "skipped": 0,
+    "failed": 0
+  },
+  "runs": [
+    {
+      "module": "tests/test_authority_mesh.py",
+      "tests": 7,
+      "passed": 7,
+      "skipped": 0,
+      "failed": 0,
+      "exitCode": 0,
+      "elapsedSeconds": 23.19
+    },
+    {
+      "module": "tests/test_image_governance.py",
+      "tests": 11,
+      "passed": 11,
+      "skipped": 0,
+      "failed": 0,
+      "exitCode": 0,
+      "elapsedSeconds": 0.23
+    },
+    {
+      "module": "tests/test_image_pricing.py",
+      "tests": 5,
+      "passed": 5,
+      "skipped": 0,
+      "failed": 0,
+      "exitCode": 0,
+      "elapsedSeconds": 0.01
+    },
+    {
+      "module": "tests/test_openai_client.py",
+      "tests": 4,
+      "passed": 4,
+      "skipped": 0,
+      "failed": 0,
+      "exitCode": 0,
+      "elapsedSeconds": 0.02
+    },
+    {
+      "module": "tests/test_pipeline.py",
+      "tests": 17,
+      "passed": 17,
+      "skipped": 0,
+      "failed": 0,
+      "exitCode": 0,
+      "elapsedSeconds": 6.65
+    },
+    {
+      "module": "tests/test_release_sealing.py",
+      "tests": 4,
+      "passed": 4,
+      "skipped": 0,
+      "failed": 0,
+      "exitCode": 0,
+      "elapsedSeconds": 0.02
+    },
+    {
+      "module": "tests/test_server_source.py",
+      "tests": 17,
+      "passed": 17,
+      "skipped": 0,
+      "failed": 0,
+      "exitCode": 0,
+      "elapsedSeconds": 0.09
+    },
+    {
+      "module": "tests/test_settings_store.py",
+      "tests": 5,
+      "passed": 5,
+      "skipped": 0,
+      "failed": 0,
+      "exitCode": 0,
+      "elapsedSeconds": 0.02
+    }
+  ]
+}

@@ -1,0 +1,104 @@
+{
+  "$id": "https://skyforge.local/contracts/vmp/v1/licensing_and_terms.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "assetCommercialUseAsserted": {
+      "type": "boolean"
+    },
+    "authorityRedistribution": {
+      "additionalProperties": false,
+      "properties": {
+        "basis": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "permitted": {
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "const": "unknown",
+              "minLength": 1,
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "required": [
+        "permitted",
+        "basis"
+      ],
+      "type": "object"
+    },
+    "provider": {
+      "additionalProperties": false,
+      "properties": {
+        "accountTier": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "modelAvailabilityRisk": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "modelId": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "pricingSource": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "pricingVerifiedAt": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [],
+      "type": "object"
+    },
+    "schemaVersion": {
+      "const": "skyforge.licensing-terms.v1",
+      "minLength": 1,
+      "type": "string"
+    },
+    "termsSnapshots": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "recordedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "source": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "versionOrDate": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "versionOrDate",
+          "recordedAt"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "assetCommercialUseAsserted",
+    "termsSnapshots",
+    "authorityRedistribution",
+    "provider"
+  ],
+  "title": "Commercial-use and redistribution assertions",
+  "type": "object"
+}

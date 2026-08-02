@@ -1,0 +1,72 @@
+{
+  "schemaVersion": "skyforge.geometry-comparison.v1",
+  "authority": {
+    "path": "samples/v060_field_gunship_authority.png",
+    "sha256": "81deecf91afdc833cdffdc10cba95706afe22484621ba575edb46583bddc5f08"
+  },
+  "baselineVersion": "0.5.3",
+  "candidateVersion": "0.6.0",
+  "baseline": {
+    "sha256": "ffda668ddb27a7fe43dd4ea968e40e7f1da7ea718bd144e30c82e1c127517f82",
+    "vertexCount": 19720,
+    "triangleCount": 39460,
+    "flatBellySurfaceFraction": 0.323049,
+    "verticalWallSurfaceFraction": 0.313233,
+    "combinedConstructionArtifactFraction": 0.636282,
+    "componentCount": 1,
+    "eulerNumber": -10,
+    "genus": 6.0,
+    "watertight": true,
+    "windingConsistent": true,
+    "extentsTarget": [
+      5.0875,
+      4.88125,
+      0.857019
+    ]
+  },
+  "candidate": {
+    "sha256": "a1b5dc3026c4c181ca7ae9c5ce44e13df38dcddd0fe7652ba92b4a4dbb7ad0a5",
+    "vertexCount": 54208,
+    "triangleCount": 108440,
+    "flatBellySurfaceFraction": 0.010549,
+    "verticalWallSurfaceFraction": 0.007132,
+    "combinedConstructionArtifactFraction": 0.017681,
+    "componentCount": 1,
+    "eulerNumber": -12,
+    "genus": 7.0,
+    "watertight": true,
+    "windingConsistent": true,
+    "extentsTarget": [
+      5.328125,
+      5.113281,
+      0.896141
+    ]
+  },
+  "candidateIdentityMetrics": {
+    "silhouetteIoU": 0.980687,
+    "aspectError": 0.002913,
+    "centroidDistance": 0.001486,
+    "widthProfileMAE": 0.007894
+  },
+  "candidateBlenderImportIdentityMetrics": {
+    "silhouetteIoU": 0.980849,
+    "aspectError": 0.002913,
+    "centroidDistance": 0.001343,
+    "widthProfileMAE": 0.007826
+  },
+  "candidateSectionThickness": {
+    "minimum": 0.014868,
+    "p05": 0.045642,
+    "median": 0.22208,
+    "p95": 0.731893,
+    "maximum": 0.899384,
+    "rootMedian": 0.566806,
+    "tipMedian": 0.109456,
+    "tipToRootRatio": 0.193109
+  },
+  "improvement": {
+    "flatBellyReductionFraction": 0.3125,
+    "verticalWallReductionFraction": 0.306101,
+    "combinedArtifactReductionFraction": 0.618601
+  }
+}

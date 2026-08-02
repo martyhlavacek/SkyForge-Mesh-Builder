@@ -1,0 +1,785 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>SkyForge Mesh Builder</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1>SkyForge Mesh Builder</h1>
+      <p>Beauty concept → approved top-down authority → generated static spacecraft mesh → Blender validation and export.</p>
+    </div>
+    <div class="header-actions">
+      <button type="button" id="openSettings" class="secondary-button">Settings</button>
+      <span class="version">v{{ version }}</span>
+    </div>
+  </header>
+
+  <dialog id="settingsDialog">
+    <form id="settingsForm" method="dialog">
+      <div class="dialog-header">
+        <div>
+          <h2>Settings</h2>
+          <p>Secrets stay in macOS Keychain. Non-secret preferences stay in local <code>config.json</code>.</p>
+        </div>
+        <button type="button" id="closeSettings" class="icon-button" aria-label="Close">×</button>
+      </div>
+      <h3>OpenAI</h3>
+      <p id="apiKeyStatus" class="field-note"></p>
+      <label>OpenAI API key
+        <input type="password" id="settingsApiKey" autocomplete="off" placeholder="Leave blank to keep the saved key">
+      </label>
+      <label class="check"><input type="checkbox" id="settingsRemoveApiKey"> Remove the saved API key</label>
+      <p class="field-note">Each governed stage has an explicit model, quality, size and candidate count. Unpriced combinations are denied before transport.</p>
+      {% for key, label in [('beautyExplore','Beauty exploration'),('beautyRefine','Beauty refinement'),('authorityDraft','Authority draft'),('authorityFinal','Authority final')] %}
+      <fieldset class="stage-settings" data-stage="{{ key }}">
+        <legend>{{ label }}</legend>
+        <div class="row four">
+          <label>Model<input id="settings-{{ key }}-model"></label>
+          <label>Quality<select id="settings-{{ key }}-quality"><option>low</option><option>medium</option><option>high</option></select></label>
+          <label>Size<select id="settings-{{ key }}-size"><option>1024x1024</option><option>1536x1024</option><option>1024x1536</option></select></label>
+          <label>Candidates<input type="number" id="settings-{{ key }}-count" min="1" max="4"></label>
+        </div>
+      </fieldset>
+      {% endfor %}
+      <h3>Image budgets (USD)</h3>
+      <div class="row four">
+        <label>Per request<input type="number" id="budgetPerRequest" min="0" step="0.001"></label>
+        <label>Per asset<input type="number" id="budgetPerAsset" min="0" step="0.01"></label>
+        <label>Per session<input type="number" id="budgetPerSession" min="0" step="0.01"></label>
+        <label>Confirmation threshold<input type="number" id="budgetConfirmation" min="0" step="0.001"></label>
+      </div>
+      <button type="button" id="testOpenAI" class="secondary-button">Test OpenAI connection</button>
+
+      <h3>Blender</h3>
+      <label>Blender executable
+        <input id="settingsBlenderPath" placeholder="Leave blank to keep the saved executable">
+        <small>The saved absolute path is never echoed back to the browser.</small>
+      </label>
+      <button type="button" id="testBlender" class="secondary-button">Test Blender</button>
+      <div id="settingsStatus" class="status">Ready.</div>
+      <div class="dialog-actions">
+        <button type="button" id="saveSettings">Save settings</button>
+      </div>
+    </form>
+  </dialog>
+
+  <section class="notice {{ 'good' if blender_available else 'warn' }}">
+    {% if blender_available %}
+      Blender is configured. Its absolute executable path is not disclosed to the browser.
+    {% else %}
+      Blender is not configured. Open <strong>Settings</strong> and confirm the Blender path before final rendering.
+    {% endif %}
+  </section>
+
+  <section class="notice {{ 'good' if openai_available else 'warn' }}">
+    {% if openai_available %}
+      OpenAI image generation configured. Generate economy beauty candidates first, approve one, then generate governed top-down authority candidates from that approved concept.
+    {% else %}
+      OpenAI image generation is not configured. Open <strong>Settings</strong>, enter the API key, test the connection, and save it to macOS Keychain.
+    {% endif %}
+  </section>
+
+  <section class="grid">
+    <section>
+      <h2>Concept Lab</h2>
+      <form id="beautyForm">
+        <label>Craft profile
+          <select name="profileId" id="conceptProfileId">
+            {% for p in profiles %}<option value="{{ p.id }}">{{ p.name }} — scale {{ p.scale }}</option>{% endfor %}
+          </select>
+        </label>
+        <label>Game asset ID
+          <input name="assetId" id="conceptAssetId" value="enemy.military.gunship.01">
+        </label>
+        <label>Beauty concept prompt
+          <textarea name="userPrompt" id="conceptPrompt" rows="4" placeholder="Example: heavy military gunship with armored split cockpit, side engine housings, dorsal guns, late-1990s PC-shmup feel" required></textarea>
+        </label>
+        <label>Governed stage
+          <select name="stage" id="beautyStage"><option value="beautyExplore">Beauty exploration</option><option value="beautyRefine">Beauty refinement</option></select>
+        </label>
+        <div id="beautyEstimate" class="cost-strip">Calculating governed estimate…</div>
+        <label class="check" id="beautyConfirmWrap" hidden><input type="checkbox" id="beautyConfirm"> Confirm this estimated charge</label>
+        <input type="hidden" name="costConfirmed" id="beautyCostConfirmed" value="false">
+        <button type="submit" id="beautyGenerate" disabled>Generate beauty concepts</button>
+      </form>
+      <div id="beautyStatus" class="status">Ready.</div>
+      <div id="beautyResults" class="results"></div>
+
+      <form id="authorityForm">
+        <h3>Generate top-down authority from approved beauty</h3>
+        <p class="field-note">Select one beauty image first. The top-down authority images are generated from that exact approved beauty candidate.</p>
+        <label>Governed stage
+          <select name="stage" id="authorityStage"><option value="authorityDraft">Authority draft</option><option value="authorityFinal">Authority final</option></select>
+        </label>
+        <div id="authorityEstimate" class="cost-strip">Calculating governed lower-bound estimate…</div>
+        <label class="check" id="authorityConfirmWrap" hidden><input type="checkbox" id="authorityConfirm"> Confirm this estimated charge</label>
+        <input type="hidden" name="costConfirmed" id="authorityCostConfirmed" value="false">
+        <button type="submit" id="authorityGenerate" disabled>Generate top-down authority</button>
+      </form>
+      <div id="authorityStatus" class="status">No approved beauty selected yet.</div>
+      <div id="authorityResults" class="results"></div>
+    </section>
+
+    <section>
+      <form id="jobForm">
+        <h2>Mesh-generation input</h2>
+        <label>Mode
+          <select name="experiment" id="experiment" required>
+            {% for key, label in experiments.items() %}<option value="{{ key }}">{{ label }}</option>{% endfor %}
+          </select>
+        </label>
+        <div class="contract-strip" aria-label="Frozen VMP contract">
+          <div><span>Provider</span><strong id="providerLabel">Local deterministic — zero provider cost</strong></div>
+          <div><span>Asset role</span><strong>Airborne — moving</strong></div>
+          <div><span>Collision</span><strong>Non-authoritative hint only</strong></div>
+        </div>
+        <label>Craft profile
+          <select name="profileId" id="meshProfileId">
+            {% for p in profiles %}<option value="{{ p.id }}">{{ p.name }} — scale {{ p.scale }}</option>{% endfor %}
+          </select>
+        </label>
+        <label>Game asset ID
+          <input name="assetId" id="meshAssetId" value="enemy.military.gunship.01" required>
+        </label>
+        <label>Approved top-down authority upload
+          <input type="file" name="authority" id="authorityUpload" accept=".png,.jpg,.jpeg,.webp">
+        </label>
+        <label class="check" id="manualAuthorityCertificationWrap">
+          <input type="checkbox" name="manualAuthorityCertified" id="manualAuthorityCertified">
+          I certify this manual upload is a strict top-down, axis-aligned authority image—not a 3/4 beauty render.
+        </label>
+        <div id="authorityUploadStatus" class="status">No manual authority selected.</div>
+        <input type="hidden" name="authorityGeneratedPath" id="authorityGeneratedPath">
+        <input type="hidden" name="beautyRunId" id="beautyRunId">
+        <input type="hidden" name="beautyFilename" id="beautyFilename">
+        <input type="hidden" name="authorityRunId" id="authorityRunId">
+        <input type="hidden" name="authorityFilename" id="authorityFilename">
+        <input type="hidden" name="conceptPrompt" id="meshConceptPrompt">
+        <p class="field-note" id="selectedAuthorityNote">Upload a top-down authority image, or choose one from the Concept Lab above.</p>
+        <fieldset id="localVmpFields" class="vmp-fields">
+          <legend>Validated Mesh Package export</legend>
+          <p class="field-note">These declarations do not bypass validation. Export becomes available only after this exact local mesh passes all gates and the separately packaged Sprite Foundry Import Probe issues an accepted Import Receipt.</p>
+          <div class="row">
+            <label>Asset version
+              <input name="assetVersion" value="1.0.0" pattern="[0-9]+\.[0-9]+\.[0-9]+">
+            </label>
+            <label>Authority redistribution
+              <select name="authorityRedistributionPermission">
+                <option value="unknown">Unknown — hash only</option>
+                <option value="prohibited">Prohibited — hash only</option>
+                <option value="permitted">Permitted — embed PNG authority</option>
+              </select>
+            </label>
+          </div>
+          <label>Authority terms basis
+            <input name="authorityTermsBasis" placeholder="Record the licence, ownership, or permission basis">
+          </label>
+          <label class="check"><input type="checkbox" name="assetCommercialUseAsserted"> Commercial use is permitted for this asset</label>
+          <label class="check"><input type="checkbox" name="approveForSpriteFoundry"> Prepare this job for Sprite Foundry distribution after all gates pass</label>
+        </fieldset>
+
+        <div id="providerMeshFields" hidden>
+          <label>Provider-generated static mesh
+            <input type="file" name="mesh" accept=".glb,.gltf,.obj,.fbx">
+          </label>
+          <p class="field-note">Provider Mesh mode evaluates an existing static mesh. Armature-backed or rigged files are rejected.</p>
+          <h2>Provider provenance</h2>
+          <div class="row three">
+            <label>Provider<input name="provider" value="Hunyuan3D"></label>
+            <label>Provider/model version<input name="providerVersion" value="record-exact-version"></label>
+            <label>Retrieved date<input type="date" name="retrievedDate" value="{{ today }}"></label>
+          </div>
+          <label>Licence or terms identifier
+            <input name="license" value="verify-before-provider-evaluation">
+          </label>
+          <label>Licence/terms URL
+            <input name="licenseUrl" placeholder="https://provider.example/terms">
+          </label>
+          <label class="check"><input type="checkbox" name="approvedForDistribution"> Approved for distribution</label>
+        </div>
+
+        <h2>Render controls</h2>
+        <div class="row three">
+          <label>Bank °<input type="number" name="bankDegrees" value="18" min="0" max="35"></label>
+          <label>Master resolution<input type="number" name="masterResolution" value="384" min="256" max="512" step="64"></label>
+          <label>Camera pitch °<input type="number" name="cameraPitchDegrees" value="20" min="0" max="45"></label>
+        </div>
+        <p class="field-note" id="authorityAxisNote">Authority Mesh uses the fixed verified coordinate contract: +Y forward, +Z up.</p>
+        <div class="row" id="providerAxisFields" hidden>
+          <label>Provider mesh forward axis
+            <select name="forwardAxis"><option>+Y</option><option>-Y</option><option>+X</option><option>-X</option><option>+Z</option><option>-Z</option></select>
+          </label>
+          <label>Provider mesh up axis
+            <select name="upAxis"><option>+Z</option><option>-Z</option><option>+Y</option><option>-Y</option><option>+X</option><option>-X</option></select>
+          </label>
+        </div>
+        <p class="field-note">Thrusters remain disabled until mesh identity is stable across more craft classes. Authority Mesh mode fails closed if either the local identity gate or the Blender gate fails.</p>
+        <button type="submit" id="generateMeshButton">Generate and validate mesh</button>
+      </form>
+
+      <aside>
+        <h2>Fail-closed gates</h2>
+        <ol>
+          <li>Generate and approve a 3/4 beauty concept.</li>
+          <li>Generate a top-down authority from that approved beauty.</li>
+          <li>Reject perspective/3/4 uploads, verify governed lineage, then read and hash approved authority pixels.</li>
+          <li>Generate a closed textured two-sided mesh with a sculpted underside from its exact silhouette.</li>
+          <li>Require raw GLB and emulated Blender-import silhouette IoU ≥ 0.94 before Blender starts.</li>
+          <li>Require Blender top-render IoU ≥ 0.94 before export is accepted.</li>
+          <li>Require the independent Sprite Foundry Import Probe to issue an accepted receipt before VMP download.</li>
+        </ol>
+        <div id="status" class="status">Ready.</div>
+      </aside>
+    </section>
+  </section>
+</main>
+<script>
+const csrf = {{ csrf_token|tojson }};
+const initialSettings = {{ current_settings|tojson }};
+const settingsDialog = document.querySelector('#settingsDialog');
+const settingsStatus = document.querySelector('#settingsStatus');
+const settingsApiKey = document.querySelector('#settingsApiKey');
+const settingsRemoveApiKey = document.querySelector('#settingsRemoveApiKey');
+const stageKeys = ['beautyExplore', 'beautyRefine', 'authorityDraft', 'authorityFinal'];
+const budgetPerRequest = document.querySelector('#budgetPerRequest');
+const budgetPerAsset = document.querySelector('#budgetPerAsset');
+const budgetPerSession = document.querySelector('#budgetPerSession');
+const budgetConfirmation = document.querySelector('#budgetConfirmation');
+const settingsBlenderPath = document.querySelector('#settingsBlenderPath');
+const apiKeyStatus = document.querySelector('#apiKeyStatus');
+const beautyForm = document.querySelector('#beautyForm');
+const authorityForm = document.querySelector('#authorityForm');
+const jobForm = document.querySelector('#jobForm');
+const beautyStatus = document.querySelector('#beautyStatus');
+const authorityStatus = document.querySelector('#authorityStatus');
+const beautyResults = document.querySelector('#beautyResults');
+const authorityResults = document.querySelector('#authorityResults');
+const statusBox = document.querySelector('#status');
+const selectedAuthorityNote = document.querySelector('#selectedAuthorityNote');
+const experiment = document.querySelector('#experiment');
+const providerMeshFields = document.querySelector('#providerMeshFields');
+const localVmpFields = document.querySelector('#localVmpFields');
+const providerLabel = document.querySelector('#providerLabel');
+const providerAxisFields = document.querySelector('#providerAxisFields');
+const authorityAxisNote = document.querySelector('#authorityAxisNote');
+const meshProfileId = document.querySelector('#meshProfileId');
+const conceptProfileId = document.querySelector('#conceptProfileId');
+const meshAssetId = document.querySelector('#meshAssetId');
+const conceptAssetId = document.querySelector('#conceptAssetId');
+const authorityGeneratedPath = document.querySelector('#authorityGeneratedPath');
+const authorityUpload = document.querySelector('#authorityUpload');
+const authorityUploadStatus = document.querySelector('#authorityUploadStatus');
+const manualAuthorityCertified = document.querySelector('#manualAuthorityCertified');
+const generateMeshButton = document.querySelector('#generateMeshButton');
+const beautyRunId = document.querySelector('#beautyRunId');
+const beautyFilename = document.querySelector('#beautyFilename');
+const authorityRunId = document.querySelector('#authorityRunId');
+const authorityFilename = document.querySelector('#authorityFilename');
+const meshConceptPrompt = document.querySelector('#meshConceptPrompt');
+const conceptPrompt = document.querySelector('#conceptPrompt');
+const beautyStage = document.querySelector('#beautyStage');
+const authorityStage = document.querySelector('#authorityStage');
+const beautyEstimate = document.querySelector('#beautyEstimate');
+const authorityEstimate = document.querySelector('#authorityEstimate');
+const beautyGenerate = document.querySelector('#beautyGenerate');
+const authorityGenerate = document.querySelector('#authorityGenerate');
+const beautyConfirm = document.querySelector('#beautyConfirm');
+const authorityConfirm = document.querySelector('#authorityConfirm');
+const beautyConfirmWrap = document.querySelector('#beautyConfirmWrap');
+const authorityConfirmWrap = document.querySelector('#authorityConfirmWrap');
+const beautyCostConfirmed = document.querySelector('#beautyCostConfirmed');
+const authorityCostConfirmed = document.querySelector('#authorityCostConfirmed');
+let selectedBeauty = null;
+let pollTimer = null;
+let manualAuthorityValidationPassed = false;
+
+function show(node, text, kind='') {
+  node.className = `status ${kind}`;
+  node.textContent = String(text ?? '');
+}
+
+function appendSafeLink(node, text, href) {
+  if (typeof href !== 'string' || !href.startsWith('/api/jobs/')) return;
+  const separator = document.createElement('br');
+  const link = document.createElement('a');
+  link.href = href;
+  link.textContent = text;
+  node.append(separator, link);
+}
+
+async function requestVmp(job, button) {
+  button.disabled = true;
+  const original = button.textContent;
+  button.textContent = 'Building and independently probing VMP…';
+  try {
+    const response = await fetch(`/api/jobs/${encodeURIComponent(job.jobId)}/vmp`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-SkyForge-CSRF': csrf},
+      body: JSON.stringify({approveCurrentArtifact: true}),
+    });
+    const payload = await response.json();
+    if (!response.ok || !payload.ok) {
+      show(statusBox, `VMP export failed closed: ${payload.error || response.statusText}`, 'bad');
+      return;
+    }
+    show(statusBox, `VMP accepted by the independent Import Probe. Semantic digest: ${payload.packageContentDigest}. Transport SHA-256: ${payload.archiveSha256}.`, 'good');
+    appendSafeLink(statusBox, 'Download accepted .sfmeshpack', payload.download);
+  } catch (error) {
+    show(statusBox, `VMP export request failed: ${error.message}`, 'bad');
+  } finally {
+    button.disabled = false;
+    button.textContent = original;
+  }
+}
+
+function showRenderedJob(node, job) {
+  const verification = job.verification || {};
+  show(node, `Mesh generated and strict contracts passed. Provider: ${job.providerLabel}. Asset role: ${job.assetRoleLabel}. Blender silhouette IoU: ${verification.silhouetteIoU ?? 'recorded'}. Collision remains a non-authoritative hint.`, 'good');
+  appendSafeLink(node, 'Download verified review package', job.download);
+  if (job.vmpReady && job.vmp) {
+    const details = document.createElement('p');
+    details.className = 'digest-summary';
+    details.textContent = `VMP semantic digest ${job.vmp.packageContentDigest}; archive SHA-256 ${job.vmp.archiveSha256}; Import Probe accepted (${job.vmp.authorityReverification}).`;
+    node.append(details);
+    appendSafeLink(node, 'Download accepted .sfmeshpack', job.vmp.download);
+  } else if (job.vmpEligible) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'secondary-button vmp-export-button';
+    button.textContent = 'Approve this exact artifact and export VMP';
+    button.addEventListener('click', () => requestVmp(job, button));
+    node.append(document.createElement('br'), button);
+  } else {
+    const note = document.createElement('p');
+    note.className = 'field-note';
+    note.textContent = job.vmpProbeConfigured
+      ? 'VMP export was not approved for this job.'
+      : 'VMP download remains unavailable until the separately bound Import Probe environment is configured.';
+    node.append(note);
+  }
+}
+
+function updateMode() {
+  const providerMode = experiment.value === 'provider_mesh';
+  providerMeshFields.hidden = !providerMode;
+  localVmpFields.hidden = providerMode;
+  providerAxisFields.hidden = !providerMode;
+  authorityAxisNote.hidden = providerMode;
+  providerLabel.textContent = providerMode
+    ? 'Uploaded provider mesh — evaluation only'
+    : 'Local deterministic — zero provider cost';
+}
+experiment.addEventListener('change', updateMode);
+updateMode();
+
+conceptProfileId.addEventListener('change', () => meshProfileId.value = conceptProfileId.value);
+meshAssetId.addEventListener('input', () => conceptAssetId.value = meshAssetId.value);
+conceptAssetId.addEventListener('input', () => meshAssetId.value = conceptAssetId.value);
+
+function clearGeneratedAuthoritySelection() {
+  authorityGeneratedPath.value = '';
+  authorityRunId.value = '';
+  authorityFilename.value = '';
+  beautyRunId.value = '';
+  beautyFilename.value = '';
+}
+
+async function validateManualAuthority() {
+  manualAuthorityValidationPassed = false;
+  const file = authorityUpload.files[0];
+  if (!file) {
+    show(authorityUploadStatus, 'No manual authority selected.');
+    return false;
+  }
+  clearGeneratedAuthoritySelection();
+  show(authorityUploadStatus, 'Validating top-down authority suitability before generation…');
+  const data = new FormData();
+  data.append('profileId', meshProfileId.value);
+  data.append('authority', file);
+  if (manualAuthorityCertified.checked) data.append('manualAuthorityCertified', 'on');
+  try {
+    const response = await fetch('/api/authority/validate', {
+      method: 'POST',
+      headers: {'X-SkyForge-CSRF': csrf},
+      body: data,
+    });
+    const payload = await response.json();
+    if (!response.ok || !payload.ok || !payload.passed) {
+      show(authorityUploadStatus, `Rejected before generation: ${payload.error || response.statusText}`, 'bad');
+      return false;
+    }
+    const metrics = payload.report?.metrics || {};
+    manualAuthorityValidationPassed = true;
+    const certification = manualAuthorityCertified.checked
+      ? 'Certification recorded.'
+      : 'Check the certification box before generation.';
+    show(
+      authorityUploadStatus,
+      `Top-down suitability passed. Mirror IoU ${metrics.bilateralSilhouetteIoU ?? 'recorded'}; axis misalignment ${metrics.majorAxisMisalignmentDegrees ?? 'recorded'}°. ${certification}`,
+      manualAuthorityCertified.checked ? 'good' : 'warn',
+    );
+    return true;
+  } catch (error) {
+    show(authorityUploadStatus, `Authority validation request failed: ${error.message}`, 'bad');
+    return false;
+  }
+}
+
+authorityUpload.addEventListener('change', validateManualAuthority);
+manualAuthorityCertified.addEventListener('change', validateManualAuthority);
+meshProfileId.addEventListener('change', () => {
+  conceptProfileId.value = meshProfileId.value;
+  if (authorityUpload.files.length) validateManualAuthority();
+});
+
+function imageCard(record, buttonText, clickHandler) {
+  const card = document.createElement('div');
+  card.className = 'result-card';
+  const img = document.createElement('img');
+  img.src = record.url;
+  img.alt = record.label;
+  const meta = document.createElement('div');
+  meta.className = 'result-meta';
+  const label = document.createElement('strong');
+  label.textContent = record.label;
+  const lineBreak = document.createElement('br');
+  const filename = document.createElement('small');
+  filename.textContent = record.filename;
+  meta.append(label, lineBreak, filename);
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.textContent = buttonText;
+  button.addEventListener('click', () => clickHandler(record, card));
+  card.append(img, meta, button);
+  return card;
+}
+
+function stageControl(stage, field) {
+  return document.querySelector(`#settings-${stage}-${field}`);
+}
+
+function updateSettingsUI(payload) {
+  const openai = payload.openai || {};
+  apiKeyStatus.textContent = openai.configured
+    ? `API key configured in ${openai.keySource || 'secure storage'} (${openai.maskedKey || 'saved'}).`
+    : 'No OpenAI API key is configured.';
+  const stages = openai.stages || {};
+  stageKeys.forEach(stage => {
+    const value = stages[stage] || {};
+    stageControl(stage, 'model').value = value.model || '';
+    stageControl(stage, 'quality').value = value.quality || 'low';
+    stageControl(stage, 'size').value = value.size || '1024x1024';
+    stageControl(stage, 'count').value = value.candidateCount || 1;
+  });
+  const budget = openai.budget || {};
+  budgetPerRequest.value = budget.perRequestUsdMax ?? 0.05;
+  budgetPerAsset.value = budget.perAssetUsdMax ?? 0.50;
+  budgetPerSession.value = budget.perSessionUsdMax ?? 2.00;
+  budgetConfirmation.value = budget.confirmationThresholdUsd ?? 0.02;
+}
+
+updateSettingsUI(initialSettings);
+
+let estimateState = {beauty: null, authority: null};
+
+async function refreshEstimate(kind) {
+  const isBeauty = kind === 'beauty';
+  const stage = isBeauty ? beautyStage.value : authorityStage.value;
+  const node = isBeauty ? beautyEstimate : authorityEstimate;
+  const button = isBeauty ? beautyGenerate : authorityGenerate;
+  const confirm = isBeauty ? beautyConfirm : authorityConfirm;
+  const confirmWrap = isBeauty ? beautyConfirmWrap : authorityConfirmWrap;
+  const hidden = isBeauty ? beautyCostConfirmed : authorityCostConfirmed;
+  button.disabled = true;
+  show(node, 'Calculating governed estimate…');
+  try {
+    const response = await fetch('/api/concepts/estimate', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-SkyForge-CSRF': csrf},
+      body: JSON.stringify({stage, assetId: conceptAssetId.value}),
+    });
+    const payload = await response.json();
+    if (!response.ok || !payload.ok) {
+      estimateState[kind] = null;
+      show(node, `Estimate unavailable: ${payload.error || response.statusText}`, 'bad');
+      confirmWrap.hidden = true;
+      return;
+    }
+    estimateState[kind] = payload;
+    const estimate = payload.estimate;
+    const lowerBound = estimate.lowerBound ? ' lower-bound' : '';
+    const message = `$${Number(estimate.estimatedOutputUsd).toFixed(3)}${lowerBound} · ${estimate.model} / ${estimate.quality} / ${estimate.size} / ${estimate.candidateCount} candidate(s) · Asset: $${Number(payload.cumulativeAssetSpendUsd).toFixed(3)} / $${Number(payload.budget.perAssetUsdMax).toFixed(2)} · Session: $${Number(payload.cumulativeSessionSpendUsd).toFixed(3)} / $${Number(payload.budget.perSessionUsdMax).toFixed(2)} · pricing ${estimate.pricingRetrieved}`;
+    show(node, payload.allowed ? message : `${message} · ${payload.denialReasons.join('; ')}`, payload.allowed ? 'good' : 'bad');
+    confirmWrap.hidden = !payload.requiresConfirmation;
+    if (!payload.requiresConfirmation) confirm.checked = false;
+    hidden.value = payload.requiresConfirmation && confirm.checked ? 'true' : 'false';
+    const selectionReady = isBeauty || Boolean(selectedBeauty);
+    button.disabled = !payload.allowed || !selectionReady || (payload.requiresConfirmation && !confirm.checked);
+  } catch (error) {
+    estimateState[kind] = null;
+    show(node, `Estimate request failed: ${error.message}`, 'bad');
+  }
+}
+
+function confirmationChanged(kind) {
+  const isBeauty = kind === 'beauty';
+  const state = estimateState[kind];
+  const confirm = isBeauty ? beautyConfirm : authorityConfirm;
+  const hidden = isBeauty ? beautyCostConfirmed : authorityCostConfirmed;
+  const button = isBeauty ? beautyGenerate : authorityGenerate;
+  hidden.value = confirm.checked ? 'true' : 'false';
+  button.disabled = !state || !state.allowed || (!isBeauty && !selectedBeauty) || (state.requiresConfirmation && !confirm.checked);
+}
+
+beautyStage.addEventListener('change', () => refreshEstimate('beauty'));
+authorityStage.addEventListener('change', () => refreshEstimate('authority'));
+beautyConfirm.addEventListener('change', () => confirmationChanged('beauty'));
+authorityConfirm.addEventListener('change', () => confirmationChanged('authority'));
+conceptAssetId.addEventListener('change', () => { refreshEstimate('beauty'); refreshEstimate('authority'); });
+refreshEstimate('beauty');
+refreshEstimate('authority');
+
+document.querySelector('#openSettings').addEventListener('click', () => settingsDialog.showModal());
+document.querySelector('#closeSettings').addEventListener('click', () => settingsDialog.close());
+
+document.querySelector('#testOpenAI').addEventListener('click', async () => {
+  show(settingsStatus, 'Testing OpenAI connection…');
+  const key = settingsApiKey.value.trim();
+  try {
+    const response = await fetch('/api/settings/test-openai', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-SkyForge-CSRF': csrf},
+      body: JSON.stringify({apiKey: key}),
+    });
+    const payload = await response.json();
+    show(settingsStatus, payload.ok ? payload.message : payload.error, payload.ok ? 'good' : 'bad');
+  } catch (error) {
+    show(settingsStatus, `OpenAI test failed: ${error.message}`, 'bad');
+  }
+});
+
+document.querySelector('#testBlender').addEventListener('click', async () => {
+  show(settingsStatus, 'Testing Blender…');
+  try {
+    const response = await fetch('/api/settings/test-blender', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-SkyForge-CSRF': csrf},
+      body: JSON.stringify({path: settingsBlenderPath.value}),
+    });
+    const payload = await response.json();
+    show(settingsStatus, payload.ok ? `${payload.version} · ${payload.executableName || 'Blender executable verified'}` : payload.error, payload.ok ? 'good' : 'bad');
+  } catch (error) {
+    show(settingsStatus, `Blender test failed: ${error.message}`, 'bad');
+  }
+});
+
+document.querySelector('#saveSettings').addEventListener('click', async () => {
+  if (settingsRemoveApiKey.checked && settingsApiKey.value.trim()) {
+    show(settingsStatus, 'Choose either a replacement API key or remove the saved key, not both.', 'bad');
+    return;
+  }
+  show(settingsStatus, 'Saving settings…');
+  const body = {
+    openai: {
+      apiKey: settingsApiKey.value.trim(),
+      removeApiKey: settingsRemoveApiKey.checked,
+      stages: Object.fromEntries(stageKeys.map(stage => [stage, {
+        model: stageControl(stage, 'model').value,
+        quality: stageControl(stage, 'quality').value,
+        size: stageControl(stage, 'size').value,
+        candidateCount: Number(stageControl(stage, 'count').value),
+      }])),
+      budget: {
+        perRequestUsdMax: Number(budgetPerRequest.value),
+        perAssetUsdMax: Number(budgetPerAsset.value),
+        perSessionUsdMax: Number(budgetPerSession.value),
+        confirmationThresholdUsd: Number(budgetConfirmation.value),
+      },
+    },
+    blender: {path: settingsBlenderPath.value},
+  };
+  try {
+    const response = await fetch('/api/settings', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-SkyForge-CSRF': csrf},
+      body: JSON.stringify(body),
+    });
+    const payload = await response.json();
+    if (!response.ok || !payload.ok) {
+      show(settingsStatus, payload.error || response.statusText, 'bad');
+      return;
+    }
+    settingsApiKey.value = '';
+    settingsRemoveApiKey.checked = false;
+    updateSettingsUI(payload.settings);
+    refreshEstimate('beauty');
+    refreshEstimate('authority');
+    show(settingsStatus, payload.message, 'good');
+  } catch (error) {
+    show(settingsStatus, `Settings save failed: ${error.message}`, 'bad');
+  }
+});
+
+beautyForm.addEventListener('submit', async event => {
+  event.preventDefault();
+  beautyResults.innerHTML = '';
+  authorityResults.innerHTML = '';
+  selectedBeauty = null;
+  show(beautyStatus, 'Generating beauty concepts…');
+  show(authorityStatus, 'No approved beauty selected yet.');
+  try {
+    const response = await fetch('/api/concepts/beauty', {
+      method: 'POST',
+      headers: {'X-SkyForge-CSRF': csrf},
+      body: new FormData(beautyForm)
+    });
+    const payload = await response.json();
+    if (!response.ok || !payload.ok) {
+      show(beautyStatus, `Failed: ${payload.error || response.statusText}`, 'bad');
+      return;
+    }
+    show(beautyStatus, `Generated ${payload.images.length} beauty concept(s). ${payload.cost.cacheHit ? 'Cache hit; no new charge.' : `Estimated output $${Number(payload.cost.estimatedOutputUsd).toFixed(3)}.`} Asset spend $${Number(payload.cost.cumulativeAssetSpendUsd).toFixed(3)}; session $${Number(payload.cost.cumulativeSessionSpendUsd).toFixed(3)}. Select one as the approved aesthetic authority.`, 'good');
+    refreshEstimate('beauty');
+    refreshEstimate('authority');
+    payload.images.forEach(record => {
+      beautyResults.append(imageCard(record, 'Approve this beauty', (item, card) => {
+        selectedBeauty = {runId: payload.runId, filename: item.filename, url: item.url};
+        [...beautyResults.children].forEach(node => node.classList.remove('selected'));
+        card.classList.add('selected');
+        beautyRunId.value = payload.runId;
+        beautyFilename.value = item.filename;
+        meshConceptPrompt.value = conceptPrompt.value;
+        show(authorityStatus, `Approved beauty selected: ${item.filename}. Now generate top-down authority candidates.`, 'good');
+        refreshEstimate('authority');
+      }));
+    });
+  } catch (error) {
+    show(beautyStatus, `Request failed: ${error.message}`, 'bad');
+  }
+});
+
+authorityForm.addEventListener('submit', async event => {
+  event.preventDefault();
+  authorityResults.innerHTML = '';
+  if (!selectedBeauty) {
+    show(authorityStatus, 'Select and approve one beauty concept first.', 'bad');
+    return;
+  }
+  show(authorityStatus, 'Generating top-down authority candidates…');
+  try {
+    const formData = new FormData(authorityForm);
+    formData.set('profileId', conceptProfileId.value);
+    formData.set('assetId', conceptAssetId.value);
+    formData.set('beautyRunId', selectedBeauty.runId);
+    formData.set('beautyFilename', selectedBeauty.filename);
+    const response = await fetch('/api/concepts/authority', {
+      method: 'POST',
+      headers: {'X-SkyForge-CSRF': csrf},
+      body: formData,
+    });
+    const payload = await response.json();
+    if (!response.ok || !payload.ok) {
+      show(authorityStatus, `Failed: ${payload.error || response.statusText}`, 'bad');
+      return;
+    }
+    show(authorityStatus, `Generated ${payload.images.length} top-down authority candidate(s). ${payload.cost.cacheHit ? 'Cache hit; no new charge.' : `Output estimate $${Number(payload.cost.estimatedOutputUsd).toFixed(3)} plus reference-input cost.`} Asset spend $${Number(payload.cost.cumulativeAssetSpendUsd).toFixed(3)}; session $${Number(payload.cost.cumulativeSessionSpendUsd).toFixed(3)}. Select one for mesh generation.`, 'good');
+    refreshEstimate('beauty');
+    refreshEstimate('authority');
+    payload.images.forEach(record => {
+      authorityResults.append(imageCard(record, 'Use this authority for mesh', (item, card) => {
+        [...authorityResults.children].forEach(node => node.classList.remove('selected'));
+        card.classList.add('selected');
+        authorityUpload.value = '';
+        manualAuthorityCertified.checked = false;
+        manualAuthorityValidationPassed = false;
+        show(authorityUploadStatus, 'Governed authority selected; manual-upload validation is not required.', 'good');
+        authorityGeneratedPath.value = `${payload.runId}/images/${item.filename}`;
+        authorityRunId.value = payload.runId;
+        authorityFilename.value = item.filename;
+        selectedAuthorityNote.textContent = `Using generated authority ${item.filename} from Concept Lab. Governed lineage will be reverified before generation.`;
+        selectedAuthorityNote.className = 'field-note good-note';
+      }));
+    });
+  } catch (error) {
+    show(authorityStatus, `Request failed: ${error.message}`, 'bad');
+  }
+});
+
+async function poll(url) {
+  clearTimeout(pollTimer);
+  try {
+    const response = await fetch(url, {cache: 'no-store'});
+    const job = await response.json();
+    if (!response.ok) {
+      show(statusBox, `Status failed: ${job.error || response.statusText}`, 'bad');
+      generateMeshButton.disabled = false;
+      return;
+    }
+    if (job.status === 'rendered') {
+      showRenderedJob(statusBox, job);
+      generateMeshButton.disabled = false;
+      return;
+    }
+    if (job.status === 'failed') {
+      show(statusBox, `Failed closed: ${job.error || 'See job logs.'}`, 'bad');
+      generateMeshButton.disabled = false;
+      return;
+    }
+    show(statusBox, `${job.status}… ${job.jobId}`);
+    pollTimer = setTimeout(() => poll(url), 1200);
+  } catch (error) {
+    show(statusBox, `Status request failed: ${error.message}`, 'bad');
+    generateMeshButton.disabled = false;
+  }
+}
+
+jobForm.addEventListener('submit', async event => {
+  event.preventDefault();
+  if (!authorityGeneratedPath.value && !authorityUpload.files.length) {
+    show(statusBox, 'Provide an uploaded authority image or select one from the Concept Lab.', 'bad');
+    return;
+  }
+  if (!authorityGeneratedPath.value) {
+    if (!manualAuthorityCertified.checked) {
+      show(statusBox, 'Confirm that the manual upload is a strict top-down authority.', 'bad');
+      return;
+    }
+    if (!manualAuthorityValidationPassed && !(await validateManualAuthority())) {
+      show(statusBox, 'Manual authority failed the pre-generation suitability gate.', 'bad');
+      return;
+    }
+  }
+  generateMeshButton.disabled = true;
+  show(statusBox, 'Authority suitability passed. Generating mesh and running strict local gates…');
+  try {
+    const response = await fetch('/api/jobs', {
+      method: 'POST',
+      headers: {'X-SkyForge-CSRF': csrf},
+      body: new FormData(jobForm)
+    });
+    const job = await response.json();
+    if (!response.ok || !job.ok) {
+      show(statusBox, `Failed closed: ${job.error || response.statusText}`, 'bad');
+      generateMeshButton.disabled = false;
+      return;
+    }
+    if (job.status === 'prepared') {
+      show(statusBox, `Authority mesh generated and locally verified. ${job.warning}`, 'warn');
+      generateMeshButton.disabled = false;
+      return;
+    }
+    show(statusBox, `${job.status}… ${job.jobId}`);
+    poll(job.statusUrl);
+  } catch (error) {
+    show(statusBox, `Request failed: ${error.message}`, 'bad');
+    generateMeshButton.disabled = false;
+  }
+});
+</script>
+</body>
+</html>

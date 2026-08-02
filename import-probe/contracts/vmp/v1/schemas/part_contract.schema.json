@@ -1,0 +1,108 @@
+{
+  "$id": "https://skyforge.local/contracts/vmp/v1/part_contract.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "parts": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "allowedDownstreamUse": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "approvalState": {
+            "enum": [
+              "approved",
+              "candidate",
+              "rejected"
+            ],
+            "minLength": 1,
+            "type": "string"
+          },
+          "bounds": {
+            "additionalProperties": false,
+            "properties": {
+              "max": {
+                "items": {
+                  "type": "number"
+                },
+                "maxItems": 3,
+                "minItems": 3,
+                "type": "array"
+              },
+              "min": {
+                "items": {
+                  "type": "number"
+                },
+                "maxItems": 3,
+                "minItems": 3,
+                "type": "array"
+              }
+            },
+            "required": [
+              "min",
+              "max"
+            ],
+            "type": "object"
+          },
+          "classificationSource": {
+            "enum": [
+              "deterministic",
+              "human_approved",
+              "provider_candidate"
+            ],
+            "minLength": 1,
+            "type": "string"
+          },
+          "glbNodeOrPrimitiveRefs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "parentPartId": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "partId": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "volumeFraction": {
+            "minimum": 0,
+            "type": "number"
+          }
+        },
+        "required": [
+          "partId",
+          "glbNodeOrPrimitiveRefs",
+          "bounds",
+          "volumeFraction",
+          "parentPartId",
+          "classificationSource",
+          "approvalState",
+          "allowedDownstreamUse"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "schemaVersion": {
+      "const": "skyforge.part-contract.v1",
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "parts"
+  ],
+  "title": "Optional semantic or candidate mesh parts",
+  "type": "object"
+}

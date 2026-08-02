@@ -1,0 +1,98 @@
+{
+  "$id": "https://skyforge.local/contracts/vmp/v1/socket_candidates.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "coordinateFrame": {
+      "const": "normalized_mesh_frame",
+      "minLength": 1,
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": "skyforge.socket-candidates.v1",
+      "minLength": 1,
+      "type": "string"
+    },
+    "sockets": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "approvalState": {
+            "enum": [
+              "approved",
+              "candidate",
+              "rejected"
+            ],
+            "minLength": 1,
+            "type": "string"
+          },
+          "confidence": {
+            "minimum": 0,
+            "type": "number"
+          },
+          "orientationQuaternion": {
+            "items": {
+              "type": "number"
+            },
+            "maxItems": 4,
+            "minItems": 4,
+            "type": "array"
+          },
+          "position": {
+            "items": {
+              "type": "number"
+            },
+            "maxItems": 3,
+            "minItems": 3,
+            "type": "array"
+          },
+          "radiusOrExtent": {
+            "items": {
+              "type": "number"
+            },
+            "maxItems": 3,
+            "minItems": 3,
+            "type": "array"
+          },
+          "semanticType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "socketId": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "deterministic",
+              "human_approved",
+              "provider_candidate"
+            ],
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "socketId",
+          "position",
+          "orientationQuaternion",
+          "radiusOrExtent",
+          "semanticType",
+          "source",
+          "confidence",
+          "approvalState"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "coordinateFrame",
+    "sockets"
+  ],
+  "title": "Optional 3D socket candidates owned by Mesh Foundry",
+  "type": "object"
+}

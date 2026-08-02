@@ -1,0 +1,108 @@
+{
+  "$id": "https://skyforge.local/contracts/vmp/v1/provider_spend_reservation.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "createdAt": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "estimatedCost": {
+      "additionalProperties": false,
+      "properties": {
+        "amount": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "unit": {
+          "enum": [
+            "credits",
+            "usd",
+            "none"
+          ],
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "unit",
+        "amount"
+      ],
+      "type": "object"
+    },
+    "process": {
+      "additionalProperties": false,
+      "properties": {
+        "heartbeatAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "pid": {
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "pid",
+        "heartbeatAt"
+      ],
+      "type": "object"
+    },
+    "providerId": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "providerTaskId": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "requestDigest": {
+      "minLength": 1,
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "reservationId": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": "skyforge.provider-spend-reservation.v1",
+      "minLength": 1,
+      "type": "string"
+    },
+    "sequence": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "state": {
+      "enum": [
+        "intent_persisted",
+        "reserved",
+        "submitted",
+        "reconciled",
+        "released",
+        "unresolved"
+      ],
+      "minLength": 1,
+      "type": "string"
+    },
+    "updatedAt": {
+      "format": "date-time",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "sequence",
+    "reservationId",
+    "requestDigest",
+    "providerId",
+    "estimatedCost",
+    "state",
+    "createdAt",
+    "updatedAt",
+    "process"
+  ],
+  "title": "Write-ahead provider spend reservation",
+  "type": "object"
+}

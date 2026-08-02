@@ -1,0 +1,28 @@
+{
+  "correspondenceStatus": "zero_matches_unresolved",
+  "evidenceClass": "mock_provider",
+  "recoveryCorrelation": {
+    "accountIdentityDigest": "5555555555555555555555555555555555555555555555555555555555555555",
+    "authoritySetSha256": "4444444444444444444444444444444444444444444444444444444444444444",
+    "dispatchWindowEnd": "2026-08-01T00:02:00Z",
+    "dispatchWindowStart": "2026-08-01T00:00:00Z",
+    "expectedCost": {
+      "amount": 20,
+      "unit": "credits"
+    },
+    "providerId": "mock",
+    "providerModel": "mock-v1",
+    "requestDigest": "1111111111111111111111111111111111111111111111111111111111111111",
+    "resolvedProviderOptionsDigest": "3333333333333333333333333333333333333333333333333333333333333333"
+  },
+  "requestDigest": "1111111111111111111111111111111111111111111111111111111111111111",
+  "reservationId": "reservation-0001",
+  "resolvedRequestDigest": "2222222222222222222222222222222222222222222222222222222222222222",
+  "schemaVersion": "skyforge.provider-task-record.v1",
+  "sequence": 1,
+  "state": "unresolved",
+  "timestamps": {
+    "createdAt": "2026-08-01T00:00:00Z",
+    "updatedAt": "2026-08-01T00:01:00Z"
+  }
+}

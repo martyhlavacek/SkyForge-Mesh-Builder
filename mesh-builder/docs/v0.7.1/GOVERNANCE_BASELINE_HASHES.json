@@ -1,0 +1,19 @@
+{
+  "baselineVersion": "0.6.0",
+  "comparisonRequiredFor": "v0.7.1 exact candidate",
+  "files": {
+    "app/authority_mesh.py": "aeed39ad40c1442562f3fa27b35010bed9f75143590ec7f7eceefcd9fc8763d5",
+    "app/concept_workflow.py": "d18010cb9751553fcdd8985857aa972df38c05069674730f8be70777399f2cf9",
+    "app/image_governance.py": "06e5585864da94e715b40acd8fd317447ae7a657bb1b465e23d48ff7f82c6594",
+    "app/macos_keychain.py": "2c38f5749dc616f538a3b36c02a6477bc908e7c97afbb99af2f7110aa756ba69",
+    "app/openai_client.py": "631fbb1ebd2ecbb4859ee0c11d5f9f6c5a22b3bd85e415ba4b7d7b0ed3d9ac18",
+    "app/settings_store.py": "bb213100b611364ba25bf58eabee359ddd88c3219736a858b83bd5dcfb96b08a",
+    "blender/build_asset.py": "46d59f407a3dc0f3bbbfb64e54c459d6fa88dc5b00058d9a0bbe5d6310231148",
+    "common/image_pricing.py": "ce1a4a073644f741b176ea026c196136bffb77b3c6010831368b8adb54959a68",
+    "common/mesh_math.py": "21a4e78c9ff29e9779331a56617aa54402b48f85fb87e628b28a0031a31707c6",
+    "common/spend_ledger.py": "a7b72ebce50cefc0fe0fe8d9cca60452df49fc0a753682adb7516ca3432bb84a",
+    "profiles/craft_profiles.json": "ae41ec0079105c99d559077e2679aca98134fe864093248e84400bb781e5e3bb",
+    "pyproject.toml": "08bb30f1ffb3041d5549ed8a8a70ae025be8ff1bc90fc702bad6b4fed8300b7a"
+  },
+  "schemaVersion": "skyforge.governance-byte-identity-baseline.v1"
+}

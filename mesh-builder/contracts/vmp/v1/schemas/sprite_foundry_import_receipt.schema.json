@@ -1,0 +1,88 @@
+{
+  "$id": "https://skyforge.local/contracts/vmp/v1/sprite_foundry_import_receipt.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "accepted": {
+      "type": "boolean"
+    },
+    "authorityReverification": {
+      "enum": [
+        "full",
+        "unavailable_due_to_terms"
+      ],
+      "minLength": 1,
+      "type": "string"
+    },
+    "collisionHintsIgnoredForRuntime": {
+      "const": true,
+      "type": "boolean"
+    },
+    "createdAt": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "diagnostics": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "importerVersion": {
+      "minLength": 1,
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "type": "string"
+    },
+    "manufacturingAxesVerified": {
+      "type": "boolean"
+    },
+    "receiptId": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": "skyforge.sprite-foundry-import-receipt.v1",
+      "minLength": 1,
+      "type": "string"
+    },
+    "schemasAccepted": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "sourceArchiveSha256": {
+      "minLength": 1,
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "sourcePackageContentDigest": {
+      "minLength": 1,
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "sourcePackageId": {
+      "minLength": 1,
+      "pattern": "^sfmeshpack:[0-9a-f]{64}$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "receiptId",
+    "sourceArchiveSha256",
+    "sourcePackageContentDigest",
+    "sourcePackageId",
+    "importerVersion",
+    "accepted",
+    "schemasAccepted",
+    "authorityReverification",
+    "manufacturingAxesVerified",
+    "collisionHintsIgnoredForRuntime",
+    "createdAt"
+  ],
+  "title": "Authoritative consumer import receipt",
+  "type": "object"
+}

@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "skyforge.mesh-builder-self-test.v0.3.1",
+  "results": [
+    {
+      "label": "control",
+      "authority": "approved_gunship_authority.png",
+      "authoritySha256": "d33075df367c97399b7ed6262030ca8ca0080eda12ebe78eb3eb3fc901f7fc1e",
+      "meshSha256": "ce9f305845c52e3a395acc18c9de8bea659ebab7e6fe7e362c4c7945f79f9d8c",
+      "targetSilhouetteIoU": 0.951989,
+      "blenderImportSilhouetteIoU": 0.952621,
+      "blenderImportBoundsDelta": 4.8e-08,
+      "heightToPlanformRatio": 0.166819577,
+      "watertight": true,
+      "windingConsistent": true,
+      "gatesPassed": true
+    },
+    {
+      "label": "user_test_authority",
+      "authority": "user_test_gunship_authority.png",
+      "authoritySha256": "3211a720a37661e410960d227cad1d4d0959eaf704856404c8c4462488750748",
+      "meshSha256": "3afa7de63516d50a21dd289f4f9ce68d2a4c1769794ddd5d53fc64f0d07f2297",
+      "targetSilhouetteIoU": 0.959283,
+      "blenderImportSilhouetteIoU": 0.955508,
+      "blenderImportBoundsDelta": 4.8e-08,
+      "heightToPlanformRatio": 0.167919993,
+      "watertight": true,
+      "windingConsistent": true,
+      "gatesPassed": true
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+[
+ {"id":"enemy_gunship","name":"Enemy — Military Gunship","class":"gunship","scale":1.0,"identityMarkers":["broad heavy massing","split orange cockpit","two separated engine housings","forward guns"]},
+ {"id":"enemy_interceptor","name":"Enemy — Interceptor","class":"interceptor","scale":0.72,"identityMarkers":["narrow spear nose","swept wings","twin engines"]},
+ {"id":"enemy_bomber","name":"Enemy — Bomber","class":"bomber","scale":1.15,"identityMarkers":["wide payload body","short wings","heavy rear engines"]},
+ {"id":"enemy_drone","name":"Enemy — Drone","class":"drone","scale":0.55,"identityMarkers":["no cockpit","compact silhouette","single core"]},
+ {"id":"player_fighter","name":"Player — Fighter","class":"fighter","scale":0.82,"identityMarkers":["visible cockpit","balanced wings","central engine"]}
+]

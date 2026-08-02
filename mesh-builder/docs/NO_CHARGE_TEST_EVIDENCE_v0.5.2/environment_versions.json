@@ -1,0 +1,16 @@
+{
+  "python": "3.13.5 (main, May  5 2026, 21:05:52) [GCC 14.2.0]",
+  "executable": "/opt/pyvenv/bin/python",
+  "platform": "Linux-6.12.13-x86_64-with-glibc2.41",
+  "distributions": {
+    "Flask": null,
+    "Werkzeug": null,
+    "blinker": null,
+    "Pillow": "12.2.0",
+    "numpy": "2.3.5",
+    "trimesh": "4.11.1",
+    "pytest": "9.0.2",
+    "ruff": null,
+    "requests": "2.32.5"
+  }
+}

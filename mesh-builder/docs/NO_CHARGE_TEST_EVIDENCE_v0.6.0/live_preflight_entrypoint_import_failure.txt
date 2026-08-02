@@ -1,0 +1,13 @@
+Observed on Marty Hlavacek's macOS clean preflight after the exact candidate, ten pins and NetworkX graph-engine contract passed. Blender was not launched.
+
+Command:
+.venv/bin/python scripts/run_live_blender_preflight.py --output <output.zip>
+
+Failure:
+ModuleNotFoundError: No module named 'app'
+
+Trace point:
+scripts/run_live_blender_preflight.py, importing app.authority_mesh
+
+Root cause:
+Direct-file Python execution placed scripts/ rather than the project root on sys.path.

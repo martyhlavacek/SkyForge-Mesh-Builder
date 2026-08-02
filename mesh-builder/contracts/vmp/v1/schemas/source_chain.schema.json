@@ -1,0 +1,116 @@
+{
+  "$id": "https://skyforge.local/contracts/vmp/v1/source_chain.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "approvalEvents": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "artifactSha256": {
+            "minLength": 1,
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "eventId": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "recordedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "approved",
+              "rejected",
+              "superseded"
+            ],
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "eventId",
+          "state",
+          "artifactSha256",
+          "recordedAt"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "authoritySetSha256": {
+      "minLength": 1,
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "lineage": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "artifactSha256": {
+            "minLength": 1,
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "producerId": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "providerModel": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "stage": {
+            "enum": [
+              "concept",
+              "authority",
+              "mesh_candidate",
+              "normalized_mesh"
+            ],
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "stage",
+          "artifactSha256",
+          "producerId"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "normalizationVersion": {
+      "minLength": 1,
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "type": "string"
+    },
+    "priorSupersededPackageDigests": {
+      "items": {
+        "minLength": 1,
+        "pattern": "^[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "schemaVersion": {
+      "const": "skyforge.source-chain.v1",
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "authoritySetSha256",
+    "lineage",
+    "normalizationVersion",
+    "approvalEvents"
+  ],
+  "title": "Immutable concept, authority, generator/provider, normalization, and approval chain",
+  "type": "object"
+}

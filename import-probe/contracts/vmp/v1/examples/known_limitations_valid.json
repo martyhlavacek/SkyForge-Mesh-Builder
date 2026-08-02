@@ -1,0 +1,23 @@
+{
+  "limitations": [
+    {
+      "affectedConsumers": [
+        "sprite_foundry"
+      ],
+      "code": "calibrated_frame_excludes_runtime_effects",
+      "description": "Calibrated hull headroom excludes composited runtime and Sprite Foundry effects.",
+      "evidenceRefs": [
+        "render/frame_contract.json#calibrationEnvelope"
+      ],
+      "excludedRuntimeEffects": [
+        "thrusters",
+        "muzzle_flashes",
+        "shadows",
+        "debris",
+        "other_sprite_foundry_effects"
+      ],
+      "severity": "warning"
+    }
+  ],
+  "schemaVersion": "skyforge.known-limitations.v1"
+}

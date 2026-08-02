@@ -1,0 +1,17 @@
+{
+  "authorities": [
+    {
+      "contentType": "image/png",
+      "embedded": true,
+      "embeddedPath": "authorities/silhouette_authority.png",
+      "embeddingDecision": "hash_only_due_to_terms",
+      "generationProvenanceRef": "provenance/source_chain.json#authority-1",
+      "independentReverification": "unavailable_due_to_terms",
+      "redistributionPermission": "unknown",
+      "role": "silhouette_authority",
+      "sourceSha256": "2222222222222222222222222222222222222222222222222222222222222222"
+    }
+  ],
+  "authoritySetSha256": "1111111111111111111111111111111111111111111111111111111111111111",
+  "schemaVersion": "skyforge.authority-manifest.v1"
+}

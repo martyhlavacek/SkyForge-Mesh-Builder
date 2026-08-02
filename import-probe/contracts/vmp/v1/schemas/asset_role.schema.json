@@ -1,0 +1,52 @@
+{
+  "$id": "https://skyforge.local/contracts/vmp/v1/asset_role.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "capabilities": {
+      "additionalProperties": false,
+      "properties": {
+        "airborne": {
+          "const": true,
+          "type": "boolean"
+        },
+        "directionalGroundSet": {
+          "const": false,
+          "type": "boolean"
+        },
+        "terrainPlacement": {
+          "const": false,
+          "type": "boolean"
+        },
+        "timelineMovement": {
+          "const": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "timelineMovement",
+        "airborne",
+        "terrainPlacement",
+        "directionalGroundSet"
+      ],
+      "type": "object"
+    },
+    "preset": {
+      "const": "air_moving",
+      "minLength": 1,
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": "skyforge.asset-role.v1",
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "preset",
+    "capabilities"
+  ],
+  "title": "Air-moving asset role contract",
+  "type": "object"
+}

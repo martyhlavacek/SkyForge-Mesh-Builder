@@ -1,0 +1,328 @@
+{
+  "$id": "https://skyforge.local/contracts/vmp/v1/frame_contract.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "calibration": {
+      "additionalProperties": false,
+      "properties": {
+        "bankSamplesDegrees": {
+          "const": [
+            -18,
+            0,
+            18
+          ],
+          "type": "array"
+        },
+        "method": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "pitchSamplesDegrees": {
+          "const": [
+            0,
+            20,
+            36
+          ],
+          "type": "array"
+        },
+        "profileDigest": {
+          "minLength": 1,
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "referencePoseMap": {
+          "additionalProperties": false,
+          "properties": {
+            "bank_left": {
+              "const": -18,
+              "type": "number"
+            },
+            "bank_right": {
+              "const": 18,
+              "type": "number"
+            },
+            "neutral": {
+              "const": 0,
+              "type": "number"
+            }
+          },
+          "required": [
+            "bank_left",
+            "neutral",
+            "bank_right"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "method",
+        "profileDigest",
+        "pitchSamplesDegrees",
+        "bankSamplesDegrees",
+        "referencePoseMap"
+      ],
+      "type": "object"
+    },
+    "calibrationEnvelope": {
+      "additionalProperties": false,
+      "properties": {
+        "chosenMargin": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "heightEnvelopeBindingPitchDegrees": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "maximumHeightToPlanformRatio": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "measuredMaximumRequiredOrthoScale": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "measuredRequiredMargin": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "runtimeEffectsEnabled": {
+          "const": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "maximumHeightToPlanformRatio",
+        "heightEnvelopeBindingPitchDegrees",
+        "measuredMaximumRequiredOrthoScale",
+        "measuredRequiredMargin",
+        "chosenMargin",
+        "runtimeEffectsEnabled"
+      ],
+      "type": "object"
+    },
+    "canonicalCamera": {
+      "additionalProperties": false,
+      "properties": {
+        "bankDegrees": {
+          "const": 0,
+          "type": "number"
+        },
+        "canonicalOrthoScale": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "pitchDegrees": {
+          "const": 20,
+          "type": "number"
+        },
+        "projection": {
+          "const": "orthographic",
+          "minLength": 1,
+          "type": "string"
+        },
+        "requiredReviewOrthoScale": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "requiredSilhouetteOrthoScale": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "yawDegrees": {
+          "const": 0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "projection",
+        "pitchDegrees",
+        "bankDegrees",
+        "yawDegrees",
+        "canonicalOrthoScale",
+        "requiredReviewOrthoScale",
+        "requiredSilhouetteOrthoScale"
+      ],
+      "type": "object"
+    },
+    "consumerDeviationPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "deviationMustBeRecorded": {
+          "const": true,
+          "type": "boolean"
+        },
+        "extensionWithinCalibrationEnvelopeOnly": {
+          "const": true,
+          "type": "boolean"
+        },
+        "newCalibrationRequiredOutsideEnvelope": {
+          "const": true,
+          "type": "boolean"
+        },
+        "spriteFoundryMayExtendBankPitchLadder": {
+          "const": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "spriteFoundryMayExtendBankPitchLadder",
+        "extensionWithinCalibrationEnvelopeOnly",
+        "newCalibrationRequiredOutsideEnvelope",
+        "deviationMustBeRecorded"
+      ],
+      "type": "object"
+    },
+    "coordinateFrame": {
+      "additionalProperties": false,
+      "properties": {
+        "forwardAxis": {
+          "const": "+Y",
+          "minLength": 1,
+          "type": "string"
+        },
+        "rightAxis": {
+          "const": "+X",
+          "minLength": 1,
+          "type": "string"
+        },
+        "upAxis": {
+          "const": "+Z",
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "forwardAxis",
+        "upAxis",
+        "rightAxis"
+      ],
+      "type": "object"
+    },
+    "headroom": {
+      "additionalProperties": false,
+      "properties": {
+        "fractionOfPlanform": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "worldUnits": {
+          "minimum": 0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "worldUnits",
+        "fractionOfPlanform"
+      ],
+      "type": "object"
+    },
+    "heightToPlanformRatio": {
+      "exclusiveMinimum": 0,
+      "type": "number"
+    },
+    "renderState": {
+      "additionalProperties": false,
+      "properties": {
+        "engine": {
+          "const": "BLENDER_EEVEE",
+          "minLength": 1,
+          "type": "string"
+        },
+        "exposure": {
+          "const": 0,
+          "type": "number"
+        },
+        "gamma": {
+          "const": 1,
+          "type": "number"
+        },
+        "resolution": {
+          "const": [
+            384,
+            384
+          ],
+          "type": "array"
+        },
+        "samples": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "transparentFilm": {
+          "const": true,
+          "type": "boolean"
+        },
+        "viewTransform": {
+          "const": "Standard",
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "engine",
+        "resolution",
+        "samples",
+        "viewTransform",
+        "exposure",
+        "gamma",
+        "transparentFilm"
+      ],
+      "type": "object"
+    },
+    "schemaVersion": {
+      "const": "skyforge.render-frame-contract.v1",
+      "minLength": 1,
+      "type": "string"
+    },
+    "silhouetteProtocol": {
+      "additionalProperties": false,
+      "properties": {
+        "alphaThreshold": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "fitCanvasPixels": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "fitMarginPixels": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "maskPolarity": {
+          "const": "foreground_true",
+          "minLength": 1,
+          "type": "string"
+        },
+        "resample": {
+          "const": "NEAREST",
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "fitCanvasPixels",
+        "fitMarginPixels",
+        "resample",
+        "alphaThreshold",
+        "maskPolarity"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "coordinateFrame",
+    "canonicalCamera",
+    "headroom",
+    "calibration",
+    "calibrationEnvelope",
+    "renderState",
+    "silhouetteProtocol",
+    "heightToPlanformRatio",
+    "consumerDeviationPolicy"
+  ],
+  "title": "Calibrated Blender frame contract and extension envelope",
+  "type": "object"
+}

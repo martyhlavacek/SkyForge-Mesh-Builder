@@ -1,0 +1,180 @@
+{
+  "$id": "https://skyforge.local/contracts/vmp/v1/material_contract.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "alphaPolicy": {
+      "enum": [
+        "opaque",
+        "binary_mask",
+        "straight_alpha"
+      ],
+      "minLength": 1,
+      "type": "string"
+    },
+    "baseColor": {
+      "additionalProperties": false,
+      "properties": {
+        "colorSpace": {
+          "const": "sRGB",
+          "minLength": 1,
+          "type": "string"
+        },
+        "decodedPixelSha256": {
+          "minLength": 1,
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "lightingState": {
+          "enum": [
+            "unlit_albedo",
+            "baked_lighting",
+            "mixed",
+            "unknown"
+          ],
+          "minLength": 1,
+          "type": "string"
+        },
+        "source": {
+          "enum": [
+            "authority_projection",
+            "provider_texture",
+            "ai_retexture",
+            "procedural"
+          ],
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "source",
+        "colorSpace",
+        "lightingState"
+      ],
+      "type": "object"
+    },
+    "externalReferences": {
+      "const": false,
+      "type": "boolean"
+    },
+    "providerProcessing": {
+      "additionalProperties": false,
+      "properties": {
+        "aiTexturingApplied": {
+          "const": false,
+          "type": "boolean"
+        },
+        "imageEnhancementApplied": {
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "enum": [
+                "not_supported",
+                "unknown"
+              ],
+              "minLength": 1,
+              "type": "string"
+            }
+          ]
+        },
+        "removeLightingApplied": {
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "enum": [
+                "not_applicable",
+                "unknown"
+              ],
+              "minLength": 1,
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "required": [
+        "imageEnhancementApplied",
+        "removeLightingApplied",
+        "aiTexturingApplied"
+      ],
+      "type": "object"
+    },
+    "schemaVersion": {
+      "const": "skyforge.mesh-material.v1",
+      "minLength": 1,
+      "type": "string"
+    },
+    "semanticRegions": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "materialSlot": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "regionId": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "regionId",
+          "materialSlot"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "textures": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "contentType": {
+            "enum": [
+              "image/png"
+            ],
+            "minLength": 1,
+            "type": "string"
+          },
+          "decodedPixelSha256": {
+            "minLength": 1,
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "path": {
+            "minLength": 1,
+            "pattern": "^materials/textures/",
+            "type": "string"
+          },
+          "sha256": {
+            "minLength": 1,
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "contentType",
+          "sha256",
+          "decodedPixelSha256"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "baseColor",
+    "alphaPolicy",
+    "externalReferences",
+    "providerProcessing",
+    "semanticRegions",
+    "textures"
+  ],
+  "title": "Mesh material and lighting-state contract",
+  "type": "object"
+}
