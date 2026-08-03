@@ -13,7 +13,6 @@ jobs:
         working-directory: mesh-builder
     env:
       PYTHONNOUSERSITE: "1"
-      PRODUCER_VENV: ${{ runner.temp }}/producer-venv
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -22,15 +21,15 @@ jobs:
           cache: pip
           cache-dependency-path: mesh-builder/requirements.txt
       - name: Create producer virtual environment
-        run: python -m venv "$PRODUCER_VENV"
+        run: python -m venv "$RUNNER_TEMP/producer-venv"
       - name: Install exact producer dependencies
-        run: '"$PRODUCER_VENV/bin/python" -m pip install --requirement requirements.txt'
+        run: '"$RUNNER_TEMP/producer-venv/bin/python" -m pip install --requirement requirements.txt'
       - name: Ruff
-        run: '"$PRODUCER_VENV/bin/ruff" check .'
+        run: '"$RUNNER_TEMP/producer-venv/bin/ruff" check .'
       - name: Complete producer test suite
-        run: '"$PRODUCER_VENV/bin/python" -m pytest -q'
+        run: '"$RUNNER_TEMP/producer-venv/bin/python" -m pytest -q'
       - name: Verify producer source binding
-        run: '"$PRODUCER_VENV/bin/python" -c ''from pathlib import Path; from common.source_binding import PRODUCER_SCOPE, verify_binding; print(verify_binding(Path.cwd(), PRODUCER_SCOPE))'''
+        run: '"$RUNNER_TEMP/producer-venv/bin/python" -c ''from pathlib import Path; from common.source_binding import PRODUCER_SCOPE, verify_binding; print(verify_binding(Path.cwd(), PRODUCER_SCOPE))'''
 
   import-probe:
     name: Import Probe
