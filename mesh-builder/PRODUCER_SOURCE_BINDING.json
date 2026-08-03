@@ -304,7 +304,7 @@
     "tests/test_canonical_json_contract.py": "6076d12a965fcb4e7042bd31348bf5c66c7986a8517cda9a9ecc2008e25df204",
     "tests/test_concept_workflow.py": "4c3ce90788364a199d000cfaf6004ebea816db5e384f3ce7ec6f5427e63b4314",
     "tests/test_frozen_contracts_v1.py": "6fec83b4ff31c09c20f82f626db22bdccee1d2b16e6705c719714aa54a344e3b",
-    "tests/test_geometry_v2.py": "b319b2e91cb47a66b51edddd852de7925fa3b799309ec0b42185e38cd4db366e",
+    "tests/test_geometry_v2.py": "cee929af2cafb5b81091be1dcda59c8ee6d01cdfcc464665d57d92a11959a7fe",
     "tests/test_image_governance.py": "692ee6b2886cd5b1155f510c254d86a376d71d6d265b286f9e17c395aa1dbfe3",
     "tests/test_image_pricing.py": "17cbefee04e1b40c0da42866f2090846f2de4150d1067cef02d19a44116b64b3",
     "tests/test_macos_keychain_runtime.py": "bfde01818ae6be5e9776d7892d1cfcdb9287a4c1c7eaa0ad4eeab65dc0973a85",
@@ -326,5 +326,5 @@
     "tests/vmp_fixtures.py": "c27460c107a85855215815f77088f3ce484cd18f5fb993d56b8f727180262997"
   },
   "schemaVersion": "skyforge.producer-source-binding.v1",
-  "treeManifestSha256": "4376157f04f1b34dcc6bb8148ab678464f14a72946a261d05d47fed731fe8a89"
+  "treeManifestSha256": "ae098f50404af3c5dd7dd4ac9b251df8da6246b5f727d37f11512bb064c43130"
 }

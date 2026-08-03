@@ -4,6 +4,7 @@ import hashlib
 import json
 import os
 import subprocess
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -19,7 +20,7 @@ from app.geometry_v2.recipes import UnsupportedGeometryProfile, load_recipe
 PACKAGE_ROOT = Path(__file__).resolve().parents[1]
 GUNSHIP = PACKAGE_ROOT / "samples" / "approved_gunship_authority.png"
 INTERCEPTOR = PACKAGE_ROOT / "samples" / "interceptor_openai_authority_regression.png"
-BASELINE_COMMIT = "d38dd5d1638eae0942929a4ed568edb048220894"
+IMPORT_PROBE_BINDING_DIGEST = "883510570c572ada2166019b356bfbefd3e7053c5074553d1c1dde1234d74ba7"
 
 
 @pytest.fixture(scope="module")
@@ -154,12 +155,25 @@ def test_experiment_has_no_network_provider_or_integration_imports():
 
 
 def test_import_probe_tree_has_no_changes():
+    probe_root = PACKAGE_ROOT.parent / "import-probe"
+    environment = os.environ.copy()
+    environment.pop("PYTHONPATH", None)
     completed = subprocess.run(
-        ["git", "diff", "--quiet", BASELINE_COMMIT, "--", "import-probe"],
-        cwd=PACKAGE_ROOT.parent,
+        [
+            sys.executable,
+            "-c",
+            "from pathlib import Path; from probe.source_binding import verify_binding; "
+            "print(verify_binding(Path.cwd()))",
+        ],
+        cwd=probe_root,
         check=False,
+        capture_output=True,
+        env=environment,
+        text=True,
     )
-    assert completed.returncode == 0
+    assert completed.returncode == 0, completed.stderr
+    assert "'fileCount': 64" in completed.stdout
+    assert IMPORT_PROBE_BINDING_DIGEST in completed.stdout
 
 
 def test_evidence_manifest_verifies_every_generated_file(experiment_results):
