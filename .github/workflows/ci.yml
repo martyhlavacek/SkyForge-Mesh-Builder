@@ -16,6 +16,7 @@ jobs:
         working-directory: mesh-builder
     env:
       PYTHONNOUSERSITE: "1"
+      SKYFORGE_PROVIDER_NETWORK_DISABLED: "1"
     steps:
       - uses: actions/checkout@v4
         with:

@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "skyforge.multiview-authority-bundle.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "assetId", "profileId", "createdAt", "sourceCommit", "viewOrder", "cameraDeclaration", "views", "contactSheet", "approval", "bundleDigest"],
+  "properties": {
+    "schemaVersion": {"const": "skyforge.multiview-authority-bundle.v1"},
+    "assetId": {"type": "string", "minLength": 1},
+    "profileId": {"enum": ["enemy_gunship", "enemy_interceptor"]},
+    "createdAt": {"type": "string", "minLength": 1},
+    "sourceCommit": {"type": "string", "minLength": 1},
+    "viewOrder": {"const": ["top", "front", "right"]},
+    "cameraDeclaration": {"const": "orthographic_or_near_orthographic_centered_consistent_scale"},
+    "views": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "prefixItems": [
+        {"$ref": "#/$defs/topView"},
+        {"$ref": "#/$defs/frontView"},
+        {"$ref": "#/$defs/rightView"}
+      ],
+      "items": false
+    },
+    "contactSheet": {
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "sha256"],
+          "properties": {
+            "path": {"type": "string", "minLength": 1},
+            "sha256": {"$ref": "#/$defs/sha256"}
+          }
+        }
+      ]
+    },
+    "approval": {
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "approvedAt", "workflowId", "bundleDigest"],
+          "properties": {
+            "status": {"const": "APPROVED"},
+            "approvedAt": {"type": "string", "minLength": 1},
+            "workflowId": {"type": "string", "minLength": 1},
+            "bundleDigest": {"$ref": "#/$defs/sha256"}
+          }
+        }
+      ]
+    },
+    "bundleDigest": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "view": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "path", "sha256", "dimensions", "mode", "hasAlpha", "backgroundStatus"],
+      "properties": {
+        "role": {"type": "string"},
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "dimensions": {
+          "type": "array",
+          "prefixItems": [{"type": "integer", "minimum": 1}, {"type": "integer", "minimum": 1}],
+          "items": false
+        },
+        "mode": {"type": "string", "minLength": 1},
+        "hasAlpha": {"type": "boolean"},
+        "backgroundStatus": {"const": "alpha_or_neutral_declared"}
+      }
+    },
+    "topView": {"allOf": [{"$ref": "#/$defs/view"}, {"properties": {"role": {"const": "top"}}}]},
+    "frontView": {"allOf": [{"$ref": "#/$defs/view"}, {"properties": {"role": {"const": "front"}}}]},
+    "rightView": {"allOf": [{"$ref": "#/$defs/view"}, {"properties": {"role": {"const": "right"}}}]}
+  }
+}

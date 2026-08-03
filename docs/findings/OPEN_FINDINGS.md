@@ -13,7 +13,8 @@ These findings remain open; this bootstrap does not claim that any are fixed.
 - **MBS-177 (Minor, non-blocking):** The attachment/exposure diagnostic image duplicates the side view.
 - **MBS-178 (Observation):** Attachment acceptance thresholds are permissive.
 - **MBS-179 (Observation):** The historical Import Probe check uses a mutable tag.
+- **MBS-180 (Blocking `geometry_v2` promotion only):** v0.8.0 Alpha 1 passed its technical review but failed controlled human visual acceptance. Its generic overlapping-primitives route must remain inactive and must not be promoted or used as the Alpha 2 basis.
 
 The accepted v0.7.1 baseline contains no geometry fix for MBS-150 through MBS-154.
 
-MBS-165 through MBS-173 are closed by MBS-CR-0025. Finding numbering continues from **MBS-180**.
+MBS-165 through MBS-173 are closed by MBS-CR-0025. Finding numbering continues from **MBS-181**.
