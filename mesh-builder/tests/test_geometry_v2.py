@@ -3,8 +3,10 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import shutil
 import subprocess
 import sys
+from dataclasses import replace
 from pathlib import Path
 
 import numpy as np
@@ -14,8 +16,17 @@ from PIL import Image
 
 from app.authority_mesh import generate_authority_mesh
 from app.geometry_v2 import GENERATOR_ID, GENERATOR_VERSION, generate_multivolume_experiment
+from app.geometry_v2.assembly import _reload_audit
 from app.geometry_v2.evidence import sha256_file, verify_manifest
+from app.geometry_v2.metrics import (
+    attachment_metrics,
+    gate_results,
+    identity_metrics,
+    semantic_height_bands,
+    topology_record,
+)
 from app.geometry_v2.recipes import UnsupportedGeometryProfile, load_recipe
+from scripts.verify_import_probe_baseline import verify_historical_probe_tree
 
 PACKAGE_ROOT = Path(__file__).resolve().parents[1]
 GUNSHIP = PACKAGE_ROOT / "samples" / "approved_gunship_authority.png"
@@ -111,15 +122,18 @@ def test_glb_reload_preserves_component_registry_and_coordinate_bounds(experimen
 
 def test_no_components_float_or_hide_inside_another(experiment_results):
     for result in experiment_results:
-        assert result.report["whollyContainedComponents"] == []
-        assert all(component["attachmentPenetration"] > 0 for component in _added_components(result))
-        assert result.report["gateResults"]["checks"]["positiveAttachmentPenetration"] is True
+        measurements = [component["attachmentMeasurement"] for component in _added_components(result)]
+        assert all(item["validEmbeddedAndExposedAttachment"] for item in measurements)
+        assert all(not item["entirelyBuriedOrContained"] for item in measurements)
+        assert all(not item["entirelyDetachedOrFloating"] for item in measurements)
+        assert result.report["gateResults"]["checks"]["measuredEmbeddedAndExposedAttachment"] is True
 
 
 def test_authority_exterior_spill_and_identity_gates(experiment_results):
     for result in experiment_results:
         metrics = result.report["identityMetrics"]
         assert metrics["silhouetteIoU"] >= 0.94
+        assert metrics["iouDecomposition"]["assembledMinusBaseIoU"] >= -0.005
         assert metrics["authorityExteriorSpillFraction"] <= 0.005
         assert metrics["widthProfileMAE"] <= 0.045
 
@@ -142,7 +156,8 @@ def test_distinct_semantic_height_bands(experiment_results):
         bands = result.report["semanticHeightBands"]
         assert bands["bandCount"] >= 3
         assert bands["ordered"] is True
-        assert bands["minimumAdjacentSeparation"] > 0
+        assert bands["minimumAdjacentSeparation"] >= bands["clusteringSeparationThreshold"]
+        assert bands["measurementSource"].startswith("independently reloaded")
 
 
 def test_experiment_has_no_network_provider_or_integration_imports():
@@ -194,3 +209,135 @@ def test_report_governance_flags_and_limitations_are_fail_closed(experiment_resu
         assert result.report["userTestingAuthorized"] is False
         assert result.report["paidProviderWorkAuthorized"] is False
         assert any("MBS-150" in limitation for limitation in result.report["limitations"])
+
+
+def test_collapsed_height_peaks_fail_measured_band_gate(experiment_results):
+    recipe, _ = load_recipe("enemy_gunship")
+    names = {"base_shell", *(component["name"] for component in recipe["components"])}
+    meshes = {name: trimesh.creation.box((0.2, 0.2, 0.2)) for name in names}
+    bands = semantic_height_bands(meshes, recipe["heightBandModel"])
+    assert bands["bandCount"] < 3
+    assert bands["ordered"] is False
+
+
+@pytest.mark.parametrize("missing_group", ["body", "semanticPeak"])
+def test_missing_height_semantic_group_has_named_error(tmp_path: Path, missing_group: str):
+    source = json.loads((PACKAGE_ROOT / "profiles" / "geometry_recipes_v1.json").read_text())
+    del source["recipes"][0]["heightBandModel"]["groups"][missing_group]
+    path = tmp_path / "recipe.json"
+    path.write_text(json.dumps(source))
+    with pytest.raises(Exception, match=missing_group):
+        load_recipe("enemy_gunship", path)
+
+
+def test_attachment_measurement_rejects_buried_detached_and_tangent_components():
+    base = trimesh.creation.box((2.0, 2.0, 1.0))
+    buried = trimesh.creation.box((0.4, 0.4, 0.2))
+    detached = trimesh.creation.box((0.4, 0.4, 0.2), transform=trimesh.transformations.translation_matrix((0, 0, 1.0)))
+    tangent = trimesh.creation.box((0.4, 0.4, 0.2), transform=trimesh.transformations.translation_matrix((0, 0, 0.6)))
+    valid = trimesh.creation.box((0.4, 0.4, 0.4), transform=trimesh.transformations.translation_matrix((0, 0, 0.55)))
+    assert attachment_metrics(base, buried)["entirelyBuriedOrContained"] is True
+    assert attachment_metrics(base, detached)["entirelyDetachedOrFloating"] is True
+    assert attachment_metrics(base, tangent)["entirelyDetachedOrFloating"] is True
+    assert attachment_metrics(base, valid)["validEmbeddedAndExposedAttachment"] is True
+
+
+def test_misplaced_component_fails_iou_decomposition_gate(experiment_results):
+    result, _ = experiment_results
+    recipe, _ = load_recipe("enemy_gunship")
+    planform = __import__("app.geometry_v2.placement", fromlist=["measure_planform"]).measure_planform(GUNSHIP)
+    scene = trimesh.load(result.mesh_path, force="scene", process=False)
+    base = scene.geometry["base_shell"].copy()
+    from app.authority_mesh import GLTF_TO_BLENDER
+    base.apply_transform(GLTF_TO_BLENDER)
+    _, original_components = __import__("app.geometry_v2.assembly", fromlist=["_place_components"])._place_components(GUNSHIP, recipe, base)
+    moved = []
+    for component in original_components:
+        mesh = component.mesh.copy()
+        mesh.apply_translation((2.0, 0.0, 0.0))
+        moved.append(replace(component, mesh=mesh))
+    metrics = identity_metrics(planform, base, moved)
+    assert metrics["iouDecomposition"]["assembledMinusBaseIoU"] < -0.005
+
+
+def test_post_reload_topology_rejects_corrupt_geometry(tmp_path: Path):
+    good = trimesh.creation.box()
+    corrupt = good.copy()
+    corrupt.faces = np.asarray(corrupt.faces)[:-1]
+    scene = trimesh.Scene()
+    scene.add_geometry(corrupt, geom_name="base_shell", node_name="base_shell")
+    path = tmp_path / "corrupt.glb"
+    path.write_bytes(trimesh.exchange.gltf.export_glb(scene))
+    audit = _reload_audit(path, {"base_shell": good})
+    assert audit["topologyPassed"] is False
+    assert audit["topology"][0]["boundaryEdgeCount"] > 0
+    renamed = _reload_audit(path, {"expected_base_shell": good, "missing_component": good})
+    assert renamed["geometryNamesMatch"] is False
+    assert renamed["componentCountAfter"] != renamed["componentCountBefore"]
+
+
+def test_topology_record_rejects_zero_area_faces():
+    mesh = trimesh.creation.box()
+    vertices = np.asarray(mesh.vertices).copy()
+    face = mesh.faces[0]
+    vertices[face[1]] = vertices[face[0]]
+    mesh.vertices = vertices
+    assert topology_record("mutated", mesh)["degenerateTriangleCount"] > 0
+
+
+def test_nested_legacy_false_gate_is_propagated_not_hardcoded(experiment_results):
+    result, _ = experiment_results
+    recipe, _ = load_recipe("enemy_gunship")
+    checks = gate_results(
+        recipe,
+        _added_components(result),
+        result.report["identityMetrics"],
+        result.report["semanticHeightBands"],
+        result.report["assemblyReload"],
+        False,
+    )
+    assert checks["checks"]["baseShellOriginalGates"] is False
+    assert checks["passed"] is False
+
+
+def test_import_probe_historical_diff_gate_rejects_mutation(tmp_path: Path):
+    repository = tmp_path / "repo"
+    repository.mkdir()
+    subprocess.run(["git", "init", "-q"], cwd=repository, check=True)
+    subprocess.run(["git", "config", "user.email", "test@example.invalid"], cwd=repository, check=True)
+    subprocess.run(["git", "config", "user.name", "Test"], cwd=repository, check=True)
+    probe = repository / "import-probe"
+    probe.mkdir()
+    source = probe / "probe.py"
+    source.write_text("accepted\n")
+    subprocess.run(["git", "add", "."], cwd=repository, check=True)
+    subprocess.run(["git", "commit", "-qm", "baseline"], cwd=repository, check=True)
+    baseline = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repository, text=True).strip()
+    verify_historical_probe_tree(repository, baseline)
+    source.write_text("mutated\n")
+    with pytest.raises(RuntimeError, match="Import Probe differs"):
+        verify_historical_probe_tree(repository, baseline)
+
+
+def test_import_probe_content_binding_rejects_mutation(tmp_path: Path):
+    source = PACKAGE_ROOT.parent / "import-probe"
+    copied = tmp_path / "import-probe"
+    shutil.copytree(source, copied)
+    target = copied / "probe" / "contracts.py"
+    target.write_text(target.read_text(encoding="utf-8") + "\n# mutation\n", encoding="utf-8")
+    environment = os.environ.copy()
+    environment.pop("PYTHONPATH", None)
+    completed = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            "from pathlib import Path; from probe.source_binding import verify_binding; verify_binding(Path.cwd())",
+        ],
+        cwd=copied,
+        check=False,
+        capture_output=True,
+        env=environment,
+        text=True,
+    )
+    assert completed.returncode != 0
+    assert "binding failed" in completed.stderr

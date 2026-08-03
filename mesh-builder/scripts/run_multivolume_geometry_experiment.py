@@ -13,7 +13,14 @@ from app.geometry_v2 import generate_multivolume_experiment  # noqa: E402
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run the offline SkyForge multivolume geometry experiment")
+    parser = argparse.ArgumentParser(
+        description="Run the offline, recipe-driven SkyForge multivolume geometry experiment",
+        epilog=(
+            "Authority pixels constrain silhouette extents and occupied row spans only. "
+            "Recipes supply semantic identities and approximate normalized positions; this script "
+            "does not detect semantic landmarks from pixels."
+        ),
+    )
     parser.add_argument("--authority", required=True, type=Path)
     parser.add_argument("--profile", required=True)
     parser.add_argument("--output-dir", required=True, type=Path)

@@ -15,7 +15,7 @@
   "$defs": {
     "recipe": {
       "type": "object",
-      "required": ["profileId", "recipeVersion", "componentCount", "allowedTopProjectionSpillFraction", "heightOrdering", "components"],
+      "required": ["profileId", "recipeVersion", "componentCount", "allowedTopProjectionSpillFraction", "heightBandModel", "components"],
       "additionalProperties": false,
       "properties": {
         "profileId": {"type": "string", "minLength": 1},
@@ -30,10 +30,24 @@
           }
         },
         "allowedTopProjectionSpillFraction": {"type": "number", "minimum": 0, "maximum": 0.005},
-        "heightOrdering": {
-          "type": "array",
-          "minItems": 3,
-          "items": {"enum": ["shell", "fuselage_engine", "cockpit_weapon_peak"]}
+        "heightBandModel": {
+          "type": "object",
+          "required": ["minimumBandCount", "minimumSeparation", "groups"],
+          "additionalProperties": false,
+          "properties": {
+            "minimumBandCount": {"type": "integer", "minimum": 3},
+            "minimumSeparation": {"type": "number", "exclusiveMinimum": 0},
+            "groups": {
+              "type": "object",
+              "required": ["shell", "body", "semanticPeak"],
+              "additionalProperties": false,
+              "properties": {
+                "shell": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+                "body": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+                "semanticPeak": {"type": "array", "minItems": 1, "items": {"type": "string"}}
+              }
+            }
+          }
         },
         "components": {
           "type": "array",

@@ -28,10 +28,18 @@ from .evidence import (
     render_components,
     render_cross_sections,
     render_overlay,
+    render_textured_top,
     sha256_file,
     write_manifest,
 )
-from .metrics import component_record, gate_results, identity_metrics, semantic_height_bands
+from .metrics import (
+    component_record,
+    gate_results,
+    identity_metrics,
+    semantic_height_bands,
+    topology_passed,
+    topology_record,
+)
 from .model import ExperimentResult, PlacedComponent
 from .placement import fit_planform_dimensions, measure_planform, normalized_anchor
 from .primitives import create_primitive
@@ -102,20 +110,6 @@ def _place_components(authority_path: Path, recipe: dict[str, Any], base_mesh: t
     return planform, placed
 
 
-def _strictly_contained_names(components: list[PlacedComponent]) -> list[str]:
-    contained: list[str] = []
-    for component in components:
-        bounds = np.asarray(component.mesh.bounds)
-        for other in components:
-            if component is other:
-                continue
-            other_bounds = np.asarray(other.mesh.bounds)
-            if np.all(bounds[0] > other_bounds[0] + 1e-6) and np.all(bounds[1] < other_bounds[1] - 1e-6):
-                contained.append(component.name)
-                break
-    return sorted(contained)
-
-
 def _assign_planar_texture(mesh: trimesh.Trimesh, image: Image.Image) -> None:
     vertices = np.asarray(mesh.vertices, dtype=np.float64)
     uv = np.column_stack((vertices[:, 0] / 5.5 + 0.5, vertices[:, 1] / 5.5 + 0.5))
@@ -145,16 +139,28 @@ def _encoded_scene(
     return scene
 
 
-def _reload_audit(path: Path, expected_target: trimesh.Trimesh) -> tuple[int, float, list[str]]:
+def _reload_audit(path: Path, expected_meshes: dict[str, trimesh.Trimesh]) -> dict[str, Any]:
     scene = trimesh.load(path, force="scene", process=False)
-    target_meshes: list[trimesh.Trimesh] = []
-    for geometry in scene.geometry.values():
+    target_meshes: dict[str, trimesh.Trimesh] = {}
+    for name, geometry in scene.geometry.items():
         mesh = geometry.copy()
         mesh.apply_transform(GLTF_TO_BLENDER)
-        target_meshes.append(mesh)
-    reloaded = trimesh.util.concatenate(target_meshes)
-    delta = float(np.max(np.abs(np.asarray(reloaded.bounds) - np.asarray(expected_target.bounds))))
-    return len(scene.geometry), delta, sorted(scene.geometry)
+        target_meshes[name] = mesh
+    expected = trimesh.util.concatenate([mesh.copy() for mesh in expected_meshes.values()])
+    reloaded = trimesh.util.concatenate([mesh.copy() for mesh in target_meshes.values()])
+    delta = float(np.max(np.abs(np.asarray(reloaded.bounds) - np.asarray(expected.bounds))))
+    records = [topology_record(name, mesh) for name, mesh in sorted(target_meshes.items())]
+    return {
+        "componentCountBefore": len(expected_meshes),
+        "componentCountAfter": len(target_meshes),
+        "geometryNamesAfter": sorted(target_meshes),
+        "geometryNamesMatch": sorted(target_meshes) == sorted(expected_meshes),
+        "coordinateBoundsDelta": round(delta, 9),
+        "coordinateEncoding": "target_xyz_to_gltf_x_z_neg_y",
+        "topology": records,
+        "topologyPassed": topology_passed(records),
+        "targetMeshes": target_meshes,
+    }
 
 
 def _export_obj(meshes: list[trimesh.Trimesh], path: Path) -> None:
@@ -175,7 +181,8 @@ def generate_multivolume_experiment(
     recipe, recipe_digest = load_recipe(profile_id, recipe_path)
     legacy_dir = output_dir / "legacy_v0.7.1"
     legacy = generate_authority_mesh(authority_path, legacy_dir)
-    if not legacy.report["gateResults"]["passed"]:
+    legacy_gates_passed = bool(legacy.report["gateResults"]["passed"])
+    if not legacy_gates_passed:
         raise RuntimeError("Nested legacy base-shell report did not pass all original gates")
 
     base_encoded = trimesh.load(legacy.mesh_path, force="mesh", process=False)
@@ -192,16 +199,15 @@ def generate_multivolume_experiment(
     finally:
         texture.close()
 
-    target_meshes = [base_target, *(component.mesh for component in components)]
-    target_assembly = trimesh.util.concatenate([mesh.copy() for mesh in target_meshes])
+    named_meshes = {"base_shell": base_target, **{item.name: item.mesh for item in components}}
+    target_meshes = list(named_meshes.values())
     obj_path = output_dir / "multivolume_experiment.obj"
     _export_obj(target_meshes, obj_path)
-    reload_count, reload_bounds_delta, reload_names = _reload_audit(mesh_path, target_assembly)
-    records = [component_record(component) for component in components]
+    reload_audit = _reload_audit(mesh_path, named_meshes)
+    records = [component_record(component, base_target) for component in components]
     identity = identity_metrics(planform, base_target, components)
-    heights = semantic_height_bands(base_target, components)
-    contained = _strictly_contained_names(components)
-    gates = gate_results(recipe, records, identity, heights, reload_count, reload_bounds_delta, contained)
+    heights = semantic_height_bands(reload_audit["targetMeshes"], recipe["heightBandModel"])
+    gates = gate_results(recipe, records, identity, heights, reload_audit, legacy_gates_passed)
 
     registry = {
         "schemaVersion": "skyforge.multivolume-component-registry.v1",
@@ -222,18 +228,24 @@ def generate_multivolume_experiment(
     registry_path = output_dir / "component_registry.json"
     registry_path.write_text(json.dumps(registry, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
-    named_meshes = {"base_shell": base_target, **{item.name: item.mesh for item in components}}
     preview_paths: list[Path] = []
     for view in ("top", "bank_left", "bank_right", "front", "side"):
         path = output_dir / f"multivolume_preview_{view}.png"
         render_components(named_meshes, path, view)
         preview_paths.append(path)
+    texture_top_path = output_dir / "multivolume_textured_top.png"
+    with Image.open(authority_path) as authority_texture:
+        render_textured_top(named_meshes, authority_texture, texture_top_path)
+    preview_paths.append(texture_top_path)
     overlay_path = output_dir / "semantic_component_planform_overlay.png"
     render_overlay(planform, components, overlay_path)
     preview_paths.append(overlay_path)
     cross_section_path = output_dir / "multivolume_cross_section_sheet.png"
     render_cross_sections(components, cross_section_path)
     preview_paths.append(cross_section_path)
+    attachment_path = output_dir / "attachment_exposure_diagnostic.png"
+    render_components(named_meshes, attachment_path, "side")
+    preview_paths.append(attachment_path)
     comparison_path = output_dir / "legacy_alpha1_comparison_contact_sheet.png"
     comparison_sheet(
         authority_path,
@@ -242,6 +254,30 @@ def generate_multivolume_experiment(
         comparison_path,
     )
     preview_paths.append(comparison_path)
+    authority_copy = output_dir / f"authority_source_{authority_path.name}"
+    authority_copy.write_bytes(authority_path.read_bytes())
+    preview_paths.append(authority_copy)
+
+    measurement_artifacts = {
+        "authority_reference.json": {
+            "file": authority_path.name,
+            "sha256": sha256_file(authority_path),
+            "constraintUse": "silhouette extents and occupied-row span only",
+        },
+        "iou_decomposition.json": identity["iouDecomposition"],
+        "measured_height_bands.json": heights,
+        "pre_export_topology.json": [
+            topology_record(name, mesh) for name, mesh in sorted(named_meshes.items())
+        ],
+        "post_reload_topology.json": reload_audit["topology"],
+        "attachment_exposure_measurements.json": {
+            record["name"]: record["attachmentMeasurement"] for record in records
+        },
+    }
+    for filename, payload in measurement_artifacts.items():
+        path = output_dir / filename
+        path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        preview_paths.append(path)
 
     legacy_report_bytes = legacy.report_path.read_bytes()
     report = {
@@ -258,8 +294,9 @@ def generate_multivolume_experiment(
             "generatorId": LEGACY_GENERATOR_ID,
             "generatorVersion": LEGACY_GENERATOR_VERSION,
             "reportSha256": _sha256_bytes(legacy_report_bytes),
+            "reportPath": str(legacy.report_path.relative_to(output_dir)),
             "meshSha256": sha256_file(legacy.mesh_path),
-            "allOriginalGatesPassed": True,
+            "allOriginalGatesPassed": legacy_gates_passed,
         },
         "geometryInputs": ["approved_authority_planform", "selected_profile_geometry_recipe"],
         "albedoGeometryInfluence": False,
@@ -267,14 +304,8 @@ def generate_multivolume_experiment(
         "components": registry["components"],
         "identityMetrics": identity,
         "semanticHeightBands": heights,
-        "assemblyReload": {
-            "componentCountBefore": len(target_meshes),
-            "componentCountAfter": reload_count,
-            "geometryNamesAfter": reload_names,
-            "coordinateBoundsDelta": round(reload_bounds_delta, 9),
-            "coordinateEncoding": "target_xyz_to_gltf_x_z_neg_y",
-        },
-        "whollyContainedComponents": contained,
+        "preExportTopology": measurement_artifacts["pre_export_topology.json"],
+        "assemblyReload": {key: value for key, value in reload_audit.items() if key != "targetMeshes"},
         "gateResults": gates,
         "limitations": [
             "Alpha 1 candidate-addresses MBS-151 through MBS-154; no finding is closed.",

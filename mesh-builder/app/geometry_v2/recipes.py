@@ -16,6 +16,10 @@ class UnsupportedGeometryProfile(ValueError):
     """Raised when an experimental profile has no explicit reviewed recipe."""
 
 
+class HeightBandContractError(ValueError):
+    """Raised when a recipe omits or misnames a required semantic height group."""
+
+
 def canonical_json_bytes(value: Any) -> bytes:
     return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
 
@@ -33,5 +37,17 @@ def load_recipe(profile_id: str, recipe_path: Path = DEFAULT_RECIPE_PATH) -> tup
     names = [component["name"] for component in recipe["components"]]
     if len(names) != len(set(names)):
         raise ValueError("Recipe component names must be unique")
+    model = recipe["heightBandModel"]
+    required_groups = ("shell", "body", "semanticPeak")
+    if set(model["groups"]) != set(required_groups):
+        raise HeightBandContractError(
+            "heightBandModel.groups must define shell, body, semanticPeak"
+        )
+    available_names = {"base_shell", *names}
+    unknown = sorted(
+        name for members in model["groups"].values() for name in members if name not in available_names
+    )
+    if unknown:
+        raise HeightBandContractError("heightBandModel references unknown components: " + ", ".join(unknown))
     digest = hashlib.sha256(canonical_json_bytes(recipe)).hexdigest()
     return recipe, digest

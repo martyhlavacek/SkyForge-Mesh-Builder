@@ -82,6 +82,30 @@ def render_components(meshes: dict[str, trimesh.Trimesh], output_path: Path, vie
     canvas.save(output_path)
 
 
+def render_textured_top(meshes: dict[str, trimesh.Trimesh], texture: Image.Image, output_path: Path) -> None:
+    """Render a deterministic top view using the same planar texture projection as the GLB."""
+    size = 512
+    canvas = Image.new("RGBA", (size, size), (20, 24, 30, 255))
+    draw = ImageDraw.Draw(canvas, "RGBA")
+    source = texture.convert("RGBA")
+    pixels = source.load()
+    faces: list[tuple[float, list[tuple[float, float]], tuple[int, int, int, int]]] = []
+    for mesh in meshes.values():
+        vertices = np.asarray(mesh.vertices, dtype=np.float64)
+        screen = np.column_stack(
+            ((vertices[:, 0] / WORLD_SPAN + 0.5) * size, (0.5 - vertices[:, 1] / WORLD_SPAN) * size)
+        )
+        for face in np.asarray(mesh.faces, dtype=np.int64):
+            centre = vertices[face].mean(axis=0)
+            u = int(np.clip((centre[0] / WORLD_SPAN + 0.5) * (source.width - 1), 0, source.width - 1))
+            v = int(np.clip((0.5 - centre[1] / WORLD_SPAN) * (source.height - 1), 0, source.height - 1))
+            polygon = [(float(screen[index, 0]), float(screen[index, 1])) for index in face]
+            faces.append((float(centre[2]), polygon, pixels[u, v]))
+    for _, polygon, colour in sorted(faces, key=lambda item: item[0]):
+        draw.polygon(polygon, fill=colour)
+    canvas.save(output_path)
+
+
 def render_overlay(planform: AuthorityPlanform, components: list[PlacedComponent], output_path: Path) -> None:
     base = Image.fromarray(np.where(planform.mask, 70, 20).astype(np.uint8), "L").convert("RGBA")
     base = base.resize((512, 512), Image.Resampling.NEAREST)

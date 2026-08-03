@@ -6,7 +6,7 @@
       "recipeVersion": 1,
       "componentCount": {"minimum": 8, "maximum": 9},
       "allowedTopProjectionSpillFraction": 0.005,
-      "heightOrdering": ["shell", "fuselage_engine", "cockpit_weapon_peak"],
+      "heightBandModel": {"minimumBandCount": 3, "minimumSeparation": 0.025, "groups": {"shell": ["base_shell"], "body": ["fuselage", "engine_left", "engine_right"], "semanticPeak": ["cockpit_left", "cockpit_right"]}},
       "components": [
         {"name": "fuselage", "shape": "ellipsoid", "longitudinalAnchor": 0.50, "lateralAnchor": 0.0, "normalizedLength": 0.58, "normalizedWidth": 0.17, "normalizedHeight": 0.10, "attachmentPenetration": 0.035, "minimumVolume": 0.015, "minimumTriangles": 80, "subdivisions": 2},
         {"name": "cockpit_left", "shape": "ellipsoid", "longitudinalAnchor": 0.27, "lateralAnchor": -0.22, "normalizedLength": 0.17, "normalizedWidth": 0.085, "normalizedHeight": 0.18, "attachmentPenetration": 0.025, "minimumVolume": 0.002, "minimumTriangles": 80, "subdivisions": 2},
@@ -23,7 +23,7 @@
       "recipeVersion": 1,
       "componentCount": {"minimum": 6, "maximum": 7},
       "allowedTopProjectionSpillFraction": 0.005,
-      "heightOrdering": ["shell", "fuselage_engine", "cockpit_weapon_peak"],
+      "heightBandModel": {"minimumBandCount": 3, "minimumSeparation": 0.025, "groups": {"shell": ["base_shell"], "body": ["fuselage", "engine_left", "engine_right"], "semanticPeak": ["cockpit"]}},
       "components": [
         {"name": "fuselage", "shape": "ellipsoid", "longitudinalAnchor": 0.46, "lateralAnchor": 0.0, "normalizedLength": 0.62, "normalizedWidth": 0.14, "normalizedHeight": 0.09, "attachmentPenetration": 0.03, "minimumVolume": 0.01, "minimumTriangles": 80, "subdivisions": 2},
         {"name": "cockpit", "shape": "ellipsoid", "longitudinalAnchor": 0.29, "lateralAnchor": 0.0, "normalizedLength": 0.17, "normalizedWidth": 0.095, "normalizedHeight": 0.17, "attachmentPenetration": 0.02, "minimumVolume": 0.002, "minimumTriangles": 80, "subdivisions": 2},
