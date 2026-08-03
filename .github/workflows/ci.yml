@@ -18,6 +18,8 @@ jobs:
       PYTHONNOUSERSITE: "1"
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -33,6 +35,8 @@ jobs:
         run: '"$RUNNER_TEMP/producer-venv/bin/python" -m pytest -q'
       - name: Verify producer source binding
         run: '"$RUNNER_TEMP/producer-venv/bin/python" -c ''from pathlib import Path; from common.source_binding import PRODUCER_SCOPE, verify_binding; print(verify_binding(Path.cwd(), PRODUCER_SCOPE))'''
+      - name: Verify Import Probe historical accepted baseline
+        run: '"$RUNNER_TEMP/producer-venv/bin/python" scripts/verify_import_probe_baseline.py --repository-root .. --baseline v0.7.1-accepted-baseline'
 
   import-probe:
     name: Import Probe
@@ -44,6 +48,8 @@ jobs:
       PYTHONNOUSERSITE: "1"
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"

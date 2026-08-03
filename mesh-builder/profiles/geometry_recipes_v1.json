@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "skyforge.geometry-recipes.v1",
+  "recipes": [
+    {
+      "profileId": "enemy_gunship",
+      "recipeVersion": 1,
+      "componentCount": {"minimum": 8, "maximum": 9},
+      "allowedTopProjectionSpillFraction": 0.005,
+      "heightBandModel": {"minimumBandCount": 3, "minimumSeparation": 0.025, "groups": {"shell": ["base_shell"], "body": ["fuselage", "engine_left", "engine_right"], "semanticPeak": ["cockpit_left", "cockpit_right"]}},
+      "components": [
+        {"name": "fuselage", "shape": "ellipsoid", "longitudinalAnchor": 0.50, "lateralAnchor": 0.0, "normalizedLength": 0.58, "normalizedWidth": 0.17, "normalizedHeight": 0.10, "attachmentPenetration": 0.035, "minimumVolume": 0.015, "minimumTriangles": 80, "subdivisions": 2},
+        {"name": "cockpit_left", "shape": "ellipsoid", "longitudinalAnchor": 0.27, "lateralAnchor": -0.22, "normalizedLength": 0.17, "normalizedWidth": 0.085, "normalizedHeight": 0.18, "attachmentPenetration": 0.025, "minimumVolume": 0.002, "minimumTriangles": 80, "subdivisions": 2},
+        {"name": "cockpit_right", "shape": "ellipsoid", "longitudinalAnchor": 0.27, "lateralAnchor": 0.22, "normalizedLength": 0.17, "normalizedWidth": 0.085, "normalizedHeight": 0.18, "attachmentPenetration": 0.025, "minimumVolume": 0.002, "minimumTriangles": 80, "subdivisions": 2},
+        {"name": "engine_left", "shape": "capsule", "longitudinalAnchor": 0.60, "lateralAnchor": -0.42, "normalizedLength": 0.20, "normalizedWidth": 0.055, "normalizedHeight": 0.09, "attachmentPenetration": 0.035, "minimumVolume": 0.006, "minimumTriangles": 80},
+        {"name": "engine_right", "shape": "capsule", "longitudinalAnchor": 0.60, "lateralAnchor": 0.42, "normalizedLength": 0.20, "normalizedWidth": 0.055, "normalizedHeight": 0.09, "attachmentPenetration": 0.035, "minimumVolume": 0.006, "minimumTriangles": 80},
+        {"name": "weapon_left", "shape": "box", "longitudinalAnchor": 0.16, "lateralAnchor": -0.35, "normalizedLength": 0.12, "normalizedWidth": 0.045, "normalizedHeight": 0.055, "attachmentPenetration": 0.018, "minimumVolume": 0.001, "minimumTriangles": 12},
+        {"name": "weapon_right", "shape": "box", "longitudinalAnchor": 0.16, "lateralAnchor": 0.35, "normalizedLength": 0.12, "normalizedWidth": 0.045, "normalizedHeight": 0.055, "attachmentPenetration": 0.018, "minimumVolume": 0.001, "minimumTriangles": 12},
+        {"name": "belly", "shape": "ellipsoid", "longitudinalAnchor": 0.63, "lateralAnchor": 0.0, "normalizedLength": 0.25, "normalizedWidth": 0.13, "normalizedHeight": 0.08, "attachmentPenetration": 0.03, "minimumVolume": 0.004, "minimumTriangles": 80, "subdivisions": 2}
+      ]
+    },
+    {
+      "profileId": "enemy_interceptor",
+      "recipeVersion": 1,
+      "componentCount": {"minimum": 6, "maximum": 7},
+      "allowedTopProjectionSpillFraction": 0.005,
+      "heightBandModel": {"minimumBandCount": 3, "minimumSeparation": 0.025, "groups": {"shell": ["base_shell"], "body": ["fuselage", "engine_left", "engine_right"], "semanticPeak": ["cockpit"]}},
+      "components": [
+        {"name": "fuselage", "shape": "ellipsoid", "longitudinalAnchor": 0.46, "lateralAnchor": 0.0, "normalizedLength": 0.62, "normalizedWidth": 0.14, "normalizedHeight": 0.09, "attachmentPenetration": 0.03, "minimumVolume": 0.01, "minimumTriangles": 80, "subdivisions": 2},
+        {"name": "cockpit", "shape": "ellipsoid", "longitudinalAnchor": 0.29, "lateralAnchor": 0.0, "normalizedLength": 0.17, "normalizedWidth": 0.095, "normalizedHeight": 0.17, "attachmentPenetration": 0.02, "minimumVolume": 0.002, "minimumTriangles": 80, "subdivisions": 2},
+        {"name": "engine_left", "shape": "capsule", "longitudinalAnchor": 0.67, "lateralAnchor": -0.32, "normalizedLength": 0.18, "normalizedWidth": 0.09, "normalizedHeight": 0.08, "attachmentPenetration": 0.03, "minimumVolume": 0.003, "minimumTriangles": 80},
+        {"name": "engine_right", "shape": "capsule", "longitudinalAnchor": 0.67, "lateralAnchor": 0.32, "normalizedLength": 0.18, "normalizedWidth": 0.09, "normalizedHeight": 0.08, "attachmentPenetration": 0.03, "minimumVolume": 0.003, "minimumTriangles": 80},
+        {"name": "weapon_left", "shape": "box", "longitudinalAnchor": 0.13, "lateralAnchor": -0.22, "normalizedLength": 0.10, "normalizedWidth": 0.035, "normalizedHeight": 0.045, "attachmentPenetration": 0.015, "minimumVolume": 0.0005, "minimumTriangles": 12},
+        {"name": "weapon_right", "shape": "box", "longitudinalAnchor": 0.13, "lateralAnchor": 0.22, "normalizedLength": 0.10, "normalizedWidth": 0.035, "normalizedHeight": 0.045, "attachmentPenetration": 0.015, "minimumVolume": 0.0005, "minimumTriangles": 12}
+      ]
+    }
+  ]
+}
