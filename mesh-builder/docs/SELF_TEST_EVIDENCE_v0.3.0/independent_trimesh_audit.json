@@ -1,0 +1,24 @@
+{
+  "validator": "trimesh 4.11.1 independent GLB reload",
+  "source": "authority_generated_mesh.glb",
+  "vertexCount": 15052,
+  "triangleCount": 30100,
+  "isWatertight": true,
+  "isWindingConsistent": true,
+  "eulerNumber": 2,
+  "bodyCount": 1,
+  "volume": 4.646409757312992,
+  "bounds": [
+    [
+      -1.9249999523162842,
+      -2.543750047683716,
+      -0.11999999731779099
+    ],
+    [
+      1.9249999523162842,
+      2.543750047683716,
+      0.7286946177482605
+    ]
+  ],
+  "visualKind": "texture"
+}

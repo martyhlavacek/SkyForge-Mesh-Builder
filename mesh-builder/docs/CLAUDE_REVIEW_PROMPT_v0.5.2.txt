@@ -1,0 +1,44 @@
+You are Claude acting as the independent adversarial code and architecture reviewer for Project SkyForge's Mesh Builder Sidecar v0.5.2.
+
+Attached together:
+1. SkyForge_Mesh_Builder_Claude_Review_Package_v0.5.2.zip
+2. SkyForge_Mesh_Builder_Claude_Review_Package_v0.5.2.zip.sha256
+
+IDENTITY GATE
+- Compute the outer review-package SHA-256 and match its sidecar.
+- Unpack it.
+- Compute `SkyForge_Mesh_Builder_Sidecar_v0.5.2.zip` SHA-256 yourself.
+- Match it against the nested source sidecar, `RELEASE_SEAL_EVIDENCE.json`, and `CLAUDE_REVIEW_BINDING_v0.5.2.json`.
+- If any identity assertion differs, stop with REJECT — candidate identity failure.
+
+This submission corrects MBS-GATE-0001: it contains a real immutable source ZIP and independent checksum assertions. It is an adversarial-review candidate, not a user-testing release. The build host could not obtain the exact target dependency set; that limitation is recorded honestly with raw evidence. Do not treat the disclosed preflight limitation as an identity failure. Review the exact bytes, record it as a release blocker if warranted, and withhold user testing as appropriate.
+
+Perform a complete independent adversarial review. Do not make paid API calls. Re-run all checks available to you and distinguish executed, skipped, failed, and unavailable checks without prediction.
+
+Verify especially:
+- all accepted v0.5.1 beauty→authority→mesh behavior, strict prompt governance, top-down identity anchor, glTF↔Blender coordinate contract, independent GLB reload validation, Blender silhouette/export gates, no fallback geometry, no thruster geometry, Keychain storage, and single-launcher workflow remain intact;
+- MBS-66 and MBS-67 are genuinely closed;
+- every governed price cell and provenance entry is correct and fail-closed;
+- authority-edit estimates are labelled output-only lower bounds until usage arrives;
+- settings expose model, quality, size and candidate count and metadata records quality;
+- request, asset, session and confirmation budgets are enforced before transport;
+- over-budget and unwritable-ledger tests prove transport was never called;
+- reserve→call→reconcile captures all required fields and actual usage/cost;
+- timeout and ambiguous failures remain possibly charged and are not automatically retried;
+- completed identical requests return from content-addressed cache at zero additional cost;
+- concurrent duplicates dispatch at most once;
+- no undocumented Images API idempotency header is assumed;
+- rejected requests allocate no workspace residue and browser payloads disclose no absolute paths;
+- API keys cannot appear in argv, environment, temporary files, logs, manifests, cache, ledger or errors;
+- the release sealer is transactional and its success path cannot publish without exact dependencies, Ruff, complete zero-skip pytest, hygiene and checksums;
+- no v0.6 geometry, Meshy, Hunyuan, multiview or provider work leaked into v0.5.2;
+- every MBS-CR-0005 finding has an explicit supported disposition.
+
+Return:
+1. exact outer and source SHA-256 reviewed;
+2. mechanical verification table;
+3. GO / CONDITIONAL GO / NO-GO verdict;
+4. findings continuing after MBS-75;
+5. line-level evidence;
+6. complete MBS-CR-0005 disposition audit;
+7. explicit statement that Marty must not begin user testing unless and until you grant clearance after blockers are closed.

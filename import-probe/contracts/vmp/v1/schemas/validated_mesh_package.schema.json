@@ -1,0 +1,310 @@
+{
+  "$id": "https://skyforge.local/contracts/vmp/v1/validated_mesh_package.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "approval": {
+      "additionalProperties": false,
+      "properties": {
+        "approvedForDistribution": {
+          "const": true,
+          "type": "boolean"
+        },
+        "distributionTarget": {
+          "const": "sprite_foundry",
+          "minLength": 1,
+          "type": "string"
+        },
+        "state": {
+          "const": "approved",
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "state",
+        "approvedForDistribution",
+        "distributionTarget"
+      ],
+      "type": "object"
+    },
+    "assetId": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "assetVersion": {
+      "minLength": 1,
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "type": "string"
+    },
+    "contentIndex": {
+      "additionalProperties": {
+        "additionalProperties": false,
+        "properties": {
+          "sha256": {
+            "minLength": 1,
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "sizeBytes": {
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "sha256",
+          "sizeBytes"
+        ],
+        "type": "object"
+      },
+      "minProperties": 1,
+      "propertyNames": {
+        "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\).+$",
+        "type": "string"
+      },
+      "type": "object"
+    },
+    "contracts": {
+      "additionalProperties": false,
+      "properties": {
+        "assetRoleContract": {
+          "const": "skyforge.asset-role.v1",
+          "minLength": 1,
+          "type": "string"
+        },
+        "coordinateContract": {
+          "const": "skyforge.mesh-coordinate.v1",
+          "minLength": 1,
+          "type": "string"
+        },
+        "frameContract": {
+          "const": "skyforge.render-frame-contract.v1",
+          "minLength": 1,
+          "type": "string"
+        },
+        "materialContract": {
+          "const": "skyforge.mesh-material.v1",
+          "minLength": 1,
+          "type": "string"
+        },
+        "minimumSpriteFoundryImporter": {
+          "minLength": 1,
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "coordinateContract",
+        "assetRoleContract",
+        "frameContract",
+        "materialContract",
+        "minimumSpriteFoundryImporter"
+      ],
+      "type": "object"
+    },
+    "craftProfileId": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "digestProfile": {
+      "$id": "https://skyforge.local/contracts/vmp/v1/vmp_content_digest_profile.schema.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "canonicalization": {
+          "const": "RFC8785-JCS",
+          "minLength": 1,
+          "type": "string"
+        },
+        "hashAlgorithm": {
+          "const": "sha256",
+          "minLength": 1,
+          "type": "string"
+        },
+        "includedManifestFields": {
+          "const": [
+            "schemaVersion",
+            "packageVersion",
+            "assetId",
+            "assetVersion",
+            "craftProfileId",
+            "producer.foundry",
+            "producer.sidecarVersion",
+            "producer.providerId",
+            "producer.providerModel",
+            "producer.identityModel",
+            "contracts.coordinateContract",
+            "contracts.assetRoleContract",
+            "contracts.frameContract",
+            "contracts.materialContract",
+            "contracts.minimumSpriteFoundryImporter",
+            "source.authoritySetSha256",
+            "source.providerEvidencePackageSha256",
+            "supersession.supersedesPackageContentDigest",
+            "supersession.reasonCode",
+            "contentIndex"
+          ],
+          "type": "array"
+        },
+        "optionalFieldEncoding": {
+          "additionalProperties": false,
+          "properties": {
+            "absent": {
+              "const": "omitted",
+              "minLength": 1,
+              "type": "string"
+            },
+            "explicitNull": {
+              "const": "prohibited",
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "absent",
+            "explicitNull"
+          ],
+          "type": "object"
+        },
+        "profileVersion": {
+          "const": "skyforge.vmp-content-digest.v1",
+          "minLength": 1,
+          "type": "string"
+        },
+        "unknownFieldPolicy": {
+          "const": "excluded",
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "profileVersion",
+        "canonicalization",
+        "hashAlgorithm",
+        "includedManifestFields",
+        "unknownFieldPolicy",
+        "optionalFieldEncoding"
+      ],
+      "title": "SkyForge VMP v1 semantic digest profile",
+      "type": "object"
+    },
+    "packageContentDigest": {
+      "minLength": 1,
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "packageId": {
+      "minLength": 1,
+      "pattern": "^sfmeshpack:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "packageVersion": {
+      "const": "1.0.0",
+      "minLength": 1,
+      "type": "string"
+    },
+    "producer": {
+      "additionalProperties": false,
+      "properties": {
+        "foundry": {
+          "const": "mesh_foundry",
+          "minLength": 1,
+          "type": "string"
+        },
+        "identityModel": {
+          "enum": [
+            "deterministic_reproducibility",
+            "approved_artifact_immutability"
+          ],
+          "minLength": 1,
+          "type": "string"
+        },
+        "providerId": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "providerModel": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "sidecarVersion": {
+          "minLength": 1,
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "foundry",
+        "sidecarVersion",
+        "providerId",
+        "identityModel"
+      ],
+      "type": "object"
+    },
+    "schemaVersion": {
+      "const": "skyforge.validated-mesh-package.v1",
+      "minLength": 1,
+      "type": "string"
+    },
+    "source": {
+      "additionalProperties": false,
+      "properties": {
+        "authoritySetSha256": {
+          "minLength": 1,
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "providerEvidencePackageSha256": {
+          "minLength": 1,
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "authoritySetSha256"
+      ],
+      "type": "object"
+    },
+    "supersession": {
+      "additionalProperties": false,
+      "properties": {
+        "reasonCode": {
+          "enum": [
+            "producer_version_rebuild",
+            "asset_revision",
+            "provider_candidate_superseded"
+          ],
+          "minLength": 1,
+          "type": "string"
+        },
+        "supersedesPackageContentDigest": {
+          "minLength": 1,
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "supersedesPackageContentDigest",
+        "reasonCode"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "packageId",
+    "packageContentDigest",
+    "packageVersion",
+    "assetId",
+    "assetVersion",
+    "craftProfileId",
+    "producer",
+    "approval",
+    "contracts",
+    "source",
+    "contentIndex",
+    "digestProfile"
+  ],
+  "title": "Validated Mesh Package manifest v1",
+  "type": "object"
+}

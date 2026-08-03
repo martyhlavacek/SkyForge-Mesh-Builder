@@ -1,0 +1,68 @@
+{
+  "approval": {
+    "approvedForDistribution": true,
+    "distributionTarget": "sprite_foundry",
+    "state": "approved"
+  },
+  "assetId": "approved_gunship",
+  "assetVersion": "1.0.0",
+  "contentIndex": {
+    "asset.json": {
+      "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "sizeBytes": 123
+    }
+  },
+  "contracts": {
+    "assetRoleContract": "skyforge.asset-role.v1",
+    "coordinateContract": "skyforge.mesh-coordinate.v1",
+    "frameContract": "skyforge.render-frame-contract.v1",
+    "materialContract": "skyforge.mesh-material.v1",
+    "minimumSpriteFoundryImporter": "0.1.0"
+  },
+  "craftProfileId": "enemy_gunship",
+  "digestProfile": {
+    "canonicalization": "RFC8785-JCS",
+    "hashAlgorithm": "sha256",
+    "includedManifestFields": [
+      "schemaVersion",
+      "packageVersion",
+      "assetId",
+      "assetVersion",
+      "craftProfileId",
+      "producer.foundry",
+      "producer.sidecarVersion",
+      "producer.providerId",
+      "producer.providerModel",
+      "producer.identityModel",
+      "contracts.coordinateContract",
+      "contracts.assetRoleContract",
+      "contracts.frameContract",
+      "contracts.materialContract",
+      "contracts.minimumSpriteFoundryImporter",
+      "source.authoritySetSha256",
+      "source.providerEvidencePackageSha256",
+      "supersession.supersedesPackageContentDigest",
+      "supersession.reasonCode",
+      "contentIndex"
+    ],
+    "optionalFieldEncoding": {
+      "absent": "omitted",
+      "explicitNull": "prohibited"
+    },
+    "profileVersion": "skyforge.vmp-content-digest.v1",
+    "unknownFieldPolicy": "excluded"
+  },
+  "packageContentDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "packageId": "sfmeshpack:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "packageVersion": "1.0.0",
+  "producer": {
+    "foundry": "mesh_foundry",
+    "identityModel": "deterministic_reproducibility",
+    "providerId": "local_deterministic",
+    "sidecarVersion": "0.7.0"
+  },
+  "schemaVersion": "skyforge.validated-mesh-package.v1",
+  "source": {
+    "authoritySetSha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  }
+}

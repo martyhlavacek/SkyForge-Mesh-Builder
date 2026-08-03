@@ -1,0 +1,13 @@
+{
+  "baselineVersion": "0.6.0",
+  "comparisonRequiredFor": "v0.7.0 exact candidate",
+  "files": {
+    "app/image_governance.py": "06e5585864da94e715b40acd8fd317447ae7a657bb1b465e23d48ff7f82c6594",
+    "app/macos_keychain.py": "2c38f5749dc616f538a3b36c02a6477bc908e7c97afbb99af2f7110aa756ba69",
+    "app/openai_client.py": "631fbb1ebd2ecbb4859ee0c11d5f9f6c5a22b3bd85e415ba4b7d7b0ed3d9ac18",
+    "app/settings_store.py": "bb213100b611364ba25bf58eabee359ddd88c3219736a858b83bd5dcfb96b08a",
+    "common/image_pricing.py": "ce1a4a073644f741b176ea026c196136bffb77b3c6010831368b8adb54959a68",
+    "common/spend_ledger.py": "a7b72ebce50cefc0fe0fe8d9cca60452df49fc0a753682adb7516ca3432bb84a"
+  },
+  "schemaVersion": "skyforge.governance-byte-identity-baseline.v1"
+}

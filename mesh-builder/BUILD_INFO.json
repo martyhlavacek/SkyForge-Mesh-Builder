@@ -1,0 +1,181 @@
+{
+  "apiKeyStorage": {
+    "backend": "macOS Keychain via native Security.framework SecItem calls",
+    "childProcessArgumentExposure": false,
+    "plaintextConfigAllowed": false,
+    "service": "com.skyforge.mesh-builder.openai"
+  },
+  "budgetDefaultsUsd": {
+    "confirmationThreshold": 0.02,
+    "perAsset": 0.5,
+    "perRequest": 0.05,
+    "perSession": 2.0
+  },
+  "buildDate": "2026-08-02",
+  "geometryPath": "two-sided authority-derived planform field with sculpted underside and tapered perimeter seam",
+  "imageDefaults": {
+    "authorityDraft": {
+      "candidateCount": 2,
+      "estimate": "output-only lower bound",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "size": "1024x1024"
+    },
+    "authorityFinal": {
+      "candidateCount": 1,
+      "estimate": "output-only lower bound",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "size": "1024x1024"
+    },
+    "beautyExplore": {
+      "candidateCount": 2,
+      "model": "gpt-image-2",
+      "quality": "low",
+      "size": "1536x1024"
+    },
+    "beautyRefine": {
+      "candidateCount": 1,
+      "model": "gpt-image-2",
+      "quality": "medium",
+      "size": "1536x1024"
+    }
+  },
+  "meshyPublicTestMode": {
+    "assetOrVmpPromotionPermitted": false,
+    "evidenceClass": "transport_lifecycle_only",
+    "normalProviderRegistryIncluded": false,
+    "publicZeroCreditKeyOnly": true
+  },
+  "normalUserLauncher": "Launch SkyForge Mesh Builder.command",
+  "openFindings": [
+    "MBS-136",
+    "MBS-150",
+    "MBS-151",
+    "MBS-152",
+    "MBS-153",
+    "MBS-154"
+  ],
+  "paidProviderWorkAuthorized": false,
+  "providerIntegrationIncluded": true,
+  "purpose": "v0.7.1 fail-closed authority suitability, lineage integrity, release reproducibility evidence, expanded governance identity, and Import Probe diagnostic hotfix",
+  "r3QualificationCorrection": {
+    "behaviouralChange": false,
+    "correction": "defer the evidence-harness import to the single test body, leaving runtime and evidence logic unchanged",
+    "exactMacOSGate": "complete Ruff 0.15.22 and zero-skip producer/probe suites remain mandatory in R3",
+    "finding": "R2 exact Ruff 0.15.22 reported one I001 in tests/test_authority_suitability_evidence.py",
+    "localVerification": "Python compileall passed; focused evidence test executed with a transient Flask import stub; adjacent non-Flask tests rerun",
+    "scope": "test-only Ruff import-block correction after exact macOS R2 preflight"
+  },
+  "r4QualificationCorrection": {
+    "behaviouralChange": false,
+    "correction": "remove the single surplus blank line; no import, assertion, runtime, evidence, provider, Blender, or release behavior changed",
+    "exactMacOSGate": "complete Ruff 0.15.22 and zero-skip producer/probe suites remain mandatory in R4",
+    "finding": "R3 exact Ruff 0.15.22 reported I001 because tests/test_authority_suitability_evidence.py contained two blank lines between the final import and the module constant",
+    "localVerification": "Python compileall and AST parsing passed; source-binding and deterministic source-archive verification rerun",
+    "scope": "test-only exact Ruff I001 correction after the R3 macOS preflight"
+  },
+  "releaseStatus": "authority-suitability-hotfix-r2-evidence-identity-corrected-r4-exact-ruff-whitespace-correction-macos-seal-and-claude-review-pending-no-user-testing",
+  "runtimeDependencies": {
+    "binding": "PRODUCER_SOURCE_BINDING.json",
+    "canonicalJson": "rfc8785==0.1.4",
+    "exactPinCount": 12,
+    "graphEngine": "networkx==3.6.1",
+    "schemaValidator": "jsonschema==4.26.0"
+  },
+  "runtimeEffectsEnabled": false,
+  "v0_6FeaturesIncluded": true,
+  "v0_6Geometry": {
+    "albedoInfluencesGeometry": "false_for_alpha_mask; foreground_mask_derivation_only_for_opaque_colour_distance",
+    "genusMax": 0,
+    "geometryMetricsSource": "independent_reloaded_glb_in_target_frame",
+    "lowerFieldRelativeResidualMin": 0.1,
+    "measuredComponentCount": true,
+    "meshGridSize": "adaptive_256_224_192_160",
+    "metrics": [
+      "flatBellySurfaceFraction",
+      "verticalWallSurfaceFraction",
+      "combinedConstructionArtifactFraction",
+      "sectionThickness",
+      "eulerNumber",
+      "genus",
+      "upperLowerIndependence",
+      "holeFilter",
+      "selectedMeshGridSize",
+      "binnedFunctionRelativeResidual"
+    ],
+    "previewGridSize": 128,
+    "smallEnclosedHoleAreaMaxPixels": 12,
+    "sourceReloadEdgeAuditAgreement": true,
+    "workGridSize": 384
+  },
+  "verification": {
+    "asymmetryMutationGuard": "FLOOR_RAISED_TO_0_20_CLAUDE_MUTATION_REVIEW_REQUIRED",
+    "authoritySuitabilityGate": {
+      "exactFieldDefectFixture": "samples/rejected_three_quarter_beauty_mbs155.png",
+      "finding": "MBS-155",
+      "governedLineageReverified": true,
+      "manualCertificationRequired": true,
+      "stage": "before_job_allocation_provider_execution_blender_or_api_spend"
+    },
+    "availableNoChargeTests": {
+      "executed": 222,
+      "failed": 0,
+      "passed": 222,
+      "scope": "all locally executable non-Flask/non-RFC8785 producer tests in this container, including 21 authority-mesh tests and 22 server-source/static-boundary tests; the exact macOS sealer must rerun the complete pinned zero-skip suite",
+      "skipped": 0
+    },
+    "browserJavascriptSyntax": "PASS_NODE_CHECK_AFTER_JINJA_PLACEHOLDER_SUBSTITUTION",
+    "cleanRuntimeGraphEngine": "NETWORKX_3_6_1_PINNED_AND_TARGETED_SPLIT_TEST_PASS",
+    "compileAll": "PASS",
+    "completePinnedPytestSuite": "MANDATORY_EXACT_CLEAN_ENVIRONMENT_ZERO_SKIP_GATE_BEFORE_CANDIDATE_ASSEMBLY",
+    "exactSourceBinding": "V071_PRODUCER_SOURCE_AND_EXACT_DEPENDENCY_BINDING_REQUIRED_BEFORE_BLENDER_RESOLUTION",
+    "governanceIdentityFileCount": 12,
+    "lintExceptionPolicy": {
+      "behaviouralChange": false,
+      "mechanism": "inline_noqa_only_on_post_bootstrap_project_imports",
+      "rule": "E402",
+      "scope": "Direct-entry script imports in run_live_blender_preflight.py, run_local_adapter_evidence.py, run_meshy_test_mode_diagnostic.py, run_migration_evidence.py, run_mock_provider_fault_matrix.py, and seal_release.py that must follow the package-root sys.path bootstrap"
+    },
+    "liveBlenderEntrypoint": "DIRECT_FILE_BOOTSTRAP_PLUS_LAUNCHER_PYTHONPATH_REGRESSION_GUARDED",
+    "liveBlenderPreflightCommand": "Run v0.7.1 Live Blender Preflight.command",
+    "liveBlenderTest": "MANDATORY_ALL_THREE_CLEARED_FIXTURES; CANDIDATE_ASSEMBLER_FAILS_CLOSED_WITHOUT_REPORT",
+    "liveMacOSKeychainTest": "PRESERVED_UNCHANGED_FROM_FIELD_VERIFIED_V0.5.3",
+    "liveOpenAITest": "NO_NEW_PAID_CALLS_V0.6.0_COST_PATH_UNCHANGED_FROM_FIELD_VERIFIED_V0.5.3",
+    "locallyUnavailableExactModules": [
+      "Flask-dependent route and Concept Lab tests",
+      "rfc8785 canonical-JSON contract tests"
+    ],
+    "noPaidCalls": "PASS_NO_OPENAI_OR_PAID_PROVIDER_CALLS",
+    "r2AuthorityEvidenceIdentityCorrection": {
+      "authorityMeshRegression": "No geometry/runtime files changed; R1 exact macOS authority-mesh coverage passed. The local authority-mesh group was started but not used as evidence after the container timeout.",
+      "binding": {
+        "decodedRgbaSha256": "4053c4b9322114b10a998f2f5ccaee50a7afd63f6107ce78177fa3a2ad7347f1",
+        "embeddedAuthoritySha256": "9bba31bc544b6dd84d566d0c6b27b4b8fdc1a3d39f287665c5a8fc9e8f143e9e",
+        "originalFixtureSha256": "6a82feefadddce2f09ea318534b3c8d913470164d5ca6f784cb05d4972b50208"
+      },
+      "cause": "v0.7.0 copied the user beauty through a lossless PNG re-encode, so original and embedded byte SHA-256 values differ while decoded RGBA pixels are exact",
+      "exactMacOSGate": "complete zero-skip suite and stage-5 evidence rerun mandatory",
+      "focusedLocalTests": "13 passed plus direct exact-artifact decoded-pixel verification",
+      "localRegression": "201 adjacent non-Flask/non-RFC8785 tests passed in this container; R1 exact macOS source passed 243/243 before this evidence-only correction; R2 complete exact zero-skip rerun remains mandatory",
+      "scope": "evidence and candidate verifier only; runtime authority rejection unchanged"
+    },
+    "releaseReproducibilityEvidence": "PRIMARY_HASH_EVIDENCE_REQUIRED_FOR_PRODUCER_AND_PROBE_SOURCE_AND_RELEASE_ARCHIVES",
+    "releaseSeal": "SEPARATE_DETERMINISTIC_PRODUCER_AND_IMPORT_PROBE_RELEASES_REQUIRED",
+    "ruff_0_15_22": "MANDATORY_EXACT_CLEAN_ENVIRONMENT_GATE_BEFORE_CANDIDATE_ASSEMBLY"
+  },
+  "version": "0.7.1",
+  "vmpV1": {
+    "assetRolesImplemented": [
+      "air_moving"
+    ],
+    "authorityEmbedding": "fail_closed_permission_conditional",
+    "consumerReceiptAuthoritative": true,
+    "digestProfile": "skyforge.vmp-content-digest.v1",
+    "importProbe": "separate_source_binding_dependency_environment_and_process",
+    "packageVersion": "1.0.0",
+    "producerExport": "rendered_local_job_plus_explicit_artifact_approval_plus_independent_receipt",
+    "structure": "frozen"
+  },
+  "workPackages": {}
+}

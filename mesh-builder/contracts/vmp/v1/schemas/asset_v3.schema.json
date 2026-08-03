@@ -1,0 +1,134 @@
+{
+  "$id": "https://skyforge.local/contracts/vmp/v1/asset_v3.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "anchorState": {
+      "enum": [
+        "authored",
+        "not_authored",
+        "not_applicable"
+      ],
+      "minLength": 1,
+      "type": "string"
+    },
+    "approval": {
+      "additionalProperties": false,
+      "properties": {
+        "approvedForDistribution": {
+          "const": true,
+          "type": "boolean"
+        },
+        "state": {
+          "const": "approved",
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "state",
+        "approvedForDistribution"
+      ],
+      "type": "object"
+    },
+    "assetId": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "assetRole": {
+      "const": "air_moving",
+      "minLength": 1,
+      "type": "string"
+    },
+    "assetVersion": {
+      "minLength": 1,
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "type": "string"
+    },
+    "collisionHint": {
+      "additionalProperties": false,
+      "properties": {
+        "authoritative": {
+          "const": false,
+          "type": "boolean"
+        },
+        "consumerMustIgnoreForRuntime": {
+          "const": true,
+          "type": "boolean"
+        },
+        "description": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "sourceSchema": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "authoritative",
+        "consumerMustIgnoreForRuntime",
+        "sourceSchema"
+      ],
+      "type": "object"
+    },
+    "craftProfileId": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "geometry": {
+      "additionalProperties": false,
+      "properties": {
+        "normalizedGlb": {
+          "const": "mesh/normalized.glb",
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "normalizedGlb"
+      ],
+      "type": "object"
+    },
+    "provider": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "identityModel": {
+          "enum": [
+            "deterministic_reproducibility",
+            "approved_artifact_immutability"
+          ],
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "identityModel"
+      ],
+      "type": "object"
+    },
+    "schemaVersion": {
+      "const": "skyforge.asset.v3",
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "assetId",
+    "assetVersion",
+    "craftProfileId",
+    "assetRole",
+    "provider",
+    "geometry",
+    "approval",
+    "anchorState"
+  ],
+  "title": "SkyForge mesh asset metadata v3",
+  "type": "object"
+}

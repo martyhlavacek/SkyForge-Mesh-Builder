@@ -1,0 +1,182 @@
+{
+  "$id": "https://skyforge.local/contracts/vmp/v1/authority_manifest.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "authorities": {
+      "items": {
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "embedded": {
+                  "const": true
+                }
+              },
+              "required": [
+                "embedded"
+              ]
+            },
+            "then": {
+              "properties": {
+                "embeddingDecision": {
+                  "const": "embedded"
+                },
+                "independentReverification": {
+                  "const": "full"
+                },
+                "redistributionPermission": {
+                  "const": "permitted"
+                }
+              },
+              "required": [
+                "embeddedPath"
+              ]
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "redistributionPermission": {
+                  "enum": [
+                    "unknown",
+                    "prohibited"
+                  ]
+                }
+              },
+              "required": [
+                "redistributionPermission"
+              ]
+            },
+            "then": {
+              "not": {
+                "required": [
+                  "embeddedPath"
+                ]
+              },
+              "properties": {
+                "embedded": {
+                  "const": false
+                },
+                "embeddingDecision": {
+                  "const": "hash_only_due_to_terms"
+                },
+                "independentReverification": {
+                  "const": "unavailable_due_to_terms"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "embedded": {
+                  "const": false
+                }
+              },
+              "required": [
+                "embedded"
+              ]
+            },
+            "then": {
+              "not": {
+                "required": [
+                  "embeddedPath"
+                ]
+              }
+            }
+          }
+        ],
+        "properties": {
+          "contentType": {
+            "const": "image/png",
+            "minLength": 1,
+            "type": "string"
+          },
+          "embedded": {
+            "type": "boolean"
+          },
+          "embeddedPath": {
+            "minLength": 1,
+            "pattern": "^authorities/[A-Za-z0-9._-]+\\.png$",
+            "type": "string"
+          },
+          "embeddingDecision": {
+            "enum": [
+              "embedded",
+              "hash_only_due_to_terms",
+              "absent_not_authored"
+            ],
+            "minLength": 1,
+            "type": "string"
+          },
+          "generationProvenanceRef": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "independentReverification": {
+            "enum": [
+              "full",
+              "unavailable_due_to_terms"
+            ],
+            "minLength": 1,
+            "type": "string"
+          },
+          "redistributionPermission": {
+            "enum": [
+              "permitted",
+              "prohibited",
+              "unknown"
+            ],
+            "minLength": 1,
+            "type": "string"
+          },
+          "role": {
+            "enum": [
+              "silhouette_authority",
+              "identity_authority"
+            ],
+            "minLength": 1,
+            "type": "string"
+          },
+          "sourceSha256": {
+            "minLength": 1,
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "sourceSha256",
+          "contentType",
+          "embedded",
+          "redistributionPermission",
+          "embeddingDecision",
+          "independentReverification",
+          "generationProvenanceRef"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "authoritySetSha256": {
+      "minLength": 1,
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": "skyforge.authority-manifest.v1",
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "authoritySetSha256",
+    "authorities"
+  ],
+  "title": "Authority provenance and licence-conditional embedding",
+  "type": "object"
+}

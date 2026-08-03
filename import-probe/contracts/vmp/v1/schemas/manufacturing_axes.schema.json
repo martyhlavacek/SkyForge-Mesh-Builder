@@ -1,0 +1,80 @@
+{
+  "$id": "https://skyforge.local/contracts/vmp/v1/manufacturing_axes.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "bakedCandidateAxes": {
+      "const": [
+        "bank",
+        "pitch",
+        "damage_state",
+        "destruction_sequence"
+      ],
+      "type": "array"
+    },
+    "crossProductBakeProhibited": {
+      "const": true,
+      "type": "boolean"
+    },
+    "independentLayers": {
+      "const": [
+        "hull",
+        "thruster",
+        "shadow",
+        "emission",
+        "recolour_mask"
+      ],
+      "type": "array"
+    },
+    "ownership": {
+      "additionalProperties": false,
+      "properties": {
+        "bankPitchRendering": {
+          "const": "sprite_foundry",
+          "minLength": 1,
+          "type": "string"
+        },
+        "perFrameSocketProjection": {
+          "const": "sprite_foundry",
+          "minLength": 1,
+          "type": "string"
+        },
+        "runtimeSocketAcceptance": {
+          "const": "gameplay_integration",
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "bankPitchRendering",
+        "perFrameSocketProjection",
+        "runtimeSocketAcceptance"
+      ],
+      "type": "object"
+    },
+    "runtimeTransforms": {
+      "const": [
+        "yaw",
+        "position",
+        "alpha",
+        "approved_tint"
+      ],
+      "type": "array"
+    },
+    "schemaVersion": {
+      "const": "skyforge.manufacturing-axes.v1",
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "runtimeTransforms",
+    "bakedCandidateAxes",
+    "independentLayers",
+    "crossProductBakeProhibited",
+    "ownership"
+  ],
+  "title": "SF-AM-0001 manufacturing-axis ownership enumeration",
+  "type": "object"
+}

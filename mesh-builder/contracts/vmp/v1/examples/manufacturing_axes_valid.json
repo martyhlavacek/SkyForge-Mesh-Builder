@@ -1,0 +1,28 @@
+{
+  "bakedCandidateAxes": [
+    "bank",
+    "pitch",
+    "damage_state",
+    "destruction_sequence"
+  ],
+  "crossProductBakeProhibited": true,
+  "independentLayers": [
+    "hull",
+    "thruster",
+    "shadow",
+    "emission",
+    "recolour_mask"
+  ],
+  "ownership": {
+    "bankPitchRendering": "sprite_foundry",
+    "perFrameSocketProjection": "sprite_foundry",
+    "runtimeSocketAcceptance": "gameplay_integration"
+  },
+  "runtimeTransforms": [
+    "yaw",
+    "position",
+    "alpha",
+    "approved_tint"
+  ],
+  "schemaVersion": "skyforge.manufacturing-axes.v1"
+}

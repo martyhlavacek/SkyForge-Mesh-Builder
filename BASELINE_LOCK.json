@@ -1,0 +1,29 @@
+{
+  "repositoryBootstrapParent": "2f2a9494884b2ed7761d5db718c41fe21ab98b67",
+  "reviewedCandidateVersion": "0.7.1",
+  "reviewedCandidateOuterSha256": "d896ec9e8a1e1daf87d6d083e4e619772313e86bc9cce4727570036ea67862ea",
+  "producerVersion": "0.7.1",
+  "producerSourceArchiveSha256": "e406fff90c3b4f67c93aabef46af1edd32a4fa3cc8a4fddf196ff571aca83a4c",
+  "producerSourceFileCount": 290,
+  "producerSourceBindingDigest": "abe74a567c6c612959510b55110cff2324cec4e25ae10f100096c4460d210f45",
+  "importProbeVersion": "0.1.1",
+  "importProbeSourceArchiveSha256": "13d5472ea81079016c8294d0a88685626bc840abe0452d8ffc2e3133aaaa1475",
+  "importProbeSourceFileCount": 64,
+  "importProbeSourceBindingDigest": "883510570c572ada2166019b356bfbefd3e7053c5074553d1c1dde1234d74ba7",
+  "claudeReviewId": "MBS-CR-0022",
+  "claudeVerdict": "ACCEPT",
+  "userTestingAuthorized": true,
+  "mbs155UserRegression": "PASS",
+  "vmpIndependentImportProbeUserTest": "PASS",
+  "paidProviderWorkAuthorized": false,
+  "openFindings": [
+    "MBS-136",
+    "MBS-150",
+    "MBS-151",
+    "MBS-152",
+    "MBS-153",
+    "MBS-154",
+    "MBS-158",
+    "MBS-159"
+  ]
+}

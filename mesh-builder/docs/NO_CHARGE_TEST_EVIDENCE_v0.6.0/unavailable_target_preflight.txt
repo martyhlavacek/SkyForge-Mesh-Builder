@@ -1,0 +1,13 @@
+Exact target preflight unavailable in the build sandbox.
+
+Attempted isolated install:
+  uv venv /mnt/data/skyforge_v060_env --python 3.13
+  uv pip install --python /mnt/data/skyforge_v060_env/bin/python -r requirements.txt
+
+Result:
+  No solution found because Flask was not exposed by the sandbox package registry.
+
+Also unavailable on PATH:
+  ruff 0.15.22
+
+No prediction is made for unavailable checks. Claude must execute the exact pinned preflight against the packaged candidate.

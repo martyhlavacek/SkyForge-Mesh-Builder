@@ -1,0 +1,32 @@
+
+==================================== ERRORS ====================================
+_______________ ERROR collecting tests/test_concept_workflow.py ________________
+ImportError while importing test module '/mnt/data/skyforge_v052_work/source/SkyForge_Mesh_Builder_Sidecar_v0.5.2/tests/test_concept_workflow.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib/python3.13/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_concept_workflow.py:10: in <module>
+    from app.server import create_app
+app/server.py:12: in <module>
+    from flask import Flask, jsonify, render_template, request, send_file, session
+E   ModuleNotFoundError: No module named 'flask'
+____________________ ERROR collecting tests/test_server.py _____________________
+ImportError while importing test module '/mnt/data/skyforge_v052_work/source/SkyForge_Mesh_Builder_Sidecar_v0.5.2/tests/test_server.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib/python3.13/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_server.py:9: in <module>
+    from app.server import create_app
+app/server.py:12: in <module>
+    from flask import Flask, jsonify, render_template, request, send_file, session
+E   ModuleNotFoundError: No module named 'flask'
+=========================== short test summary info ============================
+ERROR tests/test_concept_workflow.py
+ERROR tests/test_server.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 2 errors during collection !!!!!!!!!!!!!!!!!!!!
+2 errors in 0.64s
+exitCode=2

@@ -1,0 +1,99 @@
+{
+  "$id": "https://skyforge.local/contracts/vmp/v1/known_limitations.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "limitations": {
+      "contains": {
+        "properties": {
+          "code": {
+            "const": "calibrated_frame_excludes_runtime_effects"
+          },
+          "excludedRuntimeEffects": {
+            "const": [
+              "thrusters",
+              "muzzle_flashes",
+              "shadows",
+              "debris",
+              "other_sprite_foundry_effects"
+            ]
+          }
+        },
+        "required": [
+          "code",
+          "excludedRuntimeEffects"
+        ]
+      },
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "affectedConsumers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "code": {
+            "minLength": 1,
+            "pattern": "^[a-z0-9_]+$",
+            "type": "string"
+          },
+          "description": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "evidenceRefs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "excludedRuntimeEffects": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "severity": {
+            "enum": [
+              "info",
+              "warning",
+              "blocking_downstream_feature"
+            ],
+            "minLength": 1,
+            "type": "string"
+          },
+          "workaround": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "severity",
+          "description",
+          "affectedConsumers",
+          "evidenceRefs"
+        ],
+        "type": "object"
+      },
+      "minContains": 1,
+      "minItems": 1,
+      "type": "array"
+    },
+    "schemaVersion": {
+      "const": "skyforge.known-limitations.v1",
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "limitations"
+  ],
+  "title": "Known limitations including calibrated-frame runtime-effect exclusions",
+  "type": "object"
+}

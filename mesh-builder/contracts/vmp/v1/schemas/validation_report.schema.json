@@ -1,0 +1,165 @@
+{
+  "$id": "https://skyforge.local/contracts/vmp/v1/validation_report.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "executedAt": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "failureReasons": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "gates": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "failureReason": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "measuredValue": {
+            "oneOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "passed": {
+            "type": "boolean"
+          },
+          "thresholdOperator": {
+            "enum": [
+              ">=",
+              "<=",
+              "==",
+              "informational"
+            ],
+            "minLength": 1,
+            "type": "string"
+          },
+          "thresholdValue": {
+            "oneOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "passed",
+          "measuredValue",
+          "thresholdOperator",
+          "thresholdValue"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "measuredValues": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "unit": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "value": {
+            "oneOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "value"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "passed": {
+      "type": "boolean"
+    },
+    "schemaVersion": {
+      "const": "skyforge.validation-report.v1",
+      "minLength": 1,
+      "type": "string"
+    },
+    "sourceGlbSha256": {
+      "minLength": 1,
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "validationClass": {
+      "enum": [
+        "geometry",
+        "independent_reload",
+        "blender"
+      ],
+      "minLength": 1,
+      "type": "string"
+    },
+    "validatorVersion": {
+      "minLength": 1,
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "validationClass",
+    "validatorVersion",
+    "sourceGlbSha256",
+    "executedAt",
+    "measuredValues",
+    "gates",
+    "passed"
+  ],
+  "title": "Measured producer validation report without downstream readiness claim",
+  "type": "object"
+}

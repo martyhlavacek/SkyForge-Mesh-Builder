@@ -1,0 +1,118 @@
+{
+  "$id": "https://skyforge.local/contracts/vmp/v1/pivot_contract.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "partPivots": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "approvalState": {
+            "const": "approved",
+            "minLength": 1,
+            "type": "string"
+          },
+          "frame": {
+            "const": "normalized_mesh_frame",
+            "minLength": 1,
+            "type": "string"
+          },
+          "orientationQuaternion": {
+            "items": {
+              "type": "number"
+            },
+            "maxItems": 4,
+            "minItems": 4,
+            "type": "array"
+          },
+          "position": {
+            "items": {
+              "type": "number"
+            },
+            "maxItems": 3,
+            "minItems": 3,
+            "type": "array"
+          },
+          "source": {
+            "enum": [
+              "deterministic",
+              "human_approved",
+              "provider_candidate"
+            ],
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "position",
+          "orientationQuaternion",
+          "frame",
+          "source",
+          "approvalState"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "rootPivot": {
+      "additionalProperties": false,
+      "properties": {
+        "approvalState": {
+          "const": "approved",
+          "minLength": 1,
+          "type": "string"
+        },
+        "frame": {
+          "const": "normalized_mesh_frame",
+          "minLength": 1,
+          "type": "string"
+        },
+        "orientationQuaternion": {
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 4,
+          "minItems": 4,
+          "type": "array"
+        },
+        "position": {
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 3,
+          "minItems": 3,
+          "type": "array"
+        },
+        "source": {
+          "enum": [
+            "deterministic",
+            "human_approved",
+            "provider_candidate"
+          ],
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "position",
+        "orientationQuaternion",
+        "frame",
+        "source",
+        "approvalState"
+      ],
+      "type": "object"
+    },
+    "schemaVersion": {
+      "const": "skyforge.pivot-contract.v1",
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "rootPivot",
+    "partPivots"
+  ],
+  "title": "Root and authored-part pivots",
+  "type": "object"
+}

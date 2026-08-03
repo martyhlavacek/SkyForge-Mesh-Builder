@@ -1,0 +1,17 @@
+{
+  "baseline": {
+    "archive": "SkyForge_Mesh_Builder_Sidecar_v0.6.0_USER_READY.zip",
+    "archiveSha256": "68516def22275b0cb6d1fa0513097adfa717b9df584f81915922f6e62e64d106",
+    "boundFileCount": 196,
+    "sourceTreeBindingSha256": "8bdf6a8a5ab2f995578902c96faae2cbb923a940c546533bc6baf799e0cbf0d7"
+  },
+  "clearedFixtures": {
+    "approved_gunship": "2e2f5f68dfa91ac2611113c35b1b08d90dfdecc2d593f897d40963dd46a2705a",
+    "field_gunship": "f4761acd9a1f7c78c4bedc3b9616b162e4a57c2d47a756eb29ad0446952d0e91",
+    "interceptor": "97617de238dc451d4ca374e1c0b05461ab71e18cfd82643e0dd2358bf1a8f118"
+  },
+  "paidProviderWorkCleared": false,
+  "schemaVersion": "skyforge.wp0-baseline-binding.v1",
+  "targetVersion": "0.7.0",
+  "userTestingCleared": false
+}

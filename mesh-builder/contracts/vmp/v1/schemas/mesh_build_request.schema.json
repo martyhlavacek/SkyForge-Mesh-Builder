@@ -1,0 +1,119 @@
+{
+  "$id": "https://skyforge.local/contracts/vmp/v1/mesh_build_request.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "assetId": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "assetRole": {
+      "const": "air_moving",
+      "minLength": 1,
+      "type": "string"
+    },
+    "assetVersion": {
+      "minLength": 1,
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "type": "string"
+    },
+    "authoritySetSha256": {
+      "minLength": 1,
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "automaticRetry": {
+      "const": false,
+      "type": "boolean"
+    },
+    "estimatedCost": {
+      "additionalProperties": false,
+      "properties": {
+        "amount": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "unit": {
+          "enum": [
+            "credits",
+            "usd",
+            "none"
+          ],
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "unit",
+        "amount"
+      ],
+      "type": "object"
+    },
+    "operationClass": {
+      "const": "authority_to_mesh",
+      "minLength": 1,
+      "type": "string"
+    },
+    "outputContract": {
+      "const": "normalized_glb_and_vmp",
+      "minLength": 1,
+      "type": "string"
+    },
+    "providerId": {
+      "enum": [
+        "local_deterministic",
+        "mock",
+        "meshy_test_mode"
+      ],
+      "minLength": 1,
+      "type": "string"
+    },
+    "providerOptions": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "valueCanonicalSha256": {
+            "minLength": 1,
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "valueCanonicalSha256"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "requestId": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": "skyforge.mesh-build-request.v1",
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "requestId",
+    "assetId",
+    "assetVersion",
+    "assetRole",
+    "authoritySetSha256",
+    "operationClass",
+    "providerId",
+    "estimatedCost",
+    "outputContract",
+    "providerOptions",
+    "automaticRetry"
+  ],
+  "title": "Provider-neutral mesh build request",
+  "type": "object"
+}

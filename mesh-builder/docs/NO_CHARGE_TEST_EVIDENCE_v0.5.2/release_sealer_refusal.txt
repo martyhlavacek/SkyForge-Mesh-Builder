@@ -1,0 +1,9 @@
+RELEASE NOT SEALED: Target dependency set is not installed exactly:
+- Flask is unavailable (expected 3.1.1)
+- Werkzeug is unavailable (expected 3.1.7)
+- blinker is unavailable (expected 1.9.0)
+- Pillow==12.2.0 (expected 11.3.0)
+- pytest==9.0.2 (expected 8.4.1)
+- ruff is unavailable (expected 0.15.22)
+- requests==2.32.5 (expected 2.32.3)
+exitCode=1

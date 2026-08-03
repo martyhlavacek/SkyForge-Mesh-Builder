@@ -1,0 +1,74 @@
+{
+  "calibration": {
+    "bankSamplesDegrees": [
+      -18,
+      0,
+      18
+    ],
+    "method": "v0.6.0 canonical_frame_calibration",
+    "pitchSamplesDegrees": [
+      0,
+      20,
+      36
+    ],
+    "profileDigest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "referencePoseMap": {
+      "bank_left": -18,
+      "bank_right": 18,
+      "neutral": 0
+    }
+  },
+  "calibrationEnvelope": {
+    "chosenMargin": 0.3,
+    "heightEnvelopeBindingPitchDegrees": 36,
+    "maximumHeightToPlanformRatio": 0.35,
+    "measuredMaximumRequiredOrthoScale": 4.35,
+    "measuredRequiredMargin": 0.25,
+    "runtimeEffectsEnabled": false
+  },
+  "canonicalCamera": {
+    "bankDegrees": 0,
+    "canonicalOrthoScale": 4.2,
+    "pitchDegrees": 20,
+    "projection": "orthographic",
+    "requiredReviewOrthoScale": 4.4,
+    "requiredSilhouetteOrthoScale": 4.3,
+    "yawDegrees": 0
+  },
+  "consumerDeviationPolicy": {
+    "deviationMustBeRecorded": true,
+    "extensionWithinCalibrationEnvelopeOnly": true,
+    "newCalibrationRequiredOutsideEnvelope": true,
+    "spriteFoundryMayExtendBankPitchLadder": true
+  },
+  "coordinateFrame": {
+    "forwardAxis": "+Y",
+    "rightAxis": "+X",
+    "upAxis": "+Z"
+  },
+  "headroom": {
+    "fractionOfPlanform": 0.075,
+    "worldUnits": 0.3
+  },
+  "heightToPlanformRatio": 0.3,
+  "renderState": {
+    "engine": "BLENDER_EEVEE",
+    "exposure": 0,
+    "gamma": 1,
+    "resolution": [
+      384,
+      384
+    ],
+    "samples": 64,
+    "transparentFilm": true,
+    "viewTransform": "Standard"
+  },
+  "schemaVersion": "skyforge.render-frame-contract.v1",
+  "silhouetteProtocol": {
+    "alphaThreshold": 128,
+    "fitCanvasPixels": 512,
+    "fitMarginPixels": 28,
+    "maskPolarity": "foreground_true",
+    "resample": "NEAREST"
+  }
+}

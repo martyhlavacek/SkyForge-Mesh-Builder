@@ -1,0 +1,179 @@
+{
+  "$id": "https://skyforge.local/contracts/vmp/v1/provider_task_record.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "correspondenceStatus": {
+      "enum": [
+        "known_task_id",
+        "unique_correlated_match",
+        "zero_matches_unresolved",
+        "multiple_matches_unresolved",
+        "not_required_local"
+      ],
+      "minLength": 1,
+      "type": "string"
+    },
+    "evidenceClass": {
+      "enum": [
+        "local_deterministic",
+        "mock_provider",
+        "transport_lifecycle_only",
+        "production_candidate"
+      ],
+      "minLength": 1,
+      "type": "string"
+    },
+    "providerTaskId": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "recoveryCorrelation": {
+      "additionalProperties": false,
+      "properties": {
+        "accountIdentityDigest": {
+          "minLength": 1,
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "authoritySetSha256": {
+          "minLength": 1,
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "dispatchWindowEnd": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "dispatchWindowStart": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "expectedCost": {
+          "additionalProperties": false,
+          "properties": {
+            "amount": {
+              "minimum": 0,
+              "type": "number"
+            },
+            "unit": {
+              "enum": [
+                "credits",
+                "usd",
+                "none"
+              ],
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "unit",
+            "amount"
+          ],
+          "type": "object"
+        },
+        "providerId": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "providerModel": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "requestDigest": {
+          "minLength": 1,
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "resolvedProviderOptionsDigest": {
+          "minLength": 1,
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "requestDigest",
+        "providerId",
+        "providerModel",
+        "resolvedProviderOptionsDigest",
+        "authoritySetSha256",
+        "accountIdentityDigest",
+        "dispatchWindowStart",
+        "dispatchWindowEnd",
+        "expectedCost"
+      ],
+      "type": "object"
+    },
+    "requestDigest": {
+      "minLength": 1,
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "reservationId": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "resolvedRequestDigest": {
+      "minLength": 1,
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": "skyforge.provider-task-record.v1",
+      "minLength": 1,
+      "type": "string"
+    },
+    "sequence": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "state": {
+      "enum": [
+        "intent_persisted",
+        "reserved",
+        "submitted",
+        "observing",
+        "completed",
+        "failed",
+        "reconciled",
+        "released",
+        "unresolved",
+        "expired_uncaptured"
+      ],
+      "minLength": 1,
+      "type": "string"
+    },
+    "timestamps": {
+      "additionalProperties": false,
+      "properties": {
+        "createdAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "updatedAt": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "createdAt",
+        "updatedAt"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "reservationId",
+    "requestDigest",
+    "state",
+    "sequence",
+    "timestamps",
+    "resolvedRequestDigest",
+    "evidenceClass",
+    "recoveryCorrelation",
+    "correspondenceStatus"
+  ],
+  "title": "Provider task state with MBS-136 recovery correlation",
+  "type": "object"
+}

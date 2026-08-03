@@ -1,0 +1,9 @@
+SkyForge v0.6.0 automated live Blender preflight — clean-runtime failure observed on macOS arm64.
+
+Failure point: deterministic mesh generation before Blender launch.
+Exception: ImportError: no graph engines available!
+Call path: generate_authority_mesh -> reloaded_glb.split -> trimesh.graph.connected_components.
+Environment: clean Python 3.11 virtual environment installed from the candidate requirements.txt.
+Cause: trimesh 4.11.1 requires either NetworkX or SciPy for connected-component splitting, but neither graph engine was declared by the reviewed nine-package dependency set.
+Paid OpenAI transport: none.
+Blender launch: not reached.

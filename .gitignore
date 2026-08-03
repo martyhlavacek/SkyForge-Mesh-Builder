@@ -1,0 +1,14 @@
+.DS_Store
+**/.venv/
+**/__pycache__/
+**/.pytest_cache/
+**/.ruff_cache/
+**/config.json
+**/workspace/
+**/*.pyc
+**/*.pyo
+**/*.log
+**/dist/
+**/build/
+**/*_EXACT_CANDIDATE_WORK/
+**/*_FAILURE_EVIDENCE_*.zip

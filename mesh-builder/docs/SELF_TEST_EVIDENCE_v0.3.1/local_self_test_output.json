@@ -1,0 +1,35 @@
+{
+  "result": "PASS",
+  "authorities": [
+    {
+      "authority": "approved_gunship_authority.png",
+      "authoritySha256": "d33075df367c97399b7ed6262030ca8ca0080eda12ebe78eb3eb3fc901f7fc1e",
+      "targetSilhouetteIoU": 0.951989,
+      "blenderImportSilhouetteIoU": 0.952621,
+      "blenderImportBoundsDelta": 4.8e-08,
+      "heightToPlanformRatio": 0.166819577,
+      "independentAudit": {
+        "vertexCount": 15052,
+        "triangleCount": 30100,
+        "boundaryEdgeCount": 0,
+        "nonManifoldEdgeCount": 0,
+        "watertightByIndependentAudit": true
+      }
+    },
+    {
+      "authority": "user_test_gunship_authority.png",
+      "authoritySha256": "3211a720a37661e410960d227cad1d4d0959eaf704856404c8c4462488750748",
+      "targetSilhouetteIoU": 0.959283,
+      "blenderImportSilhouetteIoU": 0.955508,
+      "blenderImportBoundsDelta": 4.8e-08,
+      "heightToPlanformRatio": 0.167919993,
+      "independentAudit": {
+        "vertexCount": 19734,
+        "triangleCount": 39464,
+        "boundaryEdgeCount": 0,
+        "nonManifoldEdgeCount": 0,
+        "watertightByIndependentAudit": true
+      }
+    }
+  ]
+}

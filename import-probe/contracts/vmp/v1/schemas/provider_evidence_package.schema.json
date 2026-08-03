@@ -1,0 +1,179 @@
+{
+  "$id": "https://skyforge.local/contracts/vmp/v1/provider_evidence_package.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "evidenceClass": {
+            "const": "transport_lifecycle_only"
+          }
+        },
+        "required": [
+          "evidenceClass"
+        ]
+      },
+      "then": {
+        "properties": {
+          "promotionPermitted": {
+            "const": false
+          }
+        }
+      }
+    }
+  ],
+  "properties": {
+    "capturedArtifacts": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "capturedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "contentType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "path": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "sha256": {
+            "minLength": 1,
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "sha256",
+          "contentType",
+          "capturedAt"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "capturedAt": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "evidenceClass": {
+      "enum": [
+        "transport_lifecycle_only",
+        "exploratory_provider_candidate",
+        "authority_bearing_candidate"
+      ],
+      "minLength": 1,
+      "type": "string"
+    },
+    "expiresAt": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "modelId": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "promotionPermitted": {
+      "type": "boolean"
+    },
+    "providerId": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "reservationRecordSha256": {
+      "minLength": 1,
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "resolvedRequestDigest": {
+      "minLength": 1,
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "sanitization": {
+      "additionalProperties": false,
+      "properties": {
+        "localPathsRemoved": {
+          "const": true,
+          "type": "boolean"
+        },
+        "secretsRemoved": {
+          "const": true,
+          "type": "boolean"
+        },
+        "signedUrlsRemoved": {
+          "const": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "secretsRemoved",
+        "signedUrlsRemoved",
+        "localPathsRemoved"
+      ],
+      "type": "object"
+    },
+    "schemaVersion": {
+      "const": "skyforge.provider-evidence-package.v1",
+      "minLength": 1,
+      "type": "string"
+    },
+    "taskSnapshots": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "capturedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "phase": {
+            "enum": [
+              "submit",
+              "progress",
+              "terminal"
+            ],
+            "minLength": 1,
+            "type": "string"
+          },
+          "sanitizedObjectSha256": {
+            "minLength": 1,
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "state": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "phase",
+          "state",
+          "capturedAt",
+          "sanitizedObjectSha256"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "providerId",
+    "modelId",
+    "evidenceClass",
+    "promotionPermitted",
+    "resolvedRequestDigest",
+    "taskSnapshots",
+    "capturedArtifacts",
+    "reservationRecordSha256",
+    "sanitization",
+    "capturedAt"
+  ],
+  "title": "Separate untrusted provider evidence package metadata",
+  "type": "object"
+}

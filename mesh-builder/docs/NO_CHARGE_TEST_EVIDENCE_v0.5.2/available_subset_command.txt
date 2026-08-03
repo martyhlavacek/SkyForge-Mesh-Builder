@@ -1,0 +1,12 @@
+Executed as eight independent commands with PYTEST_DISABLE_PLUGIN_AUTOLOAD=1:
+python -m pytest -q --disable-warnings --maxfail=1 <module>
+
+Modules:
+tests/test_authority_mesh.py
+tests/test_image_governance.py
+tests/test_image_pricing.py
+tests/test_openai_client.py
+tests/test_pipeline.py
+tests/test_release_sealing.py
+tests/test_server_source.py
+tests/test_settings_store.py

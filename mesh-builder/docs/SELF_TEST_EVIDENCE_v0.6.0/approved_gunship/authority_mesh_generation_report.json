@@ -1,0 +1,155 @@
+{
+  "schemaVersion": "skyforge.authority-mesh-generation.v2",
+  "generator": {
+    "id": "skyforge.authority-two-sided-field",
+    "version": "0.6.0"
+  },
+  "source": {
+    "authorityFile": "approved_gunship_authority.png",
+    "authoritySha256": "d33075df367c97399b7ed6262030ca8ca0080eda12ebe78eb3eb3fc901f7fc1e",
+    "maskMethod": "alpha_threshold_16",
+    "sourceBounds": [
+      224,
+      132,
+      800,
+      892
+    ],
+    "authorityPixelsConsumed": true,
+    "geometryInputs": [
+      "foreground_planform_mask",
+      "distance_to_silhouette",
+      "planform_axis"
+    ],
+    "albedoGeometryInfluence": false
+  },
+  "mesh": {
+    "path": "authority_generated_mesh.glb",
+    "sha256": "9b13e348daa5ac30a1fbbc2f1e4f566163fc9b7dd6f1b88ac0734343bc8f1238",
+    "intermediateObjPath": "authority_generated_mesh.obj",
+    "intermediateObjSha256": "59188c1b721ca73976685676b1561227b36e5ac09376821dfa588b3bdbea361e",
+    "materialPath": "authority_generated_mesh.mtl",
+    "texturePath": "authority_albedo.png",
+    "vertexCount": 41592,
+    "triangleCount": 83180,
+    "componentCount": 1,
+    "componentCountSource": "independent_reloaded_glb_split",
+    "uniqueEdgeCount": 124770,
+    "boundaryEdgeCount": 0,
+    "nonManifoldEdgeCount": 0,
+    "sourceEdgeAudit": {
+      "uniqueEdgeCount": 124770,
+      "boundaryEdgeCount": 0,
+      "nonManifoldEdgeCount": 0
+    },
+    "reloadedGlbEdgeAudit": {
+      "uniqueEdgeCount": 124770,
+      "boundaryEdgeCount": 0,
+      "nonManifoldEdgeCount": 0
+    },
+    "sourceReloadEdgeAuditAgreement": true,
+    "watertightByEdgeIncidence": true,
+    "glbReloadWatertight": true,
+    "glbReloadWindingConsistent": true,
+    "coordinateContract": {
+      "internalTargetAxes": {
+        "right": "+X",
+        "forward": "+Y",
+        "up": "+Z"
+      },
+      "glTFSemanticAxes": {
+        "right": "+X",
+        "up": "+Y",
+        "forward": "-Z"
+      },
+      "encoding": "target_xyz_to_gltf_x_z_neg_y",
+      "blenderImportReconstruction": "gltf_xyz_to_blender_x_neg_z_y",
+      "blenderImportBoundsDelta": 5e-08,
+      "blenderImportHeightToPlanformRatio": 0.167978225
+    }
+  },
+  "geometryMetrics": {
+    "representation": "two_sided_planform_field_with_edge_convergence",
+    "workGridSize": 384,
+    "meshGridSize": 256,
+    "previewGridSize": 128,
+    "albedoInfluencesGeometry": false,
+    "surfaceAngleToleranceDegrees": 3.0,
+    "flatBellySurfaceFraction": 0.002941,
+    "verticalWallSurfaceFraction": 0.007098,
+    "combinedConstructionArtifactFraction": 0.010039,
+    "eulerNumber": 2,
+    "genus": 0.0,
+    "sectionThickness": {
+      "minimum": 0.018696,
+      "p05": 0.053982,
+      "median": 0.273063,
+      "p95": 0.721306,
+      "maximum": 0.898319,
+      "rootMedian": 0.61597,
+      "tipMedian": 0.142605,
+      "tipToRootRatio": 0.231513
+    }
+  },
+  "identityMetrics": {
+    "silhouetteIoU": 0.982218,
+    "aspectError": 0.002681,
+    "centroidDistance": 0.000265,
+    "widthProfileMAE": 0.005581
+  },
+  "blenderImportIdentityMetrics": {
+    "silhouetteIoU": 0.981433,
+    "aspectError": 0.000856,
+    "centroidDistance": 0.000457,
+    "widthProfileMAE": 0.005832
+  },
+  "identityMetricSource": "target_mesh_and_emulated_blender_gltf_import_top_projection",
+  "acceptanceGates": {
+    "silhouetteIoUMin": 0.94,
+    "aspectErrorMax": 0.035,
+    "centroidDistanceMax": 0.02,
+    "widthProfileMAEMax": 0.045,
+    "boundaryEdgeCountMax": 0,
+    "nonManifoldEdgeCountMax": 0,
+    "componentCountMax": 1,
+    "triangleCountMin": 1000,
+    "triangleCountMax": 180000,
+    "blenderImportSilhouetteIoUMin": 0.94,
+    "blenderImportBoundsDeltaMax": 1e-05,
+    "heightToPlanformRatioMax": 0.45,
+    "flatBellySurfaceFractionMax": 0.18,
+    "verticalWallSurfaceFractionMax": 0.08,
+    "combinedConstructionArtifactFractionMax": 0.25,
+    "tipToRootThicknessRatioMax": 0.72,
+    "sourceReloadEdgeAuditMustAgree": true
+  },
+  "gateResults": {
+    "checks": {
+      "silhouetteIoU": true,
+      "aspectError": true,
+      "centroidDistance": true,
+      "widthProfileMAE": true,
+      "blenderImportSilhouetteIoU": true,
+      "blenderImportBoundsDelta": true,
+      "heightToPlanformRatio": true,
+      "boundaryEdges": true,
+      "nonManifoldEdges": true,
+      "components": true,
+      "triangleCountMinimum": true,
+      "triangleCountMaximum": true,
+      "flatBellySurfaceFraction": true,
+      "verticalWallSurfaceFraction": true,
+      "combinedConstructionArtifactFraction": true,
+      "tipToRootThicknessRatio": true,
+      "sourceReloadEdgeAuditAgreement": true
+    },
+    "passed": true
+  },
+  "previews": [
+    "authority_mesh_preview_top.png",
+    "authority_mesh_preview_bank_left.png",
+    "authority_mesh_preview_bank_right.png",
+    "authority_mesh_generation_contact_sheet.png",
+    "authority_mesh_glb_silhouette.png",
+    "authority_mesh_blender_import_silhouette.png"
+  ]
+}

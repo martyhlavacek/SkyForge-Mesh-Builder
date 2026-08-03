@@ -1,0 +1,6 @@
+Available no-charge subset (eight independently executed pytest module commands)
+70 passed
+0 skipped
+0 failed
+All eight module commands exited 0.
+No live OpenAI calls were made.

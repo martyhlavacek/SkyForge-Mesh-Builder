@@ -1,0 +1,121 @@
+{
+  "$id": "https://skyforge.local/contracts/vmp/v1/component_manifest.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "componentCount": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "componentPolicy": {
+      "const": "single_component_required",
+      "minLength": 1,
+      "type": "string"
+    },
+    "components": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "boundaryEdges": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "bounds": {
+            "additionalProperties": false,
+            "properties": {
+              "max": {
+                "items": {
+                  "type": "number"
+                },
+                "maxItems": 3,
+                "minItems": 3,
+                "type": "array"
+              },
+              "min": {
+                "items": {
+                  "type": "number"
+                },
+                "maxItems": 3,
+                "minItems": 3,
+                "type": "array"
+              }
+            },
+            "required": [
+              "min",
+              "max"
+            ],
+            "type": "object"
+          },
+          "componentId": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "eulerNumber": {
+            "minimum": -1000000,
+            "type": "integer"
+          },
+          "genus": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "nonManifoldEdges": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "primitiveOrNodeRefs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "triangleCount": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "vertexCount": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "volumeFraction": {
+            "minimum": 0,
+            "type": "number"
+          },
+          "watertight": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "componentId",
+          "primitiveOrNodeRefs",
+          "vertexCount",
+          "triangleCount",
+          "bounds",
+          "volumeFraction",
+          "watertight",
+          "eulerNumber",
+          "genus",
+          "boundaryEdges",
+          "nonManifoldEdges"
+        ],
+        "type": "object"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+    },
+    "schemaVersion": {
+      "const": "skyforge.mesh-components.v1",
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "componentCount",
+    "componentPolicy",
+    "components"
+  ],
+  "title": "Mesh component facts",
+  "type": "object"
+}

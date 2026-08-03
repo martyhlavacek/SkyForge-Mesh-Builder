@@ -1,0 +1,133 @@
+{
+  "$id": "https://skyforge.local/contracts/vmp/v1/bounds_and_scale.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "bounds": {
+      "additionalProperties": false,
+      "properties": {
+        "extents": {
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 3,
+          "minItems": 3,
+          "type": "array"
+        },
+        "max": {
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 3,
+          "minItems": 3,
+          "type": "array"
+        },
+        "min": {
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 3,
+          "minItems": 3,
+          "type": "array"
+        }
+      },
+      "required": [
+        "min",
+        "max",
+        "extents"
+      ],
+      "type": "object"
+    },
+    "canonicalScale": {
+      "additionalProperties": false,
+      "properties": {
+        "heightToPlanformRatio": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "heightWorld": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "longestPlanformExtentWorld": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "longestPlanformExtentWorld",
+        "heightWorld",
+        "heightToPlanformRatio"
+      ],
+      "type": "object"
+    },
+    "coordinateContract": {
+      "const": "skyforge.mesh-coordinate.v1",
+      "minLength": 1,
+      "type": "string"
+    },
+    "gameplayPreviewMapping": {
+      "additionalProperties": false,
+      "properties": {
+        "canvasPixels": {
+          "const": [
+            96,
+            96
+          ],
+          "type": "array"
+        },
+        "fittedPlanformPixels": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "referenceImage": {
+          "const": "previews/gameplay_scale_96.png",
+          "minLength": 1,
+          "type": "string"
+        },
+        "transparentMarginPixels": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "worldUnitsPerPixel": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "referenceImage",
+        "canvasPixels",
+        "worldUnitsPerPixel",
+        "fittedPlanformPixels",
+        "transparentMarginPixels"
+      ],
+      "type": "object"
+    },
+    "pivotFrame": {
+      "const": "normalized_mesh_frame",
+      "minLength": 1,
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": "skyforge.mesh-bounds-scale.v1",
+      "minLength": 1,
+      "type": "string"
+    },
+    "units": {
+      "const": "skyforge_world_units",
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "coordinateContract",
+    "units",
+    "bounds",
+    "canonicalScale",
+    "gameplayPreviewMapping",
+    "pivotFrame"
+  ],
+  "title": "Normalized bounds, scale, and gameplay preview mapping",
+  "type": "object"
+}

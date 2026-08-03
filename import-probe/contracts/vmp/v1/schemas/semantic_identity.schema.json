@@ -1,0 +1,139 @@
+{
+  "$id": "https://skyforge.local/contracts/vmp/v1/semantic_identity.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "blenderSilhouetteIoUMin": {
+      "const": 0.94,
+      "type": "number"
+    },
+    "identityModel": {
+      "enum": [
+        "deterministic_reproducibility",
+        "approved_artifact_immutability"
+      ],
+      "minLength": 1,
+      "type": "string"
+    },
+    "localDeterministicContract": {
+      "additionalProperties": false,
+      "properties": {
+        "exactDecodedTexturePixels": {
+          "const": true,
+          "type": "boolean"
+        },
+        "exactIndices": {
+          "const": true,
+          "type": "boolean"
+        },
+        "exactUV": {
+          "const": true,
+          "type": "boolean"
+        },
+        "exactXZ": {
+          "const": true,
+          "type": "boolean"
+        },
+        "rawGlbShaGating": {
+          "const": false,
+          "type": "boolean"
+        },
+        "rawGlbShaInformational": {
+          "const": true,
+          "type": "boolean"
+        },
+        "yMaxAbsTolerance": {
+          "const": 1e-05,
+          "type": "number"
+        },
+        "yRmsTolerance": {
+          "const": 1e-06,
+          "type": "number"
+        }
+      },
+      "required": [
+        "exactIndices",
+        "exactXZ",
+        "exactUV",
+        "exactDecodedTexturePixels",
+        "yMaxAbsTolerance",
+        "yRmsTolerance",
+        "rawGlbShaGating",
+        "rawGlbShaInformational"
+      ],
+      "type": "object"
+    },
+    "measuredResults": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "unit": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "value": {
+            "oneOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "value"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "reference": {
+      "additionalProperties": false,
+      "maxProperties": 1,
+      "minProperties": 1,
+      "properties": {
+        "approvedArtifactGlbSha256": {
+          "minLength": 1,
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "localReferenceGlbSha256": {
+          "minLength": 1,
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        }
+      },
+      "required": [],
+      "type": "object"
+    },
+    "schemaVersion": {
+      "const": "skyforge.mesh-semantic-identity.v1",
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "identityModel",
+    "reference",
+    "localDeterministicContract",
+    "blenderSilhouetteIoUMin",
+    "measuredResults"
+  ],
+  "title": "Semantic mesh identity contract",
+  "type": "object"
+}
