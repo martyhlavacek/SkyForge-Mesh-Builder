@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "skyforge.geometry-recipes.v1",
+  "type": "object",
+  "required": ["schemaVersion", "recipes"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {"const": "skyforge.geometry-recipes.v1"},
+    "recipes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/recipe"}
+    }
+  },
+  "$defs": {
+    "recipe": {
+      "type": "object",
+      "required": ["profileId", "recipeVersion", "componentCount", "allowedTopProjectionSpillFraction", "heightOrdering", "components"],
+      "additionalProperties": false,
+      "properties": {
+        "profileId": {"type": "string", "minLength": 1},
+        "recipeVersion": {"type": "integer", "minimum": 1},
+        "componentCount": {
+          "type": "object",
+          "required": ["minimum", "maximum"],
+          "additionalProperties": false,
+          "properties": {
+            "minimum": {"type": "integer", "minimum": 1},
+            "maximum": {"type": "integer", "minimum": 1}
+          }
+        },
+        "allowedTopProjectionSpillFraction": {"type": "number", "minimum": 0, "maximum": 0.005},
+        "heightOrdering": {
+          "type": "array",
+          "minItems": 3,
+          "items": {"enum": ["shell", "fuselage_engine", "cockpit_weapon_peak"]}
+        },
+        "components": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/component"}
+        }
+      }
+    },
+    "component": {
+      "type": "object",
+      "required": ["name", "shape", "longitudinalAnchor", "lateralAnchor", "normalizedLength", "normalizedWidth", "normalizedHeight", "attachmentPenetration", "minimumVolume", "minimumTriangles"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "shape": {"enum": ["ellipsoid", "capsule", "box"]},
+        "longitudinalAnchor": {"type": "number", "minimum": 0, "maximum": 1},
+        "lateralAnchor": {"type": "number", "minimum": -1, "maximum": 1},
+        "normalizedLength": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+        "normalizedWidth": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+        "normalizedHeight": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+        "attachmentPenetration": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+        "minimumVolume": {"type": "number", "exclusiveMinimum": 0},
+        "minimumTriangles": {"type": "integer", "minimum": 12},
+        "subdivisions": {"type": "integer", "minimum": 1, "maximum": 3}
+      }
+    }
+  }
+}
