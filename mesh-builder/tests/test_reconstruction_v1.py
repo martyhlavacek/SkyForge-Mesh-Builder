@@ -15,6 +15,7 @@ from app.reconstruction_v1.bundle import BundleError, approve_bundle, build_bund
 from app.reconstruction_v1.evidence import validate_glb, verify_manifest, write_manifest
 from app.reconstruction_v1.orientation import OrientationError, proper_axis_rotations, rasterize, resolve_orientation
 from app.reconstruction_v1.provider import (
+    ArtifactHostPolicy,
     AuthorizationError,
     MeshyMultiImageProvider,
     ProviderError,
@@ -24,10 +25,12 @@ from app.reconstruction_v1.state import StateError, TaskLog
 
 
 class Response:
-    def __init__(self, status_code=200, value=None, content=b""):
+    def __init__(self, status_code=200, value=None, content=b"", *, headers=None, url=None):
         self.status_code = status_code
         self._value = value if value is not None else {}
         self.content = content
+        self.headers = headers or {}
+        self.url = url
 
     def json(self):
         return self._value
@@ -61,6 +64,14 @@ def authorization(bundle, **updates):
     values = dict(paid_enabled=True, approved_bundle_digest=bundle["bundleDigest"], confirmed_bundle_digest=bundle["bundleDigest"], maximum_credits=20, api_key="canary-super-secret")
     values.update(updates)
     return SubmissionAuthorization(**values)
+
+
+def fixture_host_policy(*hosts: str) -> ArtifactHostPolicy:
+    return ArtifactHostPolicy(
+        contract_version="skyforge.fixture-artifact-hosts.v1",
+        approved_hosts=frozenset(hosts or {"fixture.invalid"}),
+        address_resolver=lambda _hostname: ("8.8.8.8",),
+    )
 
 
 def test_bundle_exact_roles_supported_profile_and_approval(bundle_fixture):
@@ -150,6 +161,34 @@ def test_process_level_ci_network_kill_switch(bundle_fixture, environment):
     assert not transport.calls
 
 
+@pytest.mark.parametrize(
+    "environment",
+    [
+        {"SKYFORGE_PROVIDER_NETWORK_DISABLED": "1"},
+        {"CI": "true"},
+        {"GITHUB_ACTIONS": "true"},
+    ],
+)
+@pytest.mark.parametrize(
+    "operation", ["get_task", "poll_until_terminal", "download_artifact", "download_artifacts"]
+)
+def test_network_guard_blocks_every_get_entry_point(environment, operation):
+    transport = Transport()
+    provider = MeshyMultiImageProvider(transport, environ=environment)
+    with pytest.raises(AuthorizationError, match="disabled"):
+        if operation == "get_task":
+            provider.get_task("task")
+        elif operation == "poll_until_terminal":
+            provider.poll_until_terminal("task", maximum_polls=1)
+        elif operation == "download_artifact":
+            provider.download_artifact("https://fixture.invalid/model.glb")
+        else:
+            provider.download_artifacts(
+                {"modelUrls": {"glb": "https://fixture.invalid/model.glb"}}
+            )
+    assert transport.calls == []
+
+
 def test_request_profile_redaction_and_single_post(bundle_fixture):
     root, bundle = bundle_fixture
     transport = Transport([Response(value={"result": "task-1"})])
@@ -214,7 +253,9 @@ def test_submission_failure_classes(status, bundle_fixture):
 
 def test_polling_and_download_fail_closed_without_post_retry():
     transport = Transport([Response(value={"status": "FAILED"}), Response(status_code=404, content=b"expired")])
-    provider = MeshyMultiImageProvider(transport, environ={})
+    provider = MeshyMultiImageProvider(
+        transport, environ={}, artifact_host_policy=fixture_host_policy()
+    )
     assert provider.get_task("task")["status"] == "FAILED"
     with pytest.raises(ProviderError, match="expired"):
         provider.download_artifact("https://fixture.invalid/model.glb")
@@ -223,12 +264,110 @@ def test_polling_and_download_fail_closed_without_post_retry():
 
 def test_download_all_artifacts_requires_and_validates_glb():
     payload = b"glTF" + b"\0" * 20
-    provider = MeshyMultiImageProvider(Transport([Response(content=payload)]), environ={})
+    provider = MeshyMultiImageProvider(
+        Transport([Response(content=payload)]),
+        environ={},
+        artifact_host_policy=fixture_host_policy(),
+    )
     assert provider.download_artifacts({"modelUrls": {"glb": "https://fixture.invalid/model.glb"}}) == {
         "glb": payload
     }
     with pytest.raises(ProviderError, match="GLB artifact URL"):
         provider.download_artifacts({"modelUrls": {}})
+
+
+def test_artifact_policy_allows_exact_approved_https_host():
+    payload = b"glTF" + b"\0" * 20
+    url = "https://assets.meshy.test/model.glb"
+    transport = Transport([Response(content=payload, url=url)])
+    provider = MeshyMultiImageProvider(
+        transport,
+        environ={},
+        artifact_host_policy=fixture_host_policy("assets.meshy.test"),
+    )
+    assert provider.download_artifact(url) == payload
+    assert len(transport.calls) == 1
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "https://arbitrary.example/model.glb",
+        "http://assets.meshy.test/model.glb",
+        "https://localhost/model.glb",
+        "https://127.0.0.1/model.glb",
+        "https://[::1]/model.glb",
+        "https://10.1.2.3/model.glb",
+        "https://169.254.1.2/model.glb",
+        "https://user:password@assets.meshy.test/model.glb",
+        "https://assets.meshy.test.evil.example/model.glb",
+        "https://evil-assets.meshy.test/model.glb",
+        "https://assets.meshy.test:8443/model.glb",
+        "not a url",
+        "https:///missing-host.glb",
+    ],
+)
+def test_artifact_policy_rejects_unsafe_url_before_transport(url):
+    transport = Transport()
+    provider = MeshyMultiImageProvider(
+        transport,
+        environ={},
+        artifact_host_policy=fixture_host_policy("assets.meshy.test"),
+    )
+    with pytest.raises(ProviderError):
+        provider.download_artifact(url)
+    assert transport.calls == []
+
+
+def test_artifact_redirect_cannot_escape_approved_host():
+    initial = "https://assets.meshy.test/model.glb"
+    transport = Transport(
+        [
+            Response(
+                status_code=302,
+                headers={"Location": "https://evil.example/model.glb"},
+                url=initial,
+            )
+        ]
+    )
+    provider = MeshyMultiImageProvider(
+        transport,
+        environ={},
+        artifact_host_policy=fixture_host_policy("assets.meshy.test"),
+    )
+    with pytest.raises(ProviderError, match="not approved"):
+        provider.download_artifact(initial)
+    assert len(transport.calls) == 1
+
+
+def test_approved_artifact_hostname_resolving_private_fails_before_transport():
+    transport = Transport()
+    policy = ArtifactHostPolicy(
+        contract_version="skyforge.fixture-artifact-hosts.v1",
+        approved_hosts=frozenset({"assets.meshy.test"}),
+        address_resolver=lambda _hostname: ("192.168.1.20",),
+    )
+    provider = MeshyMultiImageProvider(
+        transport, environ={}, artifact_host_policy=policy
+    )
+    with pytest.raises(ProviderError, match="non-public"):
+        provider.download_artifact("https://assets.meshy.test/model.glb")
+    assert transport.calls == []
+
+
+def test_artifact_final_response_url_is_revalidated():
+    initial = "https://assets.meshy.test/model.glb"
+    transport = Transport(
+        [Response(content=b"glTF" + b"\0" * 20, url="https://evil.example/model.glb")]
+    )
+    provider = MeshyMultiImageProvider(
+        transport,
+        environ={},
+        artifact_host_policy=fixture_host_policy("assets.meshy.test"),
+    )
+    with pytest.raises(ProviderError, match="not approved"):
+        provider.download_artifact(initial)
+    assert len(transport.calls) == 1
 
 
 def test_polling_timeout_uses_get_only():

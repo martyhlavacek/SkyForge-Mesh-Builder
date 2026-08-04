@@ -1,16 +1,20 @@
 from __future__ import annotations
 
 import base64
+import ipaddress
 import json
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Protocol
+from typing import Any, Callable, Protocol
+from urllib.parse import urljoin, urlsplit
 
 from .bundle import SUPPORTED_PROFILES, validate_bundle
 
 ENDPOINT = "https://api.meshy.ai/openapi/v1/multi-image-to-3d"
 ESTIMATED_CREDITS = 20
+ARTIFACT_HOST_CONTRACT_VERSION = "skyforge.meshy-artifact-hosts.unverified.v1"
+REDIRECT_STATUSES = frozenset({301, 302, 303, 307, 308})
 
 
 class AuthorizationError(RuntimeError):
@@ -19,6 +23,64 @@ class AuthorizationError(RuntimeError):
 
 class ProviderError(RuntimeError):
     """Raised for a deterministic provider or artifact failure."""
+
+
+@dataclass(frozen=True)
+class ArtifactHostPolicy:
+    contract_version: str
+    approved_hosts: frozenset[str]
+    address_resolver: Callable[[str], tuple[str, ...]] | None = None
+
+    def validate(self, url: str) -> str:
+        if not isinstance(url, str) or not url:
+            raise ProviderError("Malformed provider artifact URL")
+        try:
+            parsed = urlsplit(url)
+            port = parsed.port
+        except ValueError as exc:
+            raise ProviderError("Malformed provider artifact URL") from exc
+        if parsed.scheme.lower() != "https" or not parsed.hostname:
+            raise ProviderError("Provider artifact URL must use HTTPS with a hostname")
+        if parsed.username is not None or parsed.password is not None:
+            raise ProviderError("Provider artifact URL must not contain credentials")
+        if port not in {None, 443}:
+            raise ProviderError("Provider artifact URL uses an unexpected port")
+        hostname = parsed.hostname.lower()
+        try:
+            ipaddress.ip_address(hostname)
+        except ValueError:
+            pass
+        else:
+            raise ProviderError("Provider artifact URL must not target an IP literal")
+        if hostname in {"localhost", "localhost.localdomain"} or hostname.endswith(".localhost"):
+            raise ProviderError("Provider artifact URL must not target localhost")
+        approved = {host.lower() for host in self.approved_hosts}
+        if hostname not in approved:
+            raise ProviderError(
+                f"Provider artifact host is not approved by {self.contract_version}"
+            )
+        if self.address_resolver is None:
+            raise ProviderError("Provider artifact address resolution policy is unavailable")
+        try:
+            addresses = self.address_resolver(hostname)
+        except Exception as exc:
+            raise ProviderError("Provider artifact hostname resolution failed") from exc
+        if not addresses:
+            raise ProviderError("Provider artifact hostname resolved to no addresses")
+        for address in addresses:
+            try:
+                resolved = ipaddress.ip_address(address)
+            except ValueError as exc:
+                raise ProviderError("Provider artifact hostname resolution was malformed") from exc
+            if not resolved.is_global:
+                raise ProviderError("Provider artifact hostname resolved to a non-public address")
+        return url
+
+
+DEFAULT_ARTIFACT_HOST_POLICY = ArtifactHostPolicy(
+    contract_version=ARTIFACT_HOST_CONTRACT_VERSION,
+    approved_hosts=frozenset(),
+)
 
 
 class HttpTransport(Protocol):
@@ -55,12 +117,23 @@ class MeshyMultiImageProvider:
         *,
         environ: dict[str, str] | None = None,
         submission_registry: Path | None = None,
+        artifact_host_policy: ArtifactHostPolicy = DEFAULT_ARTIFACT_HOST_POLICY,
     ):
         self.transport = transport
         self.environ = dict(os.environ if environ is None else environ)
         self.submission_registry = submission_registry
+        self.artifact_host_policy = artifact_host_policy
         self._post_attempted = False
         self.last_create_response: dict[str, Any] | None = None
+
+    def _assert_network_permitted(self, operation: str) -> None:
+        active = [name for name in ("CI", "GITHUB_ACTIONS") if self.environ.get(name)]
+        if self.environ.get("SKYFORGE_PROVIDER_NETWORK_DISABLED") == "1":
+            active.append("SKYFORGE_PROVIDER_NETWORK_DISABLED")
+        if active:
+            raise AuthorizationError(
+                f"Provider network operation {operation} is disabled by {','.join(active)}"
+            )
 
     def estimate_cost(self) -> dict[str, Any]:
         return {"currency": "credits", "estimatedCredits": ESTIMATED_CREDITS, "assumptionDate": "2026-08-03"}
@@ -92,8 +165,6 @@ class MeshyMultiImageProvider:
         digest = validate_bundle(root, bundle, require_approved=True)
         if authorization.paid_enabled is not True:
             raise AuthorizationError("Paid provider route is locally disabled")
-        if self.environ.get("CI") or self.environ.get("GITHUB_ACTIONS") or self.environ.get("SKYFORGE_PROVIDER_NETWORK_DISABLED") == "1":
-            raise AuthorizationError("Provider submission is disabled in CI/no-network execution")
         if bundle["profileId"] not in SUPPORTED_PROFILES:
             raise AuthorizationError("Unsupported paid reconstruction profile")
         if authorization.approved_bundle_digest != digest or authorization.confirmed_bundle_digest != digest:
@@ -116,6 +187,7 @@ class MeshyMultiImageProvider:
         return digest
 
     def submit_task(self, root: Path, bundle: dict[str, Any], authorization: SubmissionAuthorization) -> str:
+        self._assert_network_permitted("submit_task")
         self._authorize(root, bundle, authorization)
         request = self.prepare_request(root, bundle)
         self._post_attempted = True
@@ -142,6 +214,7 @@ class MeshyMultiImageProvider:
         return task_id
 
     def get_task(self, task_id: str) -> dict[str, Any]:
+        self._assert_network_permitted("get_task")
         response = self.transport.request("GET", f"{ENDPOINT}/{task_id}")
         if response.status_code in {401, 402, 429}:
             raise ProviderError(f"Meshy polling rejected with HTTP {response.status_code}")
@@ -165,6 +238,7 @@ class MeshyMultiImageProvider:
         }
 
     def poll_until_terminal(self, task_id: str, *, maximum_polls: int) -> dict[str, Any]:
+        self._assert_network_permitted("poll_until_terminal")
         if maximum_polls < 1:
             raise ProviderError("Polling limit must be positive")
         for _ in range(maximum_polls):
@@ -174,13 +248,28 @@ class MeshyMultiImageProvider:
         raise ProviderError("Meshy polling timeout reached without creating another task")
 
     def download_artifact(self, url: str) -> bytes:
-        response = self.transport.request("GET", url)
+        self._assert_network_permitted("download_artifact")
+        current_url = self.artifact_host_policy.validate(url)
+        for _ in range(4):
+            response = self.transport.request("GET", current_url, allow_redirects=False)
+            response_url = getattr(response, "url", None)
+            if response_url:
+                self.artifact_host_policy.validate(response_url)
+            if response.status_code not in REDIRECT_STATUSES:
+                break
+            location = (getattr(response, "headers", None) or {}).get("Location")
+            if not location:
+                raise ProviderError("Provider artifact redirect omitted Location")
+            current_url = self.artifact_host_policy.validate(urljoin(current_url, location))
+        else:
+            raise ProviderError("Provider artifact redirect limit exceeded")
         payload = bytes(response.content)
         if response.status_code != 200 or len(payload) < 20 or payload[:4] != b"glTF":
             raise ProviderError("Missing, expired, empty, or corrupt provider GLB")
         return payload
 
     def download_artifacts(self, normalized_response: dict[str, Any]) -> dict[str, bytes]:
+        self._assert_network_permitted("download_artifacts")
         urls = normalized_response.get("modelUrls")
         if not isinstance(urls, dict) or not isinstance(urls.get("glb"), str):
             raise ProviderError("Successful task response did not contain a GLB artifact URL")

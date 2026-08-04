@@ -59,7 +59,7 @@
     "app/reconstruction_v1/bundle.py": "a6d8952c016c1fd6b0bf7f5404a594567f47b8476a7ab65504192cb86aa1fa95",
     "app/reconstruction_v1/evidence.py": "d452f386004118cf6a2f79c6109c7f88b50e90ab385ebc10ed8558f0d097ef4c",
     "app/reconstruction_v1/orientation.py": "f2600208ab87434047a8dd4ec3b9b42162af6d517e5853ae20c3e495dc18404f",
-    "app/reconstruction_v1/provider.py": "f6fe3b92502885e284747019dca1d8d9b188153d75fd00d5229b2c669e62103c",
+    "app/reconstruction_v1/provider.py": "cd6c82ea3cdbe9c704e326b7f1ac158748bfbb275f3f26996326aa3569e212a3",
     "app/reconstruction_v1/state.py": "355cb19f587881e81b020e0fc242fcb7a191254059ba590cd25ddda8ba4c7ac0",
     "app/server.py": "7363750693bde1828b72864e07d82675c19b934f52c6fcc75ab3de024c2fa7c5",
     "app/settings_store.py": "bb213100b611364ba25bf58eabee359ddd88c3219736a858b83bd5dcfb96b08a",
@@ -325,7 +325,7 @@
     "tests/test_pipeline.py": "798c4169d5097acf590cbf62b544736e3cfba00165bed764d7ecfdd834f79599",
     "tests/test_provider_boundary.py": "da49124ae67da0a78906a00315321c096a6b02fba0b1de88355ee18c0654a4ff",
     "tests/test_provider_credit_ledger.py": "9386eadfeaa0288e39da432d28aae44b056a6254dd60dfdac3f01d70484cdd5b",
-    "tests/test_reconstruction_v1.py": "fde3d3293a16ff0b97ffa7b3e77e6b3fe857301ee423c2069b1334cb8cd245fb",
+    "tests/test_reconstruction_v1.py": "3dfe5b8b8e93c662b86fb2ee490c3a97d9f1aa865466a371200aba795dbb1ef3",
     "tests/test_release_sealing.py": "884d3f8293c7703b4951fecee6b0cba470cfaebfde503ecd2ea0264e5fc41f02",
     "tests/test_runtime_dependency_contract.py": "e8f746973b5af617c9aac1ba8492f8e98c15f8c0a39f7dc2dabe1d17b1013716",
     "tests/test_server.py": "a15db26ca4f74d7f75f0601e458885d80d6964d3d4435988b141863b9fa029b3",
@@ -337,5 +337,5 @@
     "tests/vmp_fixtures.py": "c27460c107a85855215815f77088f3ce484cd18f5fb993d56b8f727180262997"
   },
   "schemaVersion": "skyforge.producer-source-binding.v1",
-  "treeManifestSha256": "a900bb022a20bf70c6d2747a14c9a943966078bbefbe88a07177f9fb99f39c81"
+  "treeManifestSha256": "6ace859559a8d7d5ffb64e46afbb6c0be8451823d9240a678215100a3eadcd5e"
 }
