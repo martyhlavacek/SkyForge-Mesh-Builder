@@ -20,7 +20,7 @@
     "requirementsFile": "requirements.txt",
     "requirementsSha256": "7dcb231edacc45ad4a210fae9bfdf6efbaccef25d55b6da4f84291526aca3509"
   },
-  "fileCount": 303,
+  "fileCount": 313,
   "files": {
     ".gitignore": "3b4e76f9ad4ea48d671b60ea10c4a17cd40f5057a8ed0da1487a72217787d23f",
     "BUILD_INFO.json": "61ab7839dc37f01add92277f1b021c2fe210c068fb5b4c36b9a6edee79e84462",
@@ -55,6 +55,12 @@
     "app/providers/mock_provider.py": "31a641f736f74d960034e141539c5775e03f98e45b2445fb53fb977a541c7e6e",
     "app/providers/models.py": "3ffde503bc57c99fa33dc198a9b996843cdd85fe9a59f8ea1e6ca59573e15a55",
     "app/providers/registry.py": "2c40723caeef1d2fe372969a7a16e1bbbd1ce541a5cd27773fd2c6665ebb5fb0",
+    "app/reconstruction_v1/__init__.py": "ef86fc057913402bd1c6a0da618c42fb70a1a2cbc4f1c24b999979201eafced4",
+    "app/reconstruction_v1/bundle.py": "a6d8952c016c1fd6b0bf7f5404a594567f47b8476a7ab65504192cb86aa1fa95",
+    "app/reconstruction_v1/evidence.py": "d452f386004118cf6a2f79c6109c7f88b50e90ab385ebc10ed8558f0d097ef4c",
+    "app/reconstruction_v1/orientation.py": "f2600208ab87434047a8dd4ec3b9b42162af6d517e5853ae20c3e495dc18404f",
+    "app/reconstruction_v1/provider.py": "cd6c82ea3cdbe9c704e326b7f1ac158748bfbb275f3f26996326aa3569e212a3",
+    "app/reconstruction_v1/state.py": "355cb19f587881e81b020e0fc242fcb7a191254059ba590cd25ddda8ba4c7ac0",
     "app/server.py": "7363750693bde1828b72864e07d82675c19b934f52c6fcc75ab3de024c2fa7c5",
     "app/settings_store.py": "bb213100b611364ba25bf58eabee359ddd88c3219736a858b83bd5dcfb96b08a",
     "app/static/style.css": "b2c579b9e28ddfeb3f08d41daa546c1e5bb7e1a5accdaded7571880ae72c1baf",
@@ -266,6 +272,7 @@
     "profiles/craft_profiles.json": "ae41ec0079105c99d559077e2679aca98134fe864093248e84400bb781e5e3bb",
     "profiles/geometry_recipes_v1.json": "ae077a2bb90417f27517cee8b9246a0139c6c6f6d68cf965111e3f75a91eacec",
     "profiles/geometry_recipes_v1.schema.json": "3cbe07d7dbfe5487b756e4b30fc854e66bd2f586d24ff510e11c7e00fdb7518a",
+    "profiles/multiview_authority_bundle_v1.schema.json": "e242e47fed1552a9ba08b43e54053a64be408a5041b62ddbada85cf23fd7db71",
     "pyproject.toml": "08bb30f1ffb3041d5549ed8a8a70ae025be8ff1bc90fc702bad6b4fed8300b7a",
     "requirements.txt": "7dcb231edacc45ad4a210fae9bfdf6efbaccef25d55b6da4f84291526aca3509",
     "samples/approved_gunship_authority.png": "d33075df367c97399b7ed6262030ca8ca0080eda12ebe78eb3eb3fc901f7fc1e",
@@ -279,6 +286,7 @@
     "scripts/configure_blender.command": "5e28898edfa4516690dedd02b0e8742ecd09d0257412b3a01282822fbaef2f2b",
     "scripts/configure_openai.command": "c756c81a1c374382ee948dd02e3c909eb6c6883ae5634bbc89c76495f9823759",
     "scripts/generate_contract_schemas.py": "c2866c4ac6b0a807ece55c7b77b71a55ad538d6ac5de757cb0efce7f0b96ba3c",
+    "scripts/generate_multiview_fixture_evidence.py": "21b8f29824c9820907df2578c9f5a36e35335cdc9845258b2a2556fc9c780df4",
     "scripts/generate_source_binding.py": "5f55c0c4d5a1513fb0c4ff38a3a5b0df5e9bc464ce13327b1597b9e8ab5e0722",
     "scripts/lint.command": "6b1e0b0dc536aa646d352a06bb893f7c83080b4a047407565969b079eae18ec3",
     "scripts/run.command": "d793d5d5e5b3d763630d01cb9a8a727463ca49939f1884a6c371e654ce9ae090",
@@ -289,6 +297,7 @@
     "scripts/run_meshy_test_mode_diagnostic.py": "56555f236d25d0619e93a49430f23ff96e8c2be5e69f63b3adacf96140a9aca3",
     "scripts/run_migration_evidence.py": "d4e7772d669444537b1c7f7cb2180e9c8bc087bb05f427d5839b9efd18cb6444",
     "scripts/run_mock_provider_fault_matrix.py": "a8c1770c012808cc70d777874a454710f502c86ee202f4e47d2a59b57ff8ef09",
+    "scripts/run_multiview_reconstruction_pilot.py": "bae28d4857562731ea8eb3f2d3c14a3fbfb36513bdc1e09b7b8878e2ddb253b5",
     "scripts/run_multivolume_geometry_experiment.py": "234350b0f4c4211e0bcdfb808278d2a28df3fedbb222a885d14020e155cc7317",
     "scripts/run_tests.command": "c714ae02132ccf66c55193db85acc834add1ce53cc2b314042912beccbf46653",
     "scripts/seal_release.py": "27e31ac7d2eb0c3abf4c955f8dd708afdb5d65d4a628f3ade15bb57c44f357d0",
@@ -316,6 +325,7 @@
     "tests/test_pipeline.py": "798c4169d5097acf590cbf62b544736e3cfba00165bed764d7ecfdd834f79599",
     "tests/test_provider_boundary.py": "da49124ae67da0a78906a00315321c096a6b02fba0b1de88355ee18c0654a4ff",
     "tests/test_provider_credit_ledger.py": "9386eadfeaa0288e39da432d28aae44b056a6254dd60dfdac3f01d70484cdd5b",
+    "tests/test_reconstruction_v1.py": "3dfe5b8b8e93c662b86fb2ee490c3a97d9f1aa865466a371200aba795dbb1ef3",
     "tests/test_release_sealing.py": "884d3f8293c7703b4951fecee6b0cba470cfaebfde503ecd2ea0264e5fc41f02",
     "tests/test_runtime_dependency_contract.py": "e8f746973b5af617c9aac1ba8492f8e98c15f8c0a39f7dc2dabe1d17b1013716",
     "tests/test_server.py": "a15db26ca4f74d7f75f0601e458885d80d6964d3d4435988b141863b9fa029b3",
@@ -327,5 +337,5 @@
     "tests/vmp_fixtures.py": "c27460c107a85855215815f77088f3ce484cd18f5fb993d56b8f727180262997"
   },
   "schemaVersion": "skyforge.producer-source-binding.v1",
-  "treeManifestSha256": "60e2502434b31d5cc9a8f6006df6ab5eab578bdceec219839162f189b1ca44d9"
+  "treeManifestSha256": "6ace859559a8d7d5ffb64e46afbb6c0be8451823d9240a678215100a3eadcd5e"
 }

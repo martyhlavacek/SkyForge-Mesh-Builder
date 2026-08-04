@@ -13,7 +13,11 @@ These findings remain open; this bootstrap does not claim that any are fixed.
 - **MBS-177 (Minor, non-blocking):** The attachment/exposure diagnostic image duplicates the side view.
 - **MBS-178 (Observation):** Attachment acceptance thresholds are permissive.
 - **MBS-179 (Observation):** The historical Import Probe check uses a mutable tag.
+- **MBS-180 (Blocking `geometry_v2` promotion only):** v0.8.0 Alpha 1 passed its technical review but failed controlled human visual acceptance. Its generic overlapping-primitives route must remain inactive and must not be promoted or used as the Alpha 2 basis.
+- **MBS-181 (Major, remediation pending focused re-review):** MBS-CR-0026 found that task polling and artifact download bypassed the process network kill switch and artifact download accepted arbitrary URLs. The bounded remediation adds a shared provider-layer guard and fail-closed exact-host/redirect policy; this finding remains open until independent focused re-review accepts the exact candidate.
+- **MBS-182 (Observation):** The submission reservation is created before request construction. This fails in the safe direction and the reservation model is unchanged by the MBS-181 remediation.
+- **MBS-183 (Observation; pre-smoke requirement):** Meshy endpoint, parameters, model availability, artifact hosts, retention, and the current 20-credit estimate require re-verification immediately before separate live authorization.
 
 The accepted v0.7.1 baseline contains no geometry fix for MBS-150 through MBS-154.
 
-MBS-165 through MBS-173 are closed by MBS-CR-0025. Finding numbering continues from **MBS-180**.
+MBS-165 through MBS-173 are closed by MBS-CR-0025. Finding numbering continues from **MBS-184**.
