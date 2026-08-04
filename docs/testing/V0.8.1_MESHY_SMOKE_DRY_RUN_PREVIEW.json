@@ -1,0 +1,31 @@
+{
+  "artifactHostPolicyVersion": "skyforge.meshy-artifact-hosts.2026-08-04.v1",
+  "bundleDigest": null,
+  "bundleStatus": "HUMAN_APPROVED_TOP_FRONT_RIGHT_BUNDLE_NOT_AVAILABLE",
+  "estimatedCredits": 20,
+  "maximumCredits": 20,
+  "paidOperationPerformed": false,
+  "profile": null,
+  "providerTaskId": null,
+  "request": {
+    "ai_model": "meshy-6",
+    "auto_size": false,
+    "image_enhancement": false,
+    "image_urls": [
+      "<redacted-data-uri-top-not-available>",
+      "<redacted-data-uri-front-not-available>",
+      "<redacted-data-uri-right-not-available>"
+    ],
+    "should_remesh": false,
+    "should_texture": false,
+    "target_formats": [
+      "glb"
+    ]
+  },
+  "schemaVersion": "skyforge.meshy-smoke-request-preview.v1",
+  "viewRoles": [
+    "top",
+    "front",
+    "right"
+  ]
+}

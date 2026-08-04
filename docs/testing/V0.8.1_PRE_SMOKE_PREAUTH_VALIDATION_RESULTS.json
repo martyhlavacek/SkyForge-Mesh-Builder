@@ -1,0 +1,26 @@
+{
+  "deterministicEvidenceManifest": "PASS",
+  "deterministicEvidenceRerun": "PASS_BYTE_IDENTICAL_MANIFESTS",
+  "dnsPolicyMatrix": "PASS",
+  "geometryV2Unchanged": true,
+  "historicalImportProbeComparison": "PASS_v0.7.1-accepted-baseline",
+  "hostPolicyMatrix": "PASS",
+  "importProbeBinding": {
+    "fileCount": 64,
+    "result": "PASS",
+    "treeManifestSha256": "883510570c572ada2166019b356bfbefd3e7053c5074553d1c1dde1234d74ba7"
+  },
+  "importProbePytest": "39 passed, 0 skipped",
+  "importProbeRuff": "PASS",
+  "producerBinding": {
+    "fileCount": 317,
+    "result": "PASS",
+    "treeManifestSha256": "2f2a3a43e7a92aad0e413db131e9896ab019cf0c77137de45a89ba013a95132b"
+  },
+  "producerPytest": "354 passed, 0 skipped",
+  "producerRuff": "PASS",
+  "reconstructionFocusedPytest": "85 passed, 0 skipped",
+  "redirectAndFinalUrlMatrix": "PASS",
+  "secretAndSignedQueryScan": "PASS",
+  "v0.7.1AcceptedBaselineUnchanged": true
+}
