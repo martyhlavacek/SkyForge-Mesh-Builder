@@ -4,6 +4,7 @@ import base64
 import ipaddress
 import json
 import os
+import socket
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Protocol
@@ -13,7 +14,7 @@ from .bundle import SUPPORTED_PROFILES, validate_bundle
 
 ENDPOINT = "https://api.meshy.ai/openapi/v1/multi-image-to-3d"
 ESTIMATED_CREDITS = 20
-ARTIFACT_HOST_CONTRACT_VERSION = "skyforge.meshy-artifact-hosts.unverified.v1"
+ARTIFACT_HOST_CONTRACT_VERSION = "skyforge.meshy-artifact-hosts.2026-08-04.v1"
 REDIRECT_STATUSES = frozenset({301, 302, 303, 307, 308})
 
 
@@ -24,6 +25,10 @@ class AuthorizationError(RuntimeError):
 class ProviderError(RuntimeError):
     """Raised for a deterministic provider or artifact failure."""
 
+    def __init__(self, message: str, *, details: dict[str, Any] | None = None):
+        super().__init__(message)
+        self.details = details or {}
+
 
 @dataclass(frozen=True)
 class ArtifactHostPolicy:
@@ -31,7 +36,7 @@ class ArtifactHostPolicy:
     approved_hosts: frozenset[str]
     address_resolver: Callable[[str], tuple[str, ...]] | None = None
 
-    def validate(self, url: str) -> str:
+    def inspect(self, url: str) -> dict[str, Any]:
         if not isinstance(url, str) or not url:
             raise ProviderError("Malformed provider artifact URL")
         try:
@@ -66,20 +71,46 @@ class ArtifactHostPolicy:
         except Exception as exc:
             raise ProviderError("Provider artifact hostname resolution failed") from exc
         if not addresses:
-            raise ProviderError("Provider artifact hostname resolved to no addresses")
+            raise ProviderError(
+                "Provider artifact hostname resolved to no addresses",
+                details={"addresses": [], "allAddressesGloballyRoutable": False},
+            )
         for address in addresses:
             try:
                 resolved = ipaddress.ip_address(address)
             except ValueError as exc:
-                raise ProviderError("Provider artifact hostname resolution was malformed") from exc
+                raise ProviderError(
+                    "Provider artifact hostname resolution was malformed",
+                    details={"addresses": list(addresses), "allAddressesGloballyRoutable": False},
+                ) from exc
             if not resolved.is_global:
-                raise ProviderError("Provider artifact hostname resolved to a non-public address")
+                raise ProviderError(
+                    "Provider artifact hostname resolved to a non-public address",
+                    details={"addresses": list(addresses), "allAddressesGloballyRoutable": False},
+                )
+        return {
+            "contractVersion": self.contract_version,
+            "scheme": parsed.scheme.lower(),
+            "hostname": hostname,
+            "addresses": list(addresses),
+            "allAddressesGloballyRoutable": True,
+        }
+
+    def validate(self, url: str) -> str:
+        self.inspect(url)
         return url
+
+
+def operating_system_address_resolver(hostname: str) -> tuple[str, ...]:
+    """Resolve both address families through the operating system, without caching trust."""
+    records = socket.getaddrinfo(hostname, 443, type=socket.SOCK_STREAM)
+    return tuple(sorted({record[4][0] for record in records}))
 
 
 DEFAULT_ARTIFACT_HOST_POLICY = ArtifactHostPolicy(
     contract_version=ARTIFACT_HOST_CONTRACT_VERSION,
-    approved_hosts=frozenset(),
+    approved_hosts=frozenset({"assets.meshy.ai"}),
+    address_resolver=operating_system_address_resolver,
 )
 
 
@@ -136,7 +167,7 @@ class MeshyMultiImageProvider:
             )
 
     def estimate_cost(self) -> dict[str, Any]:
-        return {"currency": "credits", "estimatedCredits": ESTIMATED_CREDITS, "assumptionDate": "2026-08-03"}
+        return {"currency": "credits", "estimatedCredits": ESTIMATED_CREDITS, "assumptionDate": "2026-08-04"}
 
     @staticmethod
     def _data_uri(path: Path) -> str:
