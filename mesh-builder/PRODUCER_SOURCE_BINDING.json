@@ -20,7 +20,7 @@
     "requirementsFile": "requirements.txt",
     "requirementsSha256": "7dcb231edacc45ad4a210fae9bfdf6efbaccef25d55b6da4f84291526aca3509"
   },
-  "fileCount": 326,
+  "fileCount": 328,
   "files": {
     ".gitignore": "3b4e76f9ad4ea48d671b60ea10c4a17cd40f5057a8ed0da1487a72217787d23f",
     "BUILD_INFO.json": "61ab7839dc37f01add92277f1b021c2fe210c068fb5b4c36b9a6edee79e84462",
@@ -59,10 +59,11 @@
     "app/reconstruction_v1/__init__.py": "ef86fc057913402bd1c6a0da618c42fb70a1a2cbc4f1c24b999979201eafced4",
     "app/reconstruction_v1/authorization.py": "f1b9f4daa689d77961a5abd1d443622009b486abde6a7c047c35bee43971fd3c",
     "app/reconstruction_v1/authorization_digest_v1.schema.json": "84ddca22f4d92b33f71b40a6fb1c1797ecc085ccfdf85f83129aa7b97a83469d",
-    "app/reconstruction_v1/bundle.py": "7b97c4470c1e4d1c88673c5d7c6a1003f475f7e3b155f0b8015caf97b5ba9f2b",
+    "app/reconstruction_v1/bundle.py": "9db82aecfae15d02844d58abdd88af820f985b9bdca01acbaa1d56aff21228b7",
+    "app/reconstruction_v1/cross_view.py": "6cb6c14f57d8ad752eb593a2c1d0dd5cad4b5bfbeaad48c8e621d1e9aa7b1c49",
     "app/reconstruction_v1/evidence.py": "d452f386004118cf6a2f79c6109c7f88b50e90ab385ebc10ed8558f0d097ef4c",
     "app/reconstruction_v1/orientation.py": "f2600208ab87434047a8dd4ec3b9b42162af6d517e5853ae20c3e495dc18404f",
-    "app/reconstruction_v1/pilot.py": "d56592d744eaf6e0b8f76d2efb9b24c490e86a4f52c5a8be8dc0654ebccbe263",
+    "app/reconstruction_v1/pilot.py": "96547a264ccdd809461b4ef62bbeff6c88a76a26ec60b5002542b5ef4a66b392",
     "app/reconstruction_v1/pilot_config_v1.json": "88f750adac5d22e955ee0ef79db914c84312c6807ab10ff0f1112675a56c3f9f",
     "app/reconstruction_v1/preflight.py": "6a4ba633819ff9e09a7eeff73a38d161d363057a4b836d4cd411744db10c48a1",
     "app/reconstruction_v1/provider.py": "15e8b6b4b938ea5d69d7bb9431dd50c6b7eb3092613be06591de6644bb76f547",
@@ -280,7 +281,7 @@
     "profiles/craft_profiles.json": "ae41ec0079105c99d559077e2679aca98134fe864093248e84400bb781e5e3bb",
     "profiles/geometry_recipes_v1.json": "ae077a2bb90417f27517cee8b9246a0139c6c6f6d68cf965111e3f75a91eacec",
     "profiles/geometry_recipes_v1.schema.json": "3cbe07d7dbfe5487b756e4b30fc854e66bd2f586d24ff510e11c7e00fdb7518a",
-    "profiles/multiview_authority_bundle_v1.schema.json": "e242e47fed1552a9ba08b43e54053a64be408a5041b62ddbada85cf23fd7db71",
+    "profiles/multiview_authority_bundle_v1.schema.json": "7d6c398dc6f2dc766822a7ff688d96e971c6393f666beea4e22d651d95b0c7ef",
     "pyproject.toml": "08bb30f1ffb3041d5549ed8a8a70ae025be8ff1bc90fc702bad6b4fed8300b7a",
     "requirements.txt": "7dcb231edacc45ad4a210fae9bfdf6efbaccef25d55b6da4f84291526aca3509",
     "samples/approved_gunship_authority.png": "d33075df367c97399b7ed6262030ca8ca0080eda12ebe78eb3eb3fc901f7fc1e",
@@ -324,6 +325,7 @@
     "tests/test_candidate_assembler.py": "39750ccd36e4bcffdb856196918dfb121c25638b6328a400bbd34f2e5531c4aa",
     "tests/test_canonical_json_contract.py": "6076d12a965fcb4e7042bd31348bf5c66c7986a8517cda9a9ecc2008e25df204",
     "tests/test_concept_workflow.py": "4c3ce90788364a199d000cfaf6004ebea816db5e384f3ce7ec6f5427e63b4314",
+    "tests/test_cross_view.py": "fae986cf05a8f81c98f496845996ee8929fc9a7175ea8ab9ec7d92818f252ced",
     "tests/test_frozen_contracts_v1.py": "6fec83b4ff31c09c20f82f626db22bdccee1d2b16e6705c719714aa54a344e3b",
     "tests/test_geometry_v2.py": "f58aeaa1e1123fd774058a4f4762d364752bebe9645f450de81f0636bfe94c8e",
     "tests/test_image_governance.py": "692ee6b2886cd5b1155f510c254d86a376d71d6d265b286f9e17c395aa1dbfe3",
@@ -334,11 +336,11 @@
     "tests/test_meshy_test_mode.py": "ee584f05d434f856179171a9c27234c07b2f09e603b4f0cf00c344a393cddad0",
     "tests/test_network_guard.py": "7734ef9d1067b02b4bb883f5eba5d65c0c76aa856e1a34b3a7e4d79a4d89a015",
     "tests/test_openai_client.py": "02c43b22c92cc98857b293c1ba587ba0f05625fd0240f19bc8d42cfec5bb4112",
-    "tests/test_pilot_ui.py": "dd8ba0f8224b4f64fd19f8d0eb84e1023de26c9311fc16a1629b42a70f0956e2",
+    "tests/test_pilot_ui.py": "6ee2497213e13691c10cba6447eea6611f2e383ea8c77afe1fc6afc3ce17a2ad",
     "tests/test_pipeline.py": "798c4169d5097acf590cbf62b544736e3cfba00165bed764d7ecfdd834f79599",
     "tests/test_provider_boundary.py": "da49124ae67da0a78906a00315321c096a6b02fba0b1de88355ee18c0654a4ff",
     "tests/test_provider_credit_ledger.py": "9386eadfeaa0288e39da432d28aae44b056a6254dd60dfdac3f01d70484cdd5b",
-    "tests/test_reconstruction_v1.py": "3dfe5b8b8e93c662b86fb2ee490c3a97d9f1aa865466a371200aba795dbb1ef3",
+    "tests/test_reconstruction_v1.py": "a56c345e2801ddafb2dd2d5b6010fed1b23707acd5f47344fad89a8d7283f369",
     "tests/test_release_sealing.py": "884d3f8293c7703b4951fecee6b0cba470cfaebfde503ecd2ea0264e5fc41f02",
     "tests/test_runtime_dependency_contract.py": "e8f746973b5af617c9aac1ba8492f8e98c15f8c0a39f7dc2dabe1d17b1013716",
     "tests/test_server.py": "a15db26ca4f74d7f75f0601e458885d80d6964d3d4435988b141863b9fa029b3",
@@ -350,5 +352,5 @@
     "tests/vmp_fixtures.py": "c27460c107a85855215815f77088f3ce484cd18f5fb993d56b8f727180262997"
   },
   "schemaVersion": "skyforge.producer-source-binding.v1",
-  "treeManifestSha256": "14c3cbe71369a550e9808643ebefe6134e55e33464c816ab1664f71e2a5e2498"
+  "treeManifestSha256": "f63d2dd2e7622c21e9ace9f788e2fbffe17dda8d83a66c9b4ff43e0c54bbf756"
 }

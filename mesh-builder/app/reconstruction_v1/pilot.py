@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import shutil
 import time
 from datetime import UTC, datetime
@@ -40,10 +41,27 @@ ALLOWED_PROVENANCE = frozenset(
 )
 APPROVABLE_PROVENANCE = "human_authority_candidate"
 ALLOWED_IMAGE_SUFFIXES = frozenset({".png", ".jpg", ".jpeg"})
+ROLE_TOKENS = frozenset(VIEW_ORDER)
 
 
 class PilotError(RuntimeError):
     """A fail-closed pilot workflow refusal safe for display."""
+
+
+def _filename_tokens(filename: str) -> set[str]:
+    stem = Path(filename).name
+    with_acronym_boundaries = re.sub(r"([A-Z]+)([A-Z][a-z])", r"\1 \2", stem)
+    with_camel_boundaries = re.sub(r"([a-z0-9])([A-Z])", r"\1 \2", with_acronym_boundaries)
+    with_digit_boundaries = re.sub(
+        r"(?<=[A-Za-z])(?=[0-9])|(?<=[0-9])(?=[A-Za-z])",
+        " ",
+        with_camel_boundaries,
+    )
+    return {
+        token.casefold()
+        for token in re.split(r"[^A-Za-z0-9]+", with_digit_boundaries)
+        if token
+    }
 
 
 def load_pilot_config() -> dict[str, Any]:
@@ -130,6 +148,14 @@ class PilotRuntime:
             raise PilotError("Approved workflow is immutable; discard and restart")
         if [item[0] for item in uploads] != list(VIEW_ORDER):
             raise PilotError("Views must be supplied in top, front, right order")
+        for role, original_name, _payload, _provenance in uploads:
+            tokens = _filename_tokens(original_name)
+            conflicts = sorted((tokens & ROLE_TOKENS) - {role})
+            if conflicts:
+                raise PilotError(
+                    f"Source filename conflicts with its {role} authority role; "
+                    "rename the file before import"
+                )
         self.workspace.mkdir(parents=True, exist_ok=True)
         paths: list[tuple[str, Path]] = []
         metadata: dict[str, tuple[str, str]] = {}

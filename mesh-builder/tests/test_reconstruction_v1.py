@@ -9,7 +9,7 @@ import numpy as np
 import pytest
 import trimesh
 from jsonschema import Draft202012Validator
-from PIL import Image
+from PIL import Image, ImageDraw
 
 from app.reconstruction_v1.bundle import BundleError, approve_bundle, build_bundle, content_digest, validate_bundle
 from app.reconstruction_v1.evidence import validate_glb, verify_manifest, write_manifest
@@ -52,9 +52,18 @@ class Transport:
 @pytest.fixture
 def bundle_fixture(tmp_path: Path):
     paths = []
+    dimensions = {"top": (30, 40), "front": (30, 20), "right": (40, 20)}
     for index, role in enumerate(("top", "front", "right")):
         path = tmp_path / f"{role}.png"
-        Image.new("RGBA", (64 + index, 64), (20 + index, 30, 40, 255)).save(path)
+        image = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
+        width, height = dimensions[role]
+        left = (64 - width) // 2
+        top = (64 - height) // 2
+        ImageDraw.Draw(image).rectangle(
+            (left, top, left + width - 1, top + height - 1),
+            fill=(20 + index, 30, 40, 255),
+        )
+        image.save(path)
         paths.append(path)
     bundle = build_bundle(tmp_path, asset_id="ship-1", profile_id="enemy_gunship", source_commit="a" * 40, created_at="2026-08-03T00:00:00Z", views=list(zip(("top", "front", "right"), paths, strict=True)))
     return tmp_path, approve_bundle(tmp_path, bundle, approved_at="2026-08-03T00:01:00Z", workflow_id="fixture")
