@@ -136,6 +136,8 @@ class SubmissionAuthorization:
     maximum_credits: int
     api_key: str | None
     prior_task_id: str | None = None
+    authorization_projection: dict[str, Any] | None = None
+    confirmed_authorization_digest: str | None = None
 
 
 class MeshyMultiImageProvider:
@@ -149,11 +151,13 @@ class MeshyMultiImageProvider:
         environ: dict[str, str] | None = None,
         submission_registry: Path | None = None,
         artifact_host_policy: ArtifactHostPolicy = DEFAULT_ARTIFACT_HOST_POLICY,
+        require_authorization_digest: bool = False,
     ):
         self.transport = transport
         self.environ = dict(os.environ if environ is None else environ)
         self.submission_registry = submission_registry
         self.artifact_host_policy = artifact_host_policy
+        self.require_authorization_digest = require_authorization_digest
         self._post_attempted = False
         self.last_create_response: dict[str, Any] | None = None
 
@@ -194,6 +198,18 @@ class MeshyMultiImageProvider:
 
     def _authorize(self, root: Path, bundle: dict[str, Any], authorization: SubmissionAuthorization) -> str:
         digest = validate_bundle(root, bundle, require_approved=True)
+        if self.require_authorization_digest:
+            from .authorization import validate_authorization_projection
+
+            if authorization.authorization_projection is None:
+                raise AuthorizationError("Pilot authorization projection is unavailable")
+            recomputed = validate_authorization_projection(
+                authorization.authorization_projection,
+                bundle=bundle,
+                artifact_host_policy=self.artifact_host_policy,
+            )
+            if recomputed != authorization.confirmed_authorization_digest:
+                raise AuthorizationError("Pilot authorization digest confirmation mismatch")
         if authorization.paid_enabled is not True:
             raise AuthorizationError("Paid provider route is locally disabled")
         if bundle["profileId"] not in SUPPORTED_PROFILES:
@@ -266,6 +282,7 @@ class MeshyMultiImageProvider:
             if isinstance(response.get("task_error"), dict)
             else response.get("consumed_credits"),
             "taskError": response.get("task_error"),
+            "expiresAt": response.get("expires_at"),
         }
 
     def poll_until_terminal(self, task_id: str, *, maximum_polls: int) -> dict[str, Any]:

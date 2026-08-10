@@ -1,0 +1,10 @@
+{
+  "artifactCaptureImmediatelyAfterSuccess": true,
+  "contractFreshnessHours": 24,
+  "contractSnapshotPath": "docs/contracts/MESHY_CONTRACT_REVERIFICATION_2026-08-04.md",
+  "maximumPollCount": 30,
+  "maximumRedirects": 4,
+  "pilotPort": 5180,
+  "pollingIntervalSeconds": 10,
+  "schemaVersion": "skyforge.meshy-pilot-config.v1"
+}

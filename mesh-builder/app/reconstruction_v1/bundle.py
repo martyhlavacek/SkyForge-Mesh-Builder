@@ -104,6 +104,9 @@ def validate_bundle(root: Path, bundle: dict[str, Any], *, require_approved: boo
         raise BundleError("Views must be exactly top, front, right in that order")
     if len(set(roles)) != 3:
         raise BundleError("Duplicate multiview authority role")
+    hashes = [item.get("sha256") for item in bundle["views"]]
+    if len(set(hashes)) != 3:
+        raise BundleError("Every authority view must contain independently stored image bytes")
     for item in bundle["views"]:
         relative = _safe_relative(item["path"])
         path = root / relative

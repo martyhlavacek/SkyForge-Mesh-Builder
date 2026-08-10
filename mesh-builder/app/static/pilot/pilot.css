@@ -1,0 +1,19 @@
+:root { color-scheme: dark; font-family: ui-sans-serif, system-ui, sans-serif; background: #081018; color: #e8f0f6; }
+body { margin: 0 auto; max-width: 1180px; padding: 2rem; }
+header, section { background: #111d28; border: 1px solid #294355; border-radius: 10px; margin: 1rem 0; padding: 1.25rem; }
+.eyebrow, .warning, .bad, .error { color: #ffb4a8; font-weight: 700; }
+.good, .notice { color: #8ee6b0; font-weight: 700; }
+.message { border: 1px solid currentColor; border-radius: 8px; padding: 1rem; }
+.label { background: #17344a; border-left: 4px solid #55b9ff; padding: .75rem; }
+.three-up { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+.three-up img { background: #071018; height: 230px; object-fit: contain; width: 100%; }
+dl { display: grid; grid-template-columns: minmax(9rem, 1fr) 3fr; gap: .35rem .75rem; }
+dt { color: #9eb5c7; } dd { margin: 0; overflow-wrap: anywhere; }
+fieldset, label { display: block; margin: .75rem 0; }
+input, select, button { font: inherit; margin: .25rem; padding: .55rem; }
+button { background: #1f7ab4; border: 0; border-radius: 5px; color: white; cursor: pointer; }
+button:disabled { background: #3c4650; cursor: not-allowed; }
+button.secondary { background: #69434a; }
+pre { background: #071018; overflow: auto; padding: 1rem; }
+code { overflow-wrap: anywhere; }
+@media (max-width: 800px) { .three-up { grid-template-columns: 1fr; } }
