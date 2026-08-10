@@ -46,7 +46,7 @@
     "app/image_governance.py": "06e5585864da94e715b40acd8fd317447ae7a657bb1b465e23d48ff7f82c6594",
     "app/macos_keychain.py": "2c38f5749dc616f538a3b36c02a6477bc908e7c97afbb99af2f7110aa756ba69",
     "app/openai_client.py": "631fbb1ebd2ecbb4859ee0c11d5f9f6c5a22b3bd85e415ba4b7d7b0ed3d9ac18",
-    "app/pilot_server.py": "1c5d06247642da4003a9b6c40e448fd295a2e0fa7815298b11bc7155b4413677",
+    "app/pilot_server.py": "58a27267289d2d50318423ad12e4fe5ff18e8adc9b25c1730c87d78bfae6e2e8",
     "app/pipeline.py": "aa567b7aff0d6888a1f30d4ce530219bd15dedbb267b552d85dd9f5c843a050f",
     "app/providers/__init__.py": "7d20cb3843264ebe6000f3ca15668c2a6cfbc1def5a0a6f5b33985546b9471a5",
     "app/providers/base.py": "5384745a4f30585fb0aa89a4a4d819a5ec538ad8839e2b5e2c16de114df667ec",
@@ -334,7 +334,7 @@
     "tests/test_meshy_test_mode.py": "ee584f05d434f856179171a9c27234c07b2f09e603b4f0cf00c344a393cddad0",
     "tests/test_network_guard.py": "7734ef9d1067b02b4bb883f5eba5d65c0c76aa856e1a34b3a7e4d79a4d89a015",
     "tests/test_openai_client.py": "02c43b22c92cc98857b293c1ba587ba0f05625fd0240f19bc8d42cfec5bb4112",
-    "tests/test_pilot_ui.py": "64eb5332f08cc38f7dd4f8953677b0ae707d76cc2b14b8b83f6f9661c8d28042",
+    "tests/test_pilot_ui.py": "dd8ba0f8224b4f64fd19f8d0eb84e1023de26c9311fc16a1629b42a70f0956e2",
     "tests/test_pipeline.py": "798c4169d5097acf590cbf62b544736e3cfba00165bed764d7ecfdd834f79599",
     "tests/test_provider_boundary.py": "da49124ae67da0a78906a00315321c096a6b02fba0b1de88355ee18c0654a4ff",
     "tests/test_provider_credit_ledger.py": "9386eadfeaa0288e39da432d28aae44b056a6254dd60dfdac3f01d70484cdd5b",
@@ -350,5 +350,5 @@
     "tests/vmp_fixtures.py": "c27460c107a85855215815f77088f3ce484cd18f5fb993d56b8f727180262997"
   },
   "schemaVersion": "skyforge.producer-source-binding.v1",
-  "treeManifestSha256": "98d7ab3837b6c931ad4a6d2258a0c99253ccee598ac5b6f8999e13c9af499aaa"
+  "treeManifestSha256": "14c3cbe71369a550e9808643ebefe6134e55e33464c816ab1664f71e2a5e2498"
 }

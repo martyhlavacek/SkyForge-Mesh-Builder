@@ -435,6 +435,120 @@ def test_render_has_no_transport_secret_data_uri_or_signed_query(tmp_path: Path)
     assert "Authorization:" not in page and "data:image" not in page and "signature=" not in page
 
 
+def test_every_pilot_render_state_has_zero_key_loader_calls_and_only_sendable_submit_loads(tmp_path: Path):
+    class KeyLoaderSpy:
+        def __init__(self):
+            self.calls = 0
+
+        def __call__(self):
+            self.calls += 1
+            return None
+
+    fresh_now = datetime(2026, 8, 4, 4, 0, tzinfo=UTC)
+
+    def app_at_state(case_root: Path, target: str | None):
+        spy = KeyLoaderSpy()
+        transport = NoTransport()
+        provider = MeshyMultiImageProvider(
+            transport,
+            environ={"SKYFORGE_PROVIDER_NETWORK_DISABLED": "1"},
+            submission_registry=case_root / "registry",
+            require_authorization_digest=True,
+        )
+        app = create_pilot_app(workspace=case_root / "workspace", provider=provider, now=lambda: fresh_now, api_key_loader=spy)
+        runtime = app.extensions["skyforge_pilot_runtime"]
+        if target is not None:
+            import_valid(runtime)
+        if target not in {None, "PREPARED"}:
+            runtime.approve(workflow_id="human-fixture")
+        if target not in {None, "PREPARED", "BUNDLE_APPROVED"}:
+            runtime.request_contract_reverified()
+        if target not in {None, "PREPARED", "BUNDLE_APPROVED", "CONTRACT_REVERIFIED"}:
+            runtime.preview_authorization()
+        if target not in {
+            None,
+            "PREPARED",
+            "BUNDLE_APPROVED",
+            "CONTRACT_REVERIFIED",
+            "AUTHORIZATION_PREVIEWED",
+        }:
+            record = json.loads(runtime.authorization_path.read_text(encoding="utf-8"))
+            runtime.approve_cost(record["authorizationDigest"])
+        if target in {"SUBMITTING", "SUBMITTED", "POLLING", "SUCCEEDED", "DOWNLOADED", "VALIDATED", "USER_ACCEPTED", "USER_REJECTED", "FAILED", "CANCELED"}:
+            runtime.task_log.append("SUBMITTING", timestamp="fixture-submitting")
+        if target == "FAILED":
+            runtime.task_log.append("FAILED", timestamp="fixture-failed")
+        elif target in {"SUBMITTED", "POLLING", "SUCCEEDED", "DOWNLOADED", "VALIDATED", "USER_ACCEPTED", "USER_REJECTED", "CANCELED"}:
+            runtime.task_log.append("SUBMITTED", timestamp="fixture-submitted", details={"providerTaskId": "fixture-task"})
+            if target in {"POLLING", "SUCCEEDED", "DOWNLOADED", "VALIDATED", "USER_ACCEPTED", "USER_REJECTED", "CANCELED"}:
+                runtime.task_log.append("POLLING", timestamp="fixture-polling", details={"attempt": 1})
+            if target == "CANCELED":
+                runtime.task_log.append("CANCELED", timestamp="fixture-canceled")
+            elif target in {"SUCCEEDED", "DOWNLOADED", "VALIDATED", "USER_ACCEPTED", "USER_REJECTED"}:
+                runtime.task_log.append(
+                    "SUCCEEDED",
+                    timestamp="fixture-succeeded",
+                    details={"providerTaskId": "fixture-task", "expiresAt": "2026-08-07T04:00:00Z"},
+                )
+                if target in {"DOWNLOADED", "VALIDATED", "USER_ACCEPTED", "USER_REJECTED"}:
+                    runtime.task_log.append(
+                        "DOWNLOADED",
+                        timestamp="fixture-downloaded",
+                        details={
+                            "rawGlbSha256": "0" * 64,
+                            "artifactLocation": "captured_provider_artifact.glb",
+                            "expiresAt": "2026-08-07T04:00:00Z",
+                        },
+                    )
+                if target in {"VALIDATED", "USER_ACCEPTED", "USER_REJECTED"}:
+                    runtime.task_log.append("VALIDATED", timestamp="fixture-validated")
+                if target in {"USER_ACCEPTED", "USER_REJECTED"}:
+                    runtime.task_log.append(target, timestamp=f"fixture-{target.lower()}")
+        return app, runtime, spy, transport
+
+    presentation_states = [None, *sorted(state for state in TRANSITIONS if state is not None)]
+    for target in presentation_states:
+        app, runtime, spy, transport = app_at_state(tmp_path / (target or "initial"), target)
+        response = app.test_client().get("/")
+        assert response.status_code == 200
+        assert runtime.current_state() == target
+        assert spy.calls == 0
+        assert transport.calls == []
+
+    stale_spy = KeyLoaderSpy()
+    stale_transport = NoTransport()
+    stale_provider = MeshyMultiImageProvider(
+        stale_transport,
+        environ={"SKYFORGE_PROVIDER_NETWORK_DISABLED": "1"},
+        require_authorization_digest=True,
+    )
+    stale_app = create_pilot_app(
+        workspace=tmp_path / "stale",
+        provider=stale_provider,
+        now=lambda: datetime(2026, 8, 9, 12, 0, tzinfo=UTC),
+        api_key_loader=stale_spy,
+    )
+    stale_runtime = stale_app.extensions["skyforge_pilot_runtime"]
+    import_valid(stale_runtime)
+    stale_runtime.approve(workflow_id="human-fixture")
+    client = stale_app.test_client()
+    assert client.get("/").status_code == 200
+    assert client.post("/authorization/preview").status_code == 409
+    assert client.post("/provider/submit").status_code == 409
+    assert stale_spy.calls == 0
+    assert stale_transport.calls == []
+
+    sendable_app, sendable_runtime, sendable_spy, sendable_transport = app_at_state(
+        tmp_path / "sendable", "COST_APPROVED"
+    )
+    assert sendable_runtime.status()["sendable"] is True
+    sendable_app.testing = True
+    with pytest.raises(AuthorizationError, match="network operation submit_task is disabled"):
+        sendable_app.test_client().post("/provider/submit")
+    assert sendable_spy.calls == 1
+    assert sendable_transport.calls == []
+
+
 def test_head_only_preflight_unknown_redirect_and_stub_labels(tmp_path: Path):
     policy = ArtifactHostPolicy("fixture.v1", frozenset({"assets.meshy.ai"}), lambda _host: ("8.8.8.8",))
     transport = Transport([Response(302, headers={"Location": "https://unknown.example/a?signature=secret"})])

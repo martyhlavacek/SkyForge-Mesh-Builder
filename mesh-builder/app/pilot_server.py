@@ -121,7 +121,12 @@ def create_pilot_app(
 
     @app.post("/provider/submit")
     def provider_submit():
-        return action(lambda: runtime.submit(api_key=key_loader()), "Provider task submitted exactly once")
+        def execute():
+            if not runtime.status()["sendable"]:
+                raise PilotError("Pilot is not sendable; API-key loading is refused")
+            return runtime.submit(api_key=key_loader())
+
+        return action(execute, "Provider task submitted exactly once")
 
     @app.post("/provider/poll-and-capture")
     def provider_poll_and_capture():
