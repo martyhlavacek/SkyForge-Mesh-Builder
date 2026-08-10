@@ -14,7 +14,7 @@
     "cameraDeclaration": {"const": "measured_orthographic_cross_view_consistency_pass"},
     "crossViewConsistency": {
       "type": "object",
-      "required": ["schemaVersion", "method", "aspectTolerancePpm", "centerTolerancePpm", "measuredAspectMismatchPpm", "minAspectMismatchPpm", "maxAspectMismatchPpm", "perViewBoundingBoxes", "perViewCenterOffsetsPpm", "thresholdsUsed", "thresholdSamples", "stabilityRule", "result"],
+      "required": ["schemaVersion", "method", "aspectTolerancePpm", "centerTolerancePpm", "measuredAspectMismatchPpm", "minAspectMismatchPpm", "maxAspectMismatchPpm", "headlineMetricSource", "fixedThresholdExemplarThreshold", "fixedThresholdExemplarBoundingBoxes", "fixedThresholdExemplarCenterOffsetsPpm", "thresholdsUsed", "thresholdSamples", "stabilityRule", "result"],
       "properties": {
         "schemaVersion": {"const": "skyforge.cross-view-consistency.v1"},
         "method": {"const": "deterministic_alpha_or_border_luminance_threshold_ensemble"},
@@ -23,8 +23,10 @@
         "measuredAspectMismatchPpm": {"type": "integer", "minimum": 0},
         "minAspectMismatchPpm": {"type": "integer", "minimum": 0},
         "maxAspectMismatchPpm": {"type": "integer", "minimum": 0},
-        "perViewBoundingBoxes": {"type": "object"},
-        "perViewCenterOffsetsPpm": {"type": "object"},
+        "headlineMetricSource": {"const": "integer_median_of_thresholdSamples.aspectMismatchPpm"},
+        "fixedThresholdExemplarThreshold": {"const": 24},
+        "fixedThresholdExemplarBoundingBoxes": {"type": "object"},
+        "fixedThresholdExemplarCenterOffsetsPpm": {"type": "object"},
         "thresholdsUsed": {"const": [8, 16, 24, 40, 60, 80]},
         "thresholdSamples": {"type": "array", "minItems": 6, "maxItems": 6},
         "stabilityRule": {"type": "object"},

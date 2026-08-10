@@ -47,7 +47,7 @@ def _mask_for_threshold(image: Image.Image, threshold: int) -> Image.Image:
     luminance = image.convert("L")
     low, high = luminance.getextrema()
     if low == high:
-        return luminance.point(lambda _value: 0 if low >= 250 else 255)
+        raise CrossViewError("Uniform authority image cannot produce a valid silhouette")
     background = _border_median(luminance)
     return luminance.point(lambda value: 255 if abs(value - background) >= threshold else 0)
 
@@ -64,6 +64,8 @@ def _bbox_record(image: Image.Image, threshold: int) -> dict[str, Any]:
     minimum_pixels = max(16, image.width * image.height // 10_000)
     if width < 4 or height < 4 or foreground_pixels < minimum_pixels:
         raise CrossViewError(f"Threshold {threshold} produced foreground too small for reliable measurement")
+    if left == 0 and top == 0 and right == image.width and bottom == image.height:
+        raise CrossViewError(f"Threshold {threshold} produced a degenerate full-canvas foreground")
     horizontal = abs((left + right) - image.width) * 1_000_000 // image.width
     vertical = abs((top + bottom) - image.height) * 1_000_000 // image.height
     return {
@@ -173,9 +175,10 @@ def measure_cross_view(paths: dict[str, Path]) -> dict[str, Any]:
             "maximumDimensionSpreadPpm": maximum_dimension_spread,
             "dimensionSpreadsPpm": dimension_spreads,
             "maximumCenterOffsetPpm": maximum_center_offset,
-            "representativeThreshold": representative["threshold"],
-            "perViewBoundingBoxes": representative["boundingBoxes"],
-            "perViewCenterOffsetsPpm": {
+            "headlineMetricSource": "integer_median_of_thresholdSamples.aspectMismatchPpm",
+            "fixedThresholdExemplarThreshold": representative["threshold"],
+            "fixedThresholdExemplarBoundingBoxes": representative["boundingBoxes"],
+            "fixedThresholdExemplarCenterOffsetsPpm": {
                 role: representative["boundingBoxes"][role]["centerOffsetPpm"] for role in VIEW_ORDER
             },
             "thresholdsUsed": list(THRESHOLDS),
