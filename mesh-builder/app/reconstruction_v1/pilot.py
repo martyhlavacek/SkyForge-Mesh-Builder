@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import shutil
 import time
 from datetime import UTC, datetime
@@ -40,6 +41,7 @@ ALLOWED_PROVENANCE = frozenset(
 )
 APPROVABLE_PROVENANCE = "human_authority_candidate"
 ALLOWED_IMAGE_SUFFIXES = frozenset({".png", ".jpg", ".jpeg"})
+ROLE_TOKENS = frozenset(VIEW_ORDER)
 
 
 class PilotError(RuntimeError):
@@ -130,6 +132,18 @@ class PilotRuntime:
             raise PilotError("Approved workflow is immutable; discard and restart")
         if [item[0] for item in uploads] != list(VIEW_ORDER):
             raise PilotError("Views must be supplied in top, front, right order")
+        for role, original_name, _payload, _provenance in uploads:
+            tokens = {
+                token.casefold()
+                for token in re.split(r"[\s_.()\-]+", Path(original_name).name)
+                if token
+            }
+            conflicts = sorted((tokens & ROLE_TOKENS) - {role})
+            if conflicts:
+                raise PilotError(
+                    f"Source filename conflicts with its {role} authority role; "
+                    "rename the file before import"
+                )
         self.workspace.mkdir(parents=True, exist_ok=True)
         paths: list[tuple[str, Path]] = []
         metadata: dict[str, tuple[str, str]] = {}

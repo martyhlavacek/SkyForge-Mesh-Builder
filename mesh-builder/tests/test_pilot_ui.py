@@ -81,6 +81,20 @@ def image_bytes(color, *, mode="RGB"):
     return stream.getvalue()
 
 
+def authority_image_bytes(role, color):
+    dimensions = {"top": (30, 40), "front": (30, 20), "right": (40, 20)}
+    image = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
+    width, height = dimensions[role]
+    left = (64 - width) // 2
+    top = (64 - height) // 2
+    for x in range(left, left + width):
+        for y in range(top, top + height):
+            image.putpixel((x, y), (*color, 255))
+    stream = io.BytesIO()
+    image.save(stream, format="PNG")
+    return stream.getvalue()
+
+
 def make_contract(root: Path, verified: datetime) -> str:
     relative = "docs/contracts/MESHY_CONTRACT_REVERIFICATION_2026-08-04.md"
     path = root / relative
@@ -118,9 +132,9 @@ def import_valid(runtime: PilotRuntime, *, provenance="human_authority_candidate
         profile_id="enemy_gunship",
         asset_id="pilot.ship",
         uploads=[
-            ("top", "top.png", image_bytes((255, 0, 0)), provenance),
-            ("front", "front.png", image_bytes((0, 255, 0)), provenance),
-            ("right", "right.png", image_bytes((0, 0, 255)), provenance),
+            ("top", "top.png", authority_image_bytes("top", (255, 0, 0)), provenance),
+            ("front", "front.png", authority_image_bytes("front", (0, 255, 0)), provenance),
+            ("right", "right.png", authority_image_bytes("right", (0, 0, 255)), provenance),
         ],
     )
 

@@ -7,6 +7,8 @@ from typing import Any
 
 from PIL import Image, ImageDraw, ImageOps
 
+from .cross_view import CAMERA_DECLARATION_PASS, CrossViewError, require_cross_view_consistency
+
 VIEW_ORDER = ("top", "front", "right")
 SUPPORTED_PROFILES = frozenset({"enemy_gunship", "enemy_interceptor"})
 SCHEMA_VERSION = "skyforge.multiview-authority-bundle.v1"
@@ -52,6 +54,11 @@ def build_bundle(
 ) -> dict[str, Any]:
     if profile_id not in SUPPORTED_PROFILES:
         raise BundleError(f"Unsupported reconstruction profile: {profile_id}")
+    roles = [role for role, _path in views]
+    if roles != list(VIEW_ORDER):
+        raise BundleError("Views must be exactly top, front, right in that order")
+    if len(set(roles)) != 3:
+        raise BundleError("Duplicate multiview authority role")
     records = []
     for role, path in views:
         resolved = path.resolve()
@@ -75,6 +82,15 @@ def build_bundle(
                     "backgroundStatus": "alpha_or_neutral_declared",
                 }
             )
+    if len({item["sha256"] for item in records}) != 3:
+        raise BundleError("Every authority view must contain independently stored image bytes")
+    measurement_paths = {role: path for role, path in views}
+    try:
+        cross_view = require_cross_view_consistency(measurement_paths)
+    except CrossViewError as exc:
+        raise BundleError(str(exc)) from exc
+    if cross_view.get("result") != "PASS":
+        raise BundleError("Cross-view measurement did not produce a passing result")
     bundle = {
         "schemaVersion": SCHEMA_VERSION,
         "assetId": asset_id,
@@ -82,7 +98,8 @@ def build_bundle(
         "createdAt": created_at,
         "sourceCommit": source_commit,
         "viewOrder": list(VIEW_ORDER),
-        "cameraDeclaration": "orthographic_or_near_orthographic_centered_consistent_scale",
+        "cameraDeclaration": CAMERA_DECLARATION_PASS,
+        "crossViewConsistency": cross_view,
         "views": records,
         "contactSheet": None
         if contact_sheet is None
@@ -117,6 +134,17 @@ def validate_bundle(root: Path, bundle: dict[str, Any], *, require_approved: boo
         with Image.open(path) as image:
             if [image.width, image.height] != item["dimensions"] or image.mode != item["mode"]:
                 raise BundleError(f"Authority image metadata mismatch: {relative}")
+    measurement_paths = {item["role"]: root / _safe_relative(item["path"]) for item in bundle["views"]}
+    try:
+        recomputed_cross_view = require_cross_view_consistency(measurement_paths)
+    except CrossViewError as exc:
+        raise BundleError(str(exc)) from exc
+    if recomputed_cross_view.get("result") != "PASS":
+        raise BundleError("Cross-view measurement did not produce a passing result")
+    if bundle.get("crossViewConsistency") != recomputed_cross_view:
+        raise BundleError("Cross-view measurement record mismatch")
+    if bundle.get("cameraDeclaration") != CAMERA_DECLARATION_PASS:
+        raise BundleError("Camera declaration is not derived from passing cross-view measurement")
     contact_sheet = bundle.get("contactSheet")
     if contact_sheet is not None:
         relative = _safe_relative(contact_sheet["path"])

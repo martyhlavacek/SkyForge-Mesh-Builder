@@ -3,7 +3,7 @@
   "$id": "skyforge.multiview-authority-bundle.v1",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schemaVersion", "assetId", "profileId", "createdAt", "sourceCommit", "viewOrder", "cameraDeclaration", "views", "contactSheet", "approval", "bundleDigest"],
+  "required": ["schemaVersion", "assetId", "profileId", "createdAt", "sourceCommit", "viewOrder", "cameraDeclaration", "crossViewConsistency", "views", "contactSheet", "approval", "bundleDigest"],
   "properties": {
     "schemaVersion": {"const": "skyforge.multiview-authority-bundle.v1"},
     "assetId": {"type": "string", "minLength": 1},
@@ -11,7 +11,26 @@
     "createdAt": {"type": "string", "minLength": 1},
     "sourceCommit": {"type": "string", "minLength": 1},
     "viewOrder": {"const": ["top", "front", "right"]},
-    "cameraDeclaration": {"const": "orthographic_or_near_orthographic_centered_consistent_scale"},
+    "cameraDeclaration": {"const": "measured_orthographic_cross_view_consistency_pass"},
+    "crossViewConsistency": {
+      "type": "object",
+      "required": ["schemaVersion", "method", "aspectTolerancePpm", "centerTolerancePpm", "measuredAspectMismatchPpm", "minAspectMismatchPpm", "maxAspectMismatchPpm", "perViewBoundingBoxes", "perViewCenterOffsetsPpm", "thresholdsUsed", "thresholdSamples", "stabilityRule", "result"],
+      "properties": {
+        "schemaVersion": {"const": "skyforge.cross-view-consistency.v1"},
+        "method": {"const": "deterministic_alpha_or_border_luminance_threshold_ensemble"},
+        "aspectTolerancePpm": {"const": 150000},
+        "centerTolerancePpm": {"const": 50000},
+        "measuredAspectMismatchPpm": {"type": "integer", "minimum": 0},
+        "minAspectMismatchPpm": {"type": "integer", "minimum": 0},
+        "maxAspectMismatchPpm": {"type": "integer", "minimum": 0},
+        "perViewBoundingBoxes": {"type": "object"},
+        "perViewCenterOffsetsPpm": {"type": "object"},
+        "thresholdsUsed": {"const": [8, 16, 24, 40, 60, 80]},
+        "thresholdSamples": {"type": "array", "minItems": 6, "maxItems": 6},
+        "stabilityRule": {"type": "object"},
+        "result": {"const": "PASS"}
+      }
+    },
     "views": {
       "type": "array",
       "minItems": 3,
