@@ -14,7 +14,11 @@
 - Merge first parent: `81acdec3e7e935b53eac5748c6b41007c878639f`
 - Merge second parent: `4a959e202fd2c839e3d1f016591750fe938e55ea`
 - Accepted fallback baseline: `v0.7.1-accepted-baseline` at `d38dd5d1638eae0942929a4ed568edb048220894`
+- Accepted fallback baseline status: unchanged
+- Release artefact status: no new Git tag or GitHub Release was created
 
 The MBS-194 qualification was applied to a new immutable evidence archive without modifying the reviewed source candidate. The reviewer-authored MBS-CR-0030 text is not reconstructed in this status record; the SHA-256 above identifies the supplied original.
 
 Local no-spend pilot UI testing may proceed after the documentation record passes CI. Live provider authorization remains separate. No Meshy task, API-key use, provider polling or download, paid operation, or credit consumption is authorized by this record.
+
+MBS-136 remains OPEN against a real provider. Mocked, injected-spy, disabled-transport, and local pilot tests do not close MBS-136: the successful v0.8.1 no-spend validation proves local governance and fail-closed behavior only. Real Meshy/provider behavior remains unproven until a separately authorized live smoke test.
