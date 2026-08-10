@@ -8,6 +8,7 @@ from typing import Any
 from PIL import Image, ImageDraw, ImageOps
 
 from .cross_view import CAMERA_DECLARATION_PASS, CrossViewError, require_cross_view_consistency
+from .quarantine import QuarantineError, assert_reconstruction_hashes_eligible
 
 VIEW_ORDER = ("top", "front", "right")
 SUPPORTED_PROFILES = frozenset({"enemy_gunship", "enemy_interceptor"})
@@ -84,6 +85,10 @@ def build_bundle(
             )
     if len({item["sha256"] for item in records}) != 3:
         raise BundleError("Every authority view must contain independently stored image bytes")
+    try:
+        assert_reconstruction_hashes_eligible(item["sha256"] for item in records)
+    except QuarantineError as exc:
+        raise BundleError(str(exc)) from exc
     measurement_paths = {role: path for role, path in views}
     try:
         cross_view = require_cross_view_consistency(measurement_paths)
@@ -168,6 +173,10 @@ def validate_bundle(root: Path, bundle: dict[str, Any], *, require_approved: boo
 
 def approve_bundle(root: Path, bundle: dict[str, Any], *, approved_at: str, workflow_id: str) -> dict[str, Any]:
     digest = validate_bundle(root, bundle, require_approved=False)
+    try:
+        assert_reconstruction_hashes_eligible(item["sha256"] for item in bundle["views"])
+    except QuarantineError as exc:
+        raise BundleError(str(exc)) from exc
     approved = json.loads(json.dumps(bundle))
     approved["approval"] = {
         "status": "APPROVED",

@@ -8,12 +8,16 @@
     "contractSnapshot": {"additionalProperties": false, "properties": {"sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"}, "verificationDate": {"type": "string"}}, "required": ["sha256", "verificationDate"], "type": "object"},
     "estimatedCredits": {"const": 20},
     "humanApproval": {"additionalProperties": false, "properties": {"approvedAt": {"type": "string"}, "workflowId": {"type": "string"}}, "required": ["approvedAt", "workflowId"], "type": "object"},
+    "inputKind": {"enum": ["multiview_bundle_v1", "single_view_v1"]},
     "maximumCredits": {"const": 20},
     "producerSourceBindingDigest": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
     "profileId": {"enum": ["enemy_gunship", "enemy_interceptor"]},
+    "reconstructionInputDigest": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+    "reconstructionInputSourceSha256s": {"items": {"pattern": "^[0-9a-f]{64}$", "type": "string"}, "minItems": 1, "type": "array"},
     "requestBody": {"additionalProperties": false, "properties": {"ai_model": {"const": "meshy-6"}, "auto_size": {"const": false}, "image_enhancement": {"const": false}, "should_remesh": {"const": false}, "should_texture": {"const": false}, "target_formats": {"const": ["glb"]}}, "required": ["ai_model", "should_texture", "should_remesh", "image_enhancement", "auto_size", "target_formats"], "type": "object"},
-    "schemaVersion": {"const": "skyforge.meshy-pilot-authorization.v1"}
+    "schemaVersion": {"const": "skyforge.meshy-pilot-authorization.v1"},
+    "trackS": {"type": "object"}
   },
-  "required": ["schemaVersion", "bundleDigest", "profileId", "requestBody", "estimatedCredits", "maximumCredits", "artifactHostPolicy", "contractSnapshot", "producerSourceBindingDigest", "humanApproval"],
+  "required": ["schemaVersion", "inputKind", "reconstructionInputDigest", "reconstructionInputSourceSha256s", "bundleDigest", "profileId", "requestBody", "estimatedCredits", "maximumCredits", "artifactHostPolicy", "contractSnapshot", "producerSourceBindingDigest", "humanApproval"],
   "type": "object"
 }

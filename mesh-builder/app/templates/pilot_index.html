@@ -9,7 +9,7 @@
 <body>
   <header>
     <p class="eyebrow">EXPERIMENTAL PILOT — SEPARATE FROM v0.7.1 PRODUCTION ROUTE</p>
-    <h1>SkyForge Mesh Builder — v0.8.1 Multiview Meshy Pilot</h1>
+    <h1>SkyForge Mesh Builder — v0.8.1 Multiview Meshy Pilot + Track S Preauthorization</h1>
     <p class="warning">No live provider operation is authorized. This pilot never asks for an API key.</p>
   </header>
   {% if error %}<div class="message error" role="alert">REFUSED: {{ error }}</div>{% endif %}
@@ -18,9 +18,30 @@
   <main>
     <section>
       <h2>1. Pilot/runtime status</h2>
-      <dl><dt>Port</dt><dd>{{ pilot.config.pilotPort }}</dd><dt>Logged state</dt><dd>{{ pilot.state or 'NO TASK LOG' }}</dd><dt>Sendable</dt><dd class="{{ 'good' if pilot.sendable else 'bad' }}">{{ 'YES' if pilot.sendable else 'NO — FAIL CLOSED' }}</dd></dl>
+      <dl><dt>Port</dt><dd>{{ pilot.config.pilotPort }}</dd><dt>Input kind</dt><dd>{{ pilot.inputKind or 'NOT SELECTED' }}</dd><dt>Logged state</dt><dd>{{ pilot.state or 'NO TASK LOG' }}</dd><dt>Sendable</dt><dd class="{{ 'good' if pilot.sendable else 'bad' }}">{{ 'YES' if pilot.sendable else 'NO — FAIL CLOSED' }}</dd></dl>
       <p>Backend lifecycle states: <code id="backend-states">{{ pilot.backendStates|join(',') }}</code></p>
       <p>Allowed next states: <code>{{ pilot.allowedNextStates|join(',') if pilot.allowedNextStates else 'none' }}</code></p>
+    </section>
+
+    <section>
+      <h2>Track S — single-view reconstruction input</h2>
+      <p>The three-quarter beauty reference is reconstruction input. The approved TOP is a separate validation target and is not submitted in task 1.</p>
+      {% if not pilot.events %}
+      <form method="post" action="/single-view/import" enctype="multipart/form-data">
+        <label>Asset ID <input name="assetId" value="pilot.track-s.enemy-gunship"></label>
+        <label>Profile <select name="profileId"><option value="enemy_gunship">enemy_gunship</option><option value="enemy_interceptor">enemy_interceptor</option></select></label>
+        <label>Three-quarter beauty reference <input type="file" name="beauty" accept=".png,.jpg,.jpeg" required></label>
+        <input type="hidden" name="provenance" value="human_approved_beauty_reference">
+        <label>Provenance source type <input name="provenanceSourceType" value="human_uploaded_approved_beauty" required></label>
+        <button type="submit">Import and bind one beauty reference</button>
+      </form>
+      {% endif %}
+      {% if pilot.singleView %}
+      <article><img src="/single-view/source" alt="Imported Track S three-quarter beauty reconstruction reference">
+        <dl><dt>Role</dt><dd>{{ pilot.singleView.declaredRole }}</dd><dt>Filename</dt><dd>{{ pilot.singleView.source.originalFilename }}</dd><dt>SHA-256</dt><dd><code>{{ pilot.singleView.source.sha256 }}</code></dd><dt>Dimensions</dt><dd>{{ pilot.singleView.source.dimensions[0] }} × {{ pilot.singleView.source.dimensions[1] }}</dd><dt>Mode</dt><dd>{{ pilot.singleView.source.mode }}</dd><dt>Provenance</dt><dd>{{ pilot.singleView.source.provenance }}</dd><dt>Input digest</dt><dd><code>{{ pilot.singleView.inputDigest }}</code></dd></dl>
+      </article>
+      {% if 'BUNDLE_APPROVED' in pilot.allowedNextStates %}<form method="post" action="/bundle/approve"><input type="hidden" name="workflowId" value="pilot-ui-track-s-human-approval"><button>Approve exact single-view input digest</button></form>{% endif %}
+      {% endif %}
     </section>
 
     <section>
@@ -83,6 +104,14 @@
       <p>Estimated credits: <strong>20</strong>. Maximum credits: <strong>20</strong>.</p>
       {% if 'AUTHORIZATION_PREVIEWED' in pilot.allowedNextStates %}<form method="post" action="/authorization/preview"><button {% if not pilot.contract.fresh %}disabled{% endif %}>Preview exact authorization digest</button></form>{% endif %}
       {% if 'COST_APPROVED' in pilot.allowedNextStates and pilot.authorization %}<form method="post" action="/authorization/approve"><label>Confirm exact authorizationDigest <input name="authorizationDigest" required></label><button {% if not pilot.contract.fresh %}disabled{% endif %}>Approve exact 20-credit boundary</button></form>{% endif %}
+    </section>
+
+    <section>
+      <h2>Track S preregistration, cost, validation target, and refusal reasons</h2>
+      <dl><dt>Approved TOP validation target</dt><dd><code>{{ pilot.trackS.validationTarget.sha256 }}</code> — reconstruction input: NO</dd><dt>Quarantine digest</dt><dd><code>{{ pilot.trackS.quarantineDigest }}</code></dd><dt>Policy digest</dt><dd><code>{{ pilot.trackS.preregistrationPolicyDigest }}</code></dd><dt>Measurement specification digest</dt><dd><code>{{ pilot.trackS.measurementSpecDigest }}</code></dd><dt>Decision-rule digest</dt><dd><code>{{ pilot.trackS.decisionRuleDigest }}</code></dd><dt>Failed-task charging</dt><dd class="bad">{{ pilot.trackS.costGovernance.failedTaskChargingDisposition }}</dd><dt>Automatic retries</dt><dd>{{ pilot.trackS.costGovernance.automaticRetryCount }}</dd><dt>First-task cap</dt><dd>{{ pilot.trackS.costGovernance.cumulativeAuthorizationCap }} credits</dd></dl>
+      <p>Sequential cost model: 1-view = 20; 1+2-view = 40; 1+2+3-view = 60 credits. The strategy is information value, not per-task savings.</p>
+      <ul>{% for reason in pilot.trackS.blockedReasons %}<li class="bad">{{ reason }}</li>{% else %}<li>No Track S refusal reason is currently projected.</li>{% endfor %}</ul>
+      <p>No run-specific preregistration is fabricated by this implementation. No provider action is authorized.</p>
     </section>
 
     <section>

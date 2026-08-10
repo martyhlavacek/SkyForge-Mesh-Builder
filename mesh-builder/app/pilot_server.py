@@ -87,6 +87,23 @@ def create_pilot_app(
             "Exact on-disk authority bundle approved",
         )
 
+    @app.post("/single-view/import")
+    def import_single_view():
+        def execute():
+            upload = request.files.get("beauty")
+            if upload is None or not upload.filename:
+                raise PilotError("Missing Track S three-quarter beauty reference")
+            runtime.import_single_view(
+                profile_id=request.form.get("profileId", ""),
+                upload_name=upload.filename,
+                payload=upload.read(),
+                provenance=request.form.get("provenance", ""),
+                provenance_source_type=request.form.get("provenanceSourceType", ""),
+                asset_id=request.form.get("assetId", "pilot.track-s.asset"),
+            )
+
+        return action(execute, "Single-view Track S reconstruction input imported and bound")
+
     @app.post("/bundle/discard")
     def discard_bundle():
         return action(runtime.discard, "Pilot workspace discarded; a new workflow may begin")
@@ -98,6 +115,13 @@ def create_pilot_app(
         if item is None:
             raise PilotError("Unknown authority role")
         return send_file(runtime.workspace / item["path"], conditional=True)
+
+    @app.get("/single-view/source")
+    def single_view_source():
+        document = runtime.load_reconstruction_input(require_approved=False)
+        if document.get("inputKind") != "single_view_v1":
+            raise PilotError("No Track S single-view input is loaded")
+        return send_file(runtime.workspace / document["source"]["path"], conditional=True)
 
     @app.post("/contract/reverified")
     def contract_reverified():

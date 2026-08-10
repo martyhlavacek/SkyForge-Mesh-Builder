@@ -1,0 +1,104 @@
+{
+  "decisionRules": {
+    "automaticRetryCount": 0,
+    "automaticSecondTask": false,
+    "productionIouFloorPpmUnchanged": 940000,
+    "readableValue": "READABLE",
+    "schemaVersion": "skyforge.track-s-decision-rules.v1",
+    "strongSingleViewMinimumIouPpm": 800000,
+    "twoViewEligibleMinimumIouPpm": 650000,
+    "unreadableValue": "UNREADABLE"
+  },
+  "humanGameplayReadabilityRequired": true,
+  "inputKind": "single_view_v1",
+  "measurementSpec": {
+    "gameplayCamera": {
+      "alphaThreshold": 128,
+      "angleDegrees": 75,
+      "cameraTransform": {
+        "azimuthDegrees": 135,
+        "elevationDegrees": 75,
+        "lookAt": "reloaded_glb_bounding_box_center",
+        "objectOrigin": "reloaded_glb_declared_origin",
+        "orthographicScale": "maximum_projected_extent_times_1100000ppm",
+        "rollDegrees": 0
+      },
+      "clippingAllowed": false,
+      "coordinateConvention": "accepted_gltf_blender_contract",
+      "framing": "full_craft_fixed_margin",
+      "marginPpm": 100000,
+      "minimumForegroundPixels": 128,
+      "minimumLargest2dComponentPixelFractionPpm": 800000,
+      "projection": "repository_gameplay_camera_orthographic",
+      "resolution": [64, 64]
+    },
+    "hardGates": {
+      "blenderReloadRequired": true,
+      "connectedComponentCountInclusive": [1, 16],
+      "gameplayRenderNotClipped": true,
+      "gameplaySilhouetteNonEmpty": true,
+      "maximumDegenerateFaceCount": 0,
+      "maximumNonFiniteVertexCount": 0,
+      "minimumBoundingBoxExtentUnits": "0.000001",
+      "minimumFaceCount": 1,
+      "minimumLargestComponentVolumeFractionPpm": 600000,
+      "minimumVertexCount": 1,
+      "topSilhouetteNonEmpty": true,
+      "watertightRequired": true
+    },
+    "measurementSource": "independently_reloaded_glb_blender_5_2_lts",
+    "requiredMeasurements": [
+      "glbExists",
+      "glbSha256",
+      "glbHashMatches",
+      "glbParserValid",
+      "blenderReloadSucceeded",
+      "vertexCount",
+      "faceCount",
+      "nonFiniteVertexCount",
+      "degenerateFaceCount",
+      "manifoldEdgeCount",
+      "nonManifoldEdgeCount",
+      "connectedComponentCount",
+      "watertight",
+      "largestComponentVolumeFractionPpm",
+      "rawBoundingBoxDeclaredGlbUnits",
+      "boundingBoxExtentsMicrounits",
+      "perAxisExtentRatiosPpm",
+      "topSilhouette",
+      "topSilhouetteIou",
+      "gameplayMetrics",
+      "humanGameplayReadabilityArtifact"
+    ],
+    "schemaVersion": "skyforge.track-s-measurement-spec.v1",
+    "topAlignment": {
+      "allowedRotationsDegrees": [0, 90, 180, 270],
+      "alphaThreshold": 128,
+      "anisotropicScale": false,
+      "freeAngleRotation": false,
+      "projection": "exact_orthographic_top_gltf_blender_coordinate_contract",
+      "reflection": false,
+      "resolution": [1024, 1024],
+      "rotationTieBreak": "smallest_angle",
+      "scale": "isotropic_candidate_fore_aft_bbox_to_target_fore_aft_bbox",
+      "translation": "candidate_centroid_to_target_centroid_only",
+      "translationSearch": false
+    }
+  },
+  "prediction": {
+    "expectedExploratoryIouRangePpm": [650000, 850000],
+    "expectedOutcome": "reloadable geometry-only gunship with recognizable major volume information; top-down silhouette expected below unchanged 0.94 production IoU floor",
+    "predictionIsPassBand": false
+  },
+  "providerRequest": {
+    "ai_model": "meshy-6",
+    "auto_size": false,
+    "image_enhancement": false,
+    "should_remesh": false,
+    "should_texture": false,
+    "target_formats": ["glb"]
+  },
+  "schemaVersion": "skyforge.track-s-preregistration-policy.v1",
+  "strategyRationale": "information_value_not_per_task_savings",
+  "validationTargetRole": "approved_top_authority_validation_target"
+}
