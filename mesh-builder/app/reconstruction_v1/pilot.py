@@ -6,7 +6,7 @@ import re
 import shutil
 import time
 from datetime import UTC, datetime
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any, Callable
 
 from PIL import Image
@@ -56,6 +56,8 @@ PILOT_CONFIG_PATH = Path(__file__).with_name("pilot_config_v1.json")
 BUNDLE_FILENAME = "MultiviewAuthorityBundleV1.json"
 SINGLE_VIEW_FILENAME = "SingleViewReconstructionInputV1.json"
 AUTHORIZATION_FILENAME = "authorization_preview.json"
+SESSION_IDENTITY_FILENAME = "TrackSExperimentSessionV1.json"
+ACTIVE_SESSION_FILENAME = "ACTIVE_TRACK_S_SESSION.json"
 ALLOWED_PROVENANCE = frozenset(
     {"human_authority_candidate", "deterministic_fixture", "single_view_source"}
 )
@@ -66,6 +68,123 @@ ROLE_TOKENS = frozenset(VIEW_ORDER)
 
 class PilotError(RuntimeError):
     """A fail-closed pilot workflow refusal safe for display."""
+
+
+class PilotSessionManager:
+    """Selects an isolated Track S run without mutating the historical pilot workspace."""
+
+    def __init__(
+        self,
+        package_root: Path,
+        historical_workspace: Path,
+        sessions_root: Path,
+        provider: MeshyMultiImageProvider,
+        *,
+        now: Callable[[], datetime] | None = None,
+    ):
+        self.package_root = package_root.resolve()
+        self.historical_workspace = historical_workspace.resolve()
+        self.sessions_root = sessions_root.resolve()
+        self.provider = provider
+        self.now = now or (lambda: datetime.now(UTC))
+        self.historical_runtime = PilotRuntime(
+            self.package_root, self.historical_workspace, provider, now=self.now
+        )
+
+    @property
+    def active_pointer_path(self) -> Path:
+        return self.sessions_root / ACTIVE_SESSION_FILENAME
+
+    def _timestamp(self) -> str:
+        return self.now().astimezone(UTC).isoformat().replace("+00:00", "Z")
+
+    def active_session_identity(self) -> dict[str, Any] | None:
+        if not self.active_pointer_path.is_file():
+            return None
+        pointer = json.loads(self.active_pointer_path.read_text(encoding="utf-8"))
+        if pointer.get("schemaVersion") != "skyforge.active-track-s-session.v1":
+            raise PilotError("Active Track S session pointer is invalid")
+        session_id = pointer.get("sessionId")
+        if not isinstance(session_id, str) or not re.fullmatch(r"track-s-[0-9TZ.-]+", session_id):
+            raise PilotError("Active Track S session identity is unsafe")
+        workspace = self.sessions_root / session_id
+        if workspace.is_symlink() or not workspace.is_dir():
+            raise PilotError("Active Track S session workspace is unavailable")
+        identity_path = workspace / SESSION_IDENTITY_FILENAME
+        identity = json.loads(identity_path.read_text(encoding="utf-8"))
+        if identity != {
+            "schemaVersion": "skyforge.track-s-experiment-session.v1",
+            "sessionId": session_id,
+            "inputKind": None,
+            "createdAt": identity.get("createdAt"),
+            "historicalWorkspaceInherited": False,
+        } or not isinstance(identity.get("createdAt"), str):
+            raise PilotError("Track S session identity record is invalid")
+        return identity
+
+    def active_runtime(self) -> PilotRuntime | None:
+        identity = self.active_session_identity()
+        if identity is None:
+            return None
+        return PilotRuntime(
+            self.package_root,
+            self.sessions_root / identity["sessionId"],
+            self.provider,
+            now=self.now,
+        )
+
+    def start_track_s_session(self) -> PilotRuntime:
+        timestamp = self._timestamp()
+        session_id = "track-s-" + re.sub(r"[^0-9TZ.-]", "-", timestamp)
+        workspace = self.sessions_root / session_id
+        if workspace.exists():
+            raise PilotError("A Track S session already exists for this exact timestamp")
+        self.sessions_root.mkdir(parents=True, exist_ok=True)
+        workspace.mkdir()
+        identity = {
+            "schemaVersion": "skyforge.track-s-experiment-session.v1",
+            "sessionId": session_id,
+            "inputKind": None,
+            "createdAt": timestamp,
+            "historicalWorkspaceInherited": False,
+        }
+        (workspace / SESSION_IDENTITY_FILENAME).write_text(
+            json.dumps(identity, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
+        pointer = {
+            "schemaVersion": "skyforge.active-track-s-session.v1",
+            "sessionId": session_id,
+        }
+        temporary = self.sessions_root / f".{ACTIVE_SESSION_FILENAME}.tmp"
+        temporary.write_text(json.dumps(pointer, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        temporary.replace(self.active_pointer_path)
+        runtime = self.active_runtime()
+        if runtime is None or runtime.current_state() is not None:
+            raise PilotError("New Track S session did not start with an empty lifecycle")
+        return runtime
+
+    def historical_view_path(self, role: str) -> Path:
+        if role not in VIEW_ORDER:
+            raise PilotError("Unknown historical authority role")
+        bundle_path = self.historical_workspace / BUNDLE_FILENAME
+        bundle = json.loads(bundle_path.read_text(encoding="utf-8"))
+        item = next((entry for entry in bundle.get("views", []) if entry.get("role") == role), None)
+        if not isinstance(item, dict):
+            raise PilotError("Historical authority role is unavailable")
+        relative = PurePosixPath(str(item.get("path", "")))
+        if relative.is_absolute() or not relative.parts or ".." in relative.parts:
+            raise PilotError("Historical authority path is unsafe")
+        path = self.historical_workspace / relative
+        if path.is_symlink() or not path.is_file() or not path.resolve().is_relative_to(self.historical_workspace):
+            raise PilotError("Historical authority file is unavailable")
+        return path
+
+    def discard_active_session(self) -> None:
+        runtime = self.active_runtime()
+        if runtime is None:
+            raise PilotError("No active Track S session exists")
+        runtime.discard()
+        self.active_pointer_path.unlink()
 
 
 def _filename_tokens(filename: str) -> set[str]:

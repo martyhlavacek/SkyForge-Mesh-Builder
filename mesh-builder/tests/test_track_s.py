@@ -29,7 +29,7 @@ from app.reconstruction_v1.reconstruction_input import (
     validate_reconstruction_input,
     validate_single_view_input,
 )
-from app.reconstruction_v1.state import TRANSITIONS
+from app.reconstruction_v1.state import TRANSITIONS, TaskLog
 from app.reconstruction_v1.track_s import (
     APPROVED_TOP_SHA256,
     DECISION_RULES,
@@ -291,6 +291,127 @@ def test_pilot_ui_imports_approves_single_view_and_remains_visibly_unsendable(tm
     assert "single_view_v1" in page
     assert "UNRESOLVED" in page and "STALE" in page
     assert APPROVED_TOP_SHA256 in page and "reconstruction input: NO" in page
+    assert client.post("/provider/submit").status_code == 409
+    assert key_calls == [] and transport.calls == []
+
+
+def test_mbs213_historical_multiview_and_new_track_s_session_are_isolated(tmp_path: Path):
+    historical = tmp_path / "pilot_ui"
+    historical.mkdir()
+    dimensions = {"top": (30, 40), "front": (30, 20), "right": (40, 20)}
+    views = []
+    for index, (role, size) in enumerate(dimensions.items()):
+        canvas = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
+        left, top = (64 - size[0]) // 2, (64 - size[1]) // 2
+        for x in range(left, left + size[0]):
+            for y in range(top, top + size[1]):
+                canvas.putpixel((x, y), (20 + index, 40, 60, 255))
+        path = historical / f"authority_{role}.png"
+        canvas.save(path)
+        views.append((role, path))
+    bundle = build_bundle(
+        historical,
+        asset_id="historical.mbs195",
+        profile_id="enemy_gunship",
+        source_commit="historical",
+        created_at="historical",
+        views=views,
+    )
+    bundle = approve_bundle(historical, bundle, approved_at="historical", workflow_id="historical-human")
+    (historical / "MultiviewAuthorityBundleV1.json").write_text(
+        json.dumps(bundle, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    log = TaskLog(historical / "TaskLog.jsonl")
+    log.append(
+        "PREPARED",
+        timestamp="2026-08-01T00:00:00Z",
+        details={"inputKind": MULTIVIEW_KIND, "reconstructionInputDigest": bundle["bundleDigest"]},
+    )
+    log.append(
+        "BUNDLE_APPROVED",
+        timestamp="2026-08-01T00:01:00Z",
+        details={"inputKind": MULTIVIEW_KIND, "reconstructionInputDigest": bundle["bundleDigest"]},
+    )
+    (historical / "authorization_preview.json").write_text('{"historical":true}\n', encoding="utf-8")
+    corrupted = copy.deepcopy(bundle)
+    corrupted["cameraDeclaration"] = "rejected_historical_measurement"
+    (historical / "MultiviewAuthorityBundleV1.json").write_text(
+        json.dumps(corrupted, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    before = {path.relative_to(historical): path.read_bytes() for path in historical.rglob("*") if path.is_file()}
+
+    transport = NoTransport()
+    provider = MeshyMultiImageProvider(
+        transport,
+        environ={"SKYFORGE_PROVIDER_NETWORK_DISABLED": "1"},
+        submission_registry=tmp_path / "registry",
+        require_authorization_digest=True,
+    )
+    key_calls = []
+    app = create_pilot_app(
+        workspace=historical,
+        provider=provider,
+        now=lambda: datetime(2026, 8, 10, tzinfo=UTC),
+        api_key_loader=lambda: key_calls.append(True),
+        enable_session_isolation=True,
+    )
+    client = app.test_client()
+
+    historical_page = client.get("/").get_data(as_text=True)
+    assert "HISTORICAL READ-ONLY RUN" in historical_page
+    assert "Input kind</dt><dd>NOT SELECTED" in historical_page
+    assert "Logged state</dt><dd>BUNDLE_APPROVED" in historical_page
+    assert "Start new Track S single-view session" in historical_page
+    assert client.get("/bundle/view/top?view=historical").status_code == 200
+
+    response = client.post("/sessions/track-s/start")
+    assert response.status_code == 200
+    active_page = response.get_data(as_text=True)
+    assert "Input kind</dt><dd>NOT SELECTED" in active_page
+    assert "Logged state</dt><dd>NO TASK LOG" in active_page
+    assert "Import and bind one beauty reference" in active_page
+    assert "Profile and top/front/right import" not in active_page
+    assert "No authorization preview exists" in active_page
+    assert "UNRESOLVED" in active_page and "STALE" in active_page
+    assert APPROVED_TOP_SHA256 in active_page and "reconstruction input: NO" in active_page
+    assert before == {path.relative_to(historical): path.read_bytes() for path in historical.rglob("*") if path.is_file()}
+
+    payload = io.BytesIO()
+    Image.new("RGB", (80, 60), (20, 40, 60)).save(payload, format="PNG")
+    response = client.post(
+        "/single-view/import",
+        data={
+            "assetId": "track-s.gunship",
+            "profileId": "enemy_gunship",
+            "provenance": "human_approved_beauty_reference",
+            "provenanceSourceType": "human_uploaded_approved_beauty",
+            "beauty": (io.BytesIO(payload.getvalue()), "gunship_beauty.png"),
+        },
+        content_type="multipart/form-data",
+    )
+    assert response.status_code == 200
+    manager = app.extensions["skyforge_pilot_session_manager"]
+    active = manager.active_runtime()
+    assert active is not None and active.status()["inputKind"] == SINGLE_VIEW_KIND
+    session_schema = json.loads(
+        (PACKAGE_ROOT / "profiles/track_s_experiment_session_v1.schema.json").read_text()
+    )
+    Draft202012Validator(session_schema).validate(manager.active_session_identity())
+    pointer = json.loads(manager.active_pointer_path.read_text())
+    Draft202012Validator(session_schema["$defs"]["activePointer"]).validate(pointer)
+    assert active.current_state() == "PREPARED"
+    assert active.authorization_path.exists() is False
+    single_digest = active.load_reconstruction_input(require_approved=False)["inputDigest"]
+    assert single_digest != bundle["bundleDigest"]
+    response = client.post("/bundle/approve", data={"workflowId": "track-s-human"})
+    assert response.status_code == 200
+    assert active.task_log.events()[-1]["details"] == {
+        "inputKind": SINGLE_VIEW_KIND,
+        "reconstructionInputDigest": single_digest,
+    }
+    assert client.get("/?view=historical").status_code == 200
+    assert client.get("/?view=active").status_code == 200
+    assert before == {path.relative_to(historical): path.read_bytes() for path in historical.rglob("*") if path.is_file()}
     assert client.post("/provider/submit").status_code == 409
     assert key_calls == [] and transport.calls == []
 

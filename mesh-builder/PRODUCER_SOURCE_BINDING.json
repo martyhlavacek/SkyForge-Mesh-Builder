@@ -20,7 +20,7 @@
     "requirementsFile": "requirements.txt",
     "requirementsSha256": "7dcb231edacc45ad4a210fae9bfdf6efbaccef25d55b6da4f84291526aca3509"
   },
-  "fileCount": 337,
+  "fileCount": 338,
   "files": {
     ".gitignore": "3b4e76f9ad4ea48d671b60ea10c4a17cd40f5057a8ed0da1487a72217787d23f",
     "BUILD_INFO.json": "61ab7839dc37f01add92277f1b021c2fe210c068fb5b4c36b9a6edee79e84462",
@@ -46,7 +46,7 @@
     "app/image_governance.py": "06e5585864da94e715b40acd8fd317447ae7a657bb1b465e23d48ff7f82c6594",
     "app/macos_keychain.py": "2c38f5749dc616f538a3b36c02a6477bc908e7c97afbb99af2f7110aa756ba69",
     "app/openai_client.py": "631fbb1ebd2ecbb4859ee0c11d5f9f6c5a22b3bd85e415ba4b7d7b0ed3d9ac18",
-    "app/pilot_server.py": "f23cae80a7b0d4214c986f60e5f8c8e2fc4735df1efff6c2cc48ca295200ec4a",
+    "app/pilot_server.py": "a5fa1a6abbc5403fd6519ae88b51a07784008ecd84dc417ac3e7421b3ab3c175",
     "app/pipeline.py": "aa567b7aff0d6888a1f30d4ce530219bd15dedbb267b552d85dd9f5c843a050f",
     "app/providers/__init__.py": "7d20cb3843264ebe6000f3ca15668c2a6cfbc1def5a0a6f5b33985546b9471a5",
     "app/providers/base.py": "5384745a4f30585fb0aa89a4a4d819a5ec538ad8839e2b5e2c16de114df667ec",
@@ -63,7 +63,7 @@
     "app/reconstruction_v1/cross_view.py": "6cb6c14f57d8ad752eb593a2c1d0dd5cad4b5bfbeaad48c8e621d1e9aa7b1c49",
     "app/reconstruction_v1/evidence.py": "d452f386004118cf6a2f79c6109c7f88b50e90ab385ebc10ed8558f0d097ef4c",
     "app/reconstruction_v1/orientation.py": "f2600208ab87434047a8dd4ec3b9b42162af6d517e5853ae20c3e495dc18404f",
-    "app/reconstruction_v1/pilot.py": "b60b7df2b577425a88966b6587b43a6c6e2660a442923628cc1ec8529de0dbaa",
+    "app/reconstruction_v1/pilot.py": "c1234ed192d4c71a932cbee7093aa45790c12f828db3a6970ec26a094170d34a",
     "app/reconstruction_v1/pilot_config_v1.json": "88f750adac5d22e955ee0ef79db914c84312c6807ab10ff0f1112675a56c3f9f",
     "app/reconstruction_v1/preflight.py": "6a4ba633819ff9e09a7eeff73a38d161d363057a4b836d4cd411744db10c48a1",
     "app/reconstruction_v1/provider.py": "8ff3964ab4ce29564740a385e415214079a4dcc653a14adc557d5dd41377bf9a",
@@ -76,7 +76,7 @@
     "app/static/pilot/pilot.css": "aca324740cf8e20d1e6fc43eadc7808356258031dc69cbf92761abd361dfd7a0",
     "app/static/style.css": "b2c579b9e28ddfeb3f08d41daa546c1e5bb7e1a5accdaded7571880ae72c1baf",
     "app/templates/index.html": "9f721c813b4d345241903d3eaf36f00dcd159e756da22e8f86ad3ba98c2f0e7a",
-    "app/templates/pilot_index.html": "09972d81f967a287970ac3a7950f164e312225e8a4312a8e895ee93a03d156dd",
+    "app/templates/pilot_index.html": "17148f2bc09a657428c6200f7eb0093771edcc0b8890892772fe00084e906a2b",
     "app/vmp_builder.py": "710873677025a109923e777d337f208c1a89008ae7746c52b590b5322f9ef57c",
     "app/vmp_job_export.py": "2a9a8197a09dd714f361b9b8394792ae8c07103f40fa2dac4fc842e2a060c2cb",
     "blender/build_asset.py": "46d59f407a3dc0f3bbbfb64e54c459d6fa88dc5b00058d9a0bbe5d6310231148",
@@ -289,6 +289,7 @@
     "profiles/reconstruction_input_reference_v1.schema.json": "77fd37109198a07e99335a255861f57dfa3bf2b0093f36b3a76bb890b73f20ec",
     "profiles/single_view_reconstruction_input_v1.schema.json": "b54b6140c17ef3c86dfac31e24ae0335b00c1592db71dea4ba1b55cd2cdb15e1",
     "profiles/track_s_experiment_preregistration_v1.json": "0c74eb0ec3e048b966484e82c33f0292b81858d595d73f3bbb6a3e03ad4c1138",
+    "profiles/track_s_experiment_session_v1.schema.json": "b71ff04b2badbd38700fd0b0d4d6725d8bfc7aa79ca4de6436ce35144399777e",
     "profiles/track_s_records_v1.schema.json": "ed9c66081f1621c23681632db9f30ae673591becacf76a089e7dbbd1f3f146a3",
     "pyproject.toml": "08bb30f1ffb3041d5549ed8a8a70ae025be8ff1bc90fc702bad6b4fed8300b7a",
     "requirements.txt": "7dcb231edacc45ad4a210fae9bfdf6efbaccef25d55b6da4f84291526aca3509",
@@ -355,11 +356,11 @@
     "tests/test_server_source.py": "505c7481aaa16427eb82d2ef3a65604297cacaded917aaefddb9d7fad19b1c42",
     "tests/test_settings_store.py": "2378370454779c0a0a135993f7307c60f3ee111b6d70d58debb1e953dd1d4b34",
     "tests/test_source_binding_v070.py": "acfab4e1e6cc2dca56e6a7a52d2cb92657ea29a40ba6c5cf818d18c4afce138d",
-    "tests/test_track_s.py": "f8f4b63195432a67760f6550745555cf7295738441fbc6eb54d23b3a2a4e85c7",
+    "tests/test_track_s.py": "c83a6b3ba8561de0e86d9f1b918b96a4ed1943d42603d0c9ba8c337505904440",
     "tests/test_vmp_builder.py": "af46323a9d033503ebb8621b9be4246e423f7059fbe24ab84a3adbc2d17dd29f",
     "tests/test_vmp_job_export.py": "d9eab0fa66b1e8d91f1db999c8d7aacb096df43ce815a20338c5d997bc5ad3b4",
     "tests/vmp_fixtures.py": "c27460c107a85855215815f77088f3ce484cd18f5fb993d56b8f727180262997"
   },
   "schemaVersion": "skyforge.producer-source-binding.v1",
-  "treeManifestSha256": "f6f73ccedd12274e1dafca7f2b48a1aa5b56355599a45dea3a4028d65889630c"
+  "treeManifestSha256": "6ba720597c94678b01f89a464d23b1603efe6c7454dd93f1422f21388eaa7e0a"
 }
