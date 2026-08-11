@@ -1,6 +1,6 @@
 # Open findings
 
-These findings remain open; this bootstrap does not claim that any are fixed.
+This register records the current disposition of open and recently closed findings. Findings are closed only where an identified independent review explicitly did so.
 
 - **MBS-136:** Real-provider request-correspondence recovery remains unproven. Paid-provider work is not authorized.
 - **MBS-150:** Perimeter terracing and ribbed edge walls remain a geometry-quality issue.
@@ -19,14 +19,17 @@ These findings remain open; this bootstrap does not claim that any are fixed.
 - **MBS-184 (Observation; blocks nothing):** Offline evidence uses synthetic DNS placeholder values under `dnsResults`, which could be mistaken for observed `assets.meshy.ai` resolution. In the next evidence generation, use `stubDnsResults` or `resolutionSource: offline_stub_not_observed`.
 - **MBS-193 (Observation; blocks nothing):** The pilot constructs a `requests.Session()` when the application is created. Construction opens no socket, and all provider operations remain guarded before transport. Lazy construction remains optional.
 - **MBS-195:** The inconsistent human-approved TOP/FRONT/RIGHT authority bundle remains rejected evidence. It must not be used for provider preauthorization. If the multiview route is abandoned rather than repaired, its future disposition may be `SUPERSEDED BY SCOPE`, not CLOSED.
-- **MBS-198:** Track S requires a valid ABORT/null-result branch.
+- **MBS-198 — CLOSED by MBS-CR-0035:** Track S has a valid `ABORT_MESHY` experiment-level null-result branch that does not create a provider lifecycle state or automatic provider action.
 - **MBS-199:** The cost model and failed-task charging remain unresolved.
-- **MBS-200:** Objective, non-gameable Track S measurements and a fixed alignment procedure remain required.
+- **MBS-200 (OPEN / PARTIALLY REMEDIATED):** Measurement specification, IoU alignment, and gameplay measurements exist, but the independently reloaded-GLB Blender/topology measurement engine is not yet complete.
 - **MBS-201:** Track S preregistration remains required before the first paid task.
-- **MBS-202:** The rejected FRONT and RIGHT authority hashes are quarantined from future reconstruction inputs: FRONT `ff3d6931b1b4eb79cab63d6e0b3cf29d07f911878d39b137473111daf00af58f`; RIGHT `d787043b91dc58cb3cc443a73ef562ea6550a14d45463b20c36eff518ce37c11`.
+- **MBS-202 — CLOSED by MBS-CR-0035:** Rejected MBS-195 FRONT/RIGHT hashes are quarantined at reconstruction-input/provider boundaries while historical evidence remains inspectable.
 - **MBS-207 (Observation):** The asymmetric ppm normalization remains unchanged.
 - **MBS-208 (Minor, non-blocking):** Near-full-canvas silhouettes can still pass because the degenerate guard rejects only exact canvas-equal bounding boxes. A deliberately crafted one-pixel-border construction can yield approximately 99.6% coverage and still pass. Schedule deterministic maximum foreground-coverage and/or minimum-background-margin policy with a regression fixture; do not modify implementation in this documentation branch.
 - **MBS-209 (Minor, non-blocking):** Filename tokenization can miss ALL-CAPS role tokens immediately followed by lowercase text, such as `TOPview.png`. Schedule regression cases for `TOPview.png`, `FRONTview.png`, and `RIGHTside.png`; this does not reopen MBS-197 or MBS-205, and implementation is unchanged here.
+- **MBS-210 (Major):** Resolved failed-task charging currently accepts evidence that is insufficiently bound to a verified fresh contract artifact.
+- **MBS-211 (Minor):** The Track S gameplay-camera convention requires stronger cross-binding to the established gameplay pipeline.
+- **MBS-212 (Observation):** The contract-age evidence generator used date-only arithmetic rather than the implementation's full timestamp.
 
 The accepted v0.7.1 baseline contains no geometry fix for MBS-150 through MBS-154.
 
@@ -38,4 +41,6 @@ MBS-197 is CLOSED: MBS-CR-0034 accepted filename/role provenance conflict handli
 
 MBS-203 is CLOSED: the uniform/degenerate authority-image fail-open path was remediated and independently verified. MBS-204 is CLOSED: the Shared Authority Geometry Scaffold document is corrected to `LATER / CONTINGENCY`, with Track S restored as the preferred next empirical route. MBS-205 is CLOSED: the required role-token boundary cases were independently verified. MBS-206 is CLOSED: the headline six-threshold metric and fixed-threshold exemplar evidence are unambiguous and independently reproducible.
 
-MBS-136 remains OPEN against a real provider; mocked and local evidence does not close it. MBS-195 and MBS-198 through MBS-202 remain OPEN. MBS-207 remains an Observation. MBS-208 and MBS-209 are OPEN MINOR findings and do not block progression. All other standing findings remain unchanged. Finding numbering continues from **MBS-210**.
+MBS-198 and MBS-202 are CLOSED by MBS-CR-0035. MBS-213 is CLOSED by MBS-CR-0036 because historical multiview workspace and new Track S sessions are isolated; Track S does not inherit historical TaskLog, approval, or provider state. MBS-214 and MBS-215 are CLOSED by MBS-CR-0037: legacy `/bundle/import` is transactionally refused for active Track S sessions before upload parsing or mutation, and historical `/artifact/preflight` is refused before `PilotRuntime.preflight()`, DNS, transport, or credential access.
+
+MBS-136 remains OPEN against a real provider; mocked and local evidence does not close it. MBS-195 remains OPEN as preserved negative evidence; if Track M is eventually abandoned, its future disposition may be `SUPERSEDED BY SCOPE`, not CLOSED. MBS-199, MBS-201, and MBS-210 remain OPEN. MBS-200 remains OPEN / PARTIALLY REMEDIATED. MBS-183 remains the standing immediate preauthorization contract-reverification requirement. MBS-207 and MBS-212 remain Observations. MBS-208, MBS-209, and MBS-211 remain OPEN MINOR findings. All other standing findings remain unchanged. Finding numbering continues from **MBS-216**.
