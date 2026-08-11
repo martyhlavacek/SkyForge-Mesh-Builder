@@ -416,6 +416,123 @@ def test_mbs213_historical_multiview_and_new_track_s_session_are_isolated(tmp_pa
     assert key_calls == [] and transport.calls == []
 
 
+def _route_guard_app(tmp_path: Path):
+    historical = tmp_path / "pilot_ui"
+    historical.mkdir()
+    for role, color in (("top", (20, 30, 40)), ("front", (30, 40, 50)), ("right", (40, 50, 60))):
+        image(historical / f"authority_{role}.png", color=color)
+    (historical / "historical_marker.json").write_text('{"mbs195":"preserved"}\n')
+    transport = NoTransport()
+    provider = MeshyMultiImageProvider(
+        transport,
+        environ={"SKYFORGE_PROVIDER_NETWORK_DISABLED": "1"},
+        submission_registry=tmp_path / "registry",
+        require_authorization_digest=True,
+    )
+    key_calls = []
+    app = create_pilot_app(
+        workspace=historical,
+        provider=provider,
+        now=lambda: datetime(2026, 8, 10, tzinfo=UTC),
+        api_key_loader=lambda: key_calls.append(True),
+        enable_session_isolation=True,
+    )
+    client = app.test_client()
+    assert client.post("/sessions/track-s/start").status_code == 200
+    return app, client, historical, transport, key_calls
+
+
+def _tree_bytes(root: Path) -> dict[Path, bytes]:
+    return {path.relative_to(root): path.read_bytes() for path in root.rglob("*") if path.is_file()}
+
+
+@pytest.mark.parametrize("stage", ["EMPTY", "PREPARED", "BUNDLE_APPROVED"])
+def test_mbs214_direct_multiview_post_refused_transactionally_for_track_s(tmp_path: Path, stage: str):
+    app, client, historical, transport, key_calls = _route_guard_app(tmp_path)
+    manager = app.extensions["skyforge_pilot_session_manager"]
+    active = manager.active_runtime()
+    assert active is not None
+    if stage != "EMPTY":
+        payload = io.BytesIO()
+        Image.new("RGB", (80, 60), (20, 40, 60)).save(payload, format="PNG")
+        assert client.post(
+            "/single-view/import",
+            data={
+                "assetId": "track-s.gunship",
+                "profileId": "enemy_gunship",
+                "provenance": "human_approved_beauty_reference",
+                "provenanceSourceType": "human_uploaded_approved_beauty",
+                "beauty": (io.BytesIO(payload.getvalue()), "gunship_beauty.png"),
+            },
+            content_type="multipart/form-data",
+        ).status_code == 200
+    if stage == "BUNDLE_APPROVED":
+        assert client.post("/bundle/approve", data={"workflowId": "track-s-human"}).status_code == 200
+    before_active = _tree_bytes(active.workspace)
+    before_historical = _tree_bytes(historical)
+    before_identity = manager.active_session_identity()
+    before_status = active.status()
+    attack_image = io.BytesIO()
+    Image.new("RGB", (64, 64), (10, 20, 30)).save(attack_image, format="PNG")
+    payload = attack_image.getvalue()
+    response = client.post(
+        "/bundle/import",
+        data={
+            "assetId": "attack.multiview",
+            "profileId": "enemy_gunship",
+            "top_provenance": "human_authority_candidate",
+            "front_provenance": "human_authority_candidate",
+            "right_provenance": "human_authority_candidate",
+            "top": (io.BytesIO(payload), "top.png"),
+            "front": (io.BytesIO(payload), "front.png"),
+            "right": (io.BytesIO(payload), "right.png"),
+        },
+        content_type="multipart/form-data",
+    )
+    assert response.status_code == 409
+    assert "Multiview import is not permitted in an active Track S single-view session" in response.get_data(as_text=True)
+    assert _tree_bytes(active.workspace) == before_active
+    assert _tree_bytes(historical) == before_historical
+    assert manager.active_session_identity() == before_identity
+    after_status = active.status()
+    assert after_status["state"] == before_status["state"]
+    assert after_status["inputKind"] == before_status["inputKind"]
+    assert after_status["events"] == before_status["events"]
+    assert after_status["singleView"] == before_status["singleView"]
+    assert not any(active.workspace.glob("authority_top.*"))
+    assert not any(active.workspace.glob("authority_front.*"))
+    assert not any(active.workspace.glob("authority_right.*"))
+    assert key_calls == [] and transport.calls == []
+
+
+def test_mbs215_historical_artifact_preflight_refuses_before_any_helper(tmp_path: Path, monkeypatch):
+    app, client, historical, transport, key_calls = _route_guard_app(tmp_path)
+    runtime_calls = []
+    resolver_calls = []
+    manager = app.extensions["skyforge_pilot_session_manager"]
+    manager.provider.artifact_host_policy = ArtifactHostPolicy(
+        "guard-test.v1",
+        frozenset({"assets.meshy.ai"}),
+        lambda hostname: resolver_calls.append(hostname) or ("8.8.8.8",),
+    )
+    monkeypatch.setattr(
+        "app.reconstruction_v1.pilot.PilotRuntime.preflight",
+        lambda *_args, **_kwargs: runtime_calls.append(True) or {"finalDecision": "ALLOW"},
+    )
+    before = _tree_bytes(historical)
+    response = client.post(
+        "/artifact/preflight?view=historical",
+        data={"artifactUrl": "https://assets.meshy.ai/signed.glb?secret=redacted"},
+    )
+    assert response.status_code == 409
+    assert "Historical multiview runs are read-only" in response.get_data(as_text=True)
+    assert runtime_calls == []
+    assert resolver_calls == []
+    assert transport.calls == []
+    assert key_calls == []
+    assert _tree_bytes(historical) == before
+
+
 @pytest.mark.parametrize("denied", sorted(QUARANTINED_HASHES))
 def test_quarantine_refuses_single_at_construction_approval_authorization_and_provider(tmp_path: Path, monkeypatch, denied):
     import app.reconstruction_v1.reconstruction_input as inputs

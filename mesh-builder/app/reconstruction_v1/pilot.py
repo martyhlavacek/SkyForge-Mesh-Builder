@@ -133,6 +133,13 @@ class PilotSessionManager:
             now=self.now,
         )
 
+    def is_active_track_s_runtime(self, runtime: PilotRuntime) -> bool:
+        identity = self.active_session_identity()
+        if identity is None:
+            return False
+        expected = (self.sessions_root / identity["sessionId"]).resolve()
+        return runtime.workspace == expected
+
     def start_track_s_session(self) -> PilotRuntime:
         timestamp = self._timestamp()
         session_id = "track-s-" + re.sub(r"[^0-9TZ.-]", "-", timestamp)

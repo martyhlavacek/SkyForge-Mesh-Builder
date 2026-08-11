@@ -58,7 +58,7 @@ def create_pilot_app(
     def selected_runtime() -> tuple[PilotRuntime, bool]:
         if session_manager is None:
             return runtime, False
-        if request.values.get("view") == "historical":
+        if request.args.get("view") == "historical":
             return session_manager.historical_runtime, True
         active = session_manager.active_runtime()
         return (active, False) if active is not None else (session_manager.historical_runtime, True)
@@ -103,6 +103,8 @@ def create_pilot_app(
             selected, historical = selected_runtime()
             if historical:
                 raise PilotError("Historical multiview runs are read-only")
+            if session_manager is not None and session_manager.is_active_track_s_runtime(selected):
+                raise PilotError("Multiview import is not permitted in an active Track S single-view session")
             uploads = []
             for role in ("top", "front", "right"):
                 upload = request.files.get(role)
@@ -209,7 +211,9 @@ def create_pilot_app(
 
     @app.post("/artifact/preflight")
     def artifact_preflight():
-        selected, _historical = selected_runtime()
+        selected, historical = selected_runtime()
+        if historical:
+            return page(error="Historical multiview runs are read-only; artifact preflight is refused", status_code=409)
         report = selected.preflight(request.form.get("artifactUrl", ""))
         return page(notice=f"Artifact preflight decision: {report['finalDecision']}")
 
