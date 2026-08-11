@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "inputKind": {"enum": ["multiview_bundle_v1", "single_view_v1"]},
+    "profileId": {"enum": ["enemy_gunship", "enemy_interceptor"]},
+    "reconstructionInputDigest": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+    "schemaVersion": {"const": "skyforge.reconstruction-input-reference.v1"},
+    "sourcePaths": {"items": {"minLength": 1, "type": "string"}, "minItems": 1, "type": "array"},
+    "sourceSha256s": {"items": {"pattern": "^[0-9a-f]{64}$", "type": "string"}, "minItems": 1, "type": "array"}
+  },
+  "required": ["schemaVersion", "inputKind", "reconstructionInputDigest", "sourceSha256s", "sourcePaths", "profileId"],
+  "type": "object"
+}

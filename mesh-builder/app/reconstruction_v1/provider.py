@@ -10,7 +10,12 @@ from pathlib import Path
 from typing import Any, Callable, Protocol
 from urllib.parse import urljoin, urlsplit
 
-from .bundle import SUPPORTED_PROFILES, validate_bundle
+from .bundle import SUPPORTED_PROFILES
+from .reconstruction_input import (
+    reconstruction_image_paths,
+    reconstruction_input_reference,
+    validate_reconstruction_input,
+)
 
 ENDPOINT = "https://api.meshy.ai/openapi/v1/multi-image-to-3d"
 ESTIMATED_CREDITS = 20
@@ -180,9 +185,9 @@ class MeshyMultiImageProvider:
         return f"data:{mime};base64," + base64.b64encode(path.read_bytes()).decode("ascii")
 
     def prepare_request(self, root: Path, bundle: dict[str, Any]) -> dict[str, Any]:
-        validate_bundle(root, bundle, require_approved=True)
+        validate_reconstruction_input(root, bundle, require_approved=True)
         return {
-            "image_urls": [self._data_uri(root / item["path"]) for item in bundle["views"]],
+            "image_urls": [self._data_uri(path) for path in reconstruction_image_paths(root, bundle)],
             "ai_model": self.model,
             "should_texture": False,
             "should_remesh": False,
@@ -197,7 +202,8 @@ class MeshyMultiImageProvider:
         return redacted
 
     def _authorize(self, root: Path, bundle: dict[str, Any], authorization: SubmissionAuthorization) -> str:
-        digest = validate_bundle(root, bundle, require_approved=True)
+        digest = validate_reconstruction_input(root, bundle, require_approved=True)
+        reference = reconstruction_input_reference(root, bundle)
         if self.require_authorization_digest:
             from .authorization import validate_authorization_projection
 
@@ -212,7 +218,7 @@ class MeshyMultiImageProvider:
                 raise AuthorizationError("Pilot authorization digest confirmation mismatch")
         if authorization.paid_enabled is not True:
             raise AuthorizationError("Paid provider route is locally disabled")
-        if bundle["profileId"] not in SUPPORTED_PROFILES:
+        if reference["profileId"] not in SUPPORTED_PROFILES:
             raise AuthorizationError("Unsupported paid reconstruction profile")
         if authorization.approved_bundle_digest != digest or authorization.confirmed_bundle_digest != digest:
             raise AuthorizationError("Paid confirmation is not bound to the exact approved bundle")

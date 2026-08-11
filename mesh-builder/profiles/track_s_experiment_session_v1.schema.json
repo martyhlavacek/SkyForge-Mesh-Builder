@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "activePointer": {
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {"const": "skyforge.active-track-s-session.v1"},
+        "sessionId": {"pattern": "^track-s-[0-9TZ.-]+$", "type": "string"}
+      },
+      "required": ["schemaVersion", "sessionId"],
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "createdAt": {"minLength": 1, "type": "string"},
+    "historicalWorkspaceInherited": {"const": false},
+    "inputKind": {"type": "null"},
+    "schemaVersion": {"const": "skyforge.track-s-experiment-session.v1"},
+    "sessionId": {"pattern": "^track-s-[0-9TZ.-]+$", "type": "string"}
+  },
+  "required": ["schemaVersion", "sessionId", "inputKind", "createdAt", "historicalWorkspaceInherited"],
+  "type": "object"
+}

@@ -1,0 +1,15 @@
+{
+  "entries": [
+    {
+      "reason": "MBS-195 geometric incoherence",
+      "role": "right",
+      "sha256": "d787043b91dc58cb3cc443a73ef562ea6550a14d45463b20c36eff518ce37c11"
+    },
+    {
+      "reason": "MBS-195 geometric incoherence",
+      "role": "front",
+      "sha256": "ff3d6931b1b4eb79cab63d6e0b3cf29d07f911878d39b137473111daf00af58f"
+    }
+  ],
+  "schemaVersion": "skyforge.reconstruction-input-quarantine.v1"
+}

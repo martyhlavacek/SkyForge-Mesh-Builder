@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "costGovernance": {
+      "properties": {
+        "automaticRetryCount": {"const": 0},
+        "automaticSecondTask": {"const": false},
+        "authorizedTaskCount": {"const": 1},
+        "cumulativeAuthorizationCap": {"const": 20},
+        "expectedCreditsPerTask": {"const": 20},
+        "failedTaskChargingDisposition": {"enum": ["UNRESOLVED", "CHARGED", "NOT_CHARGED", "CONDITIONAL"]},
+        "schemaVersion": {"const": "skyforge.track-s-cost-governance.v1"},
+        "strategyRationale": {"const": "information_value_not_per_task_savings"}
+      },
+      "required": ["schemaVersion", "expectedCreditsPerTask", "cumulativeAuthorizationCap", "authorizedTaskCount", "automaticRetryCount", "automaticSecondTask", "strategyRationale", "failedTaskChargingDisposition"],
+      "type": "object"
+    },
+    "measurementResult": {
+      "additionalProperties": true,
+      "properties": {
+        "blenderReloadSucceeded": {"const": true},
+        "boundingBoxExtentsMicrounits": {"items": {"minimum": 2, "type": "integer"}, "maxItems": 3, "minItems": 3, "type": "array"},
+        "connectedComponentCount": {"maximum": 16, "minimum": 1, "type": "integer"},
+        "degenerateFaceCount": {"const": 0},
+        "faceCount": {"minimum": 1, "type": "integer"},
+        "gameplayMetrics": {"type": "object"},
+        "glbExists": {"const": true},
+        "glbHashMatches": {"const": true},
+        "glbParserValid": {"const": true},
+        "glbSha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+        "largestComponentVolumeFractionPpm": {"minimum": 600000, "type": "integer"},
+        "manifoldEdgeCount": {"minimum": 0, "type": "integer"},
+        "nonFiniteVertexCount": {"const": 0},
+        "nonManifoldEdgeCount": {"minimum": 0, "type": "integer"},
+        "perAxisExtentRatiosPpm": {"items": {"minimum": 1, "type": "integer"}, "maxItems": 3, "minItems": 3, "type": "array"},
+        "rawBoundingBoxDeclaredGlbUnits": {
+          "properties": {
+            "maximumMicrounits": {"items": {"type": "integer"}, "maxItems": 3, "minItems": 3, "type": "array"},
+            "minimumMicrounits": {"items": {"type": "integer"}, "maxItems": 3, "minItems": 3, "type": "array"}
+          },
+          "required": ["minimumMicrounits", "maximumMicrounits"],
+          "type": "object"
+        },
+        "topSilhouetteNonEmpty": {"const": true},
+        "vertexCount": {"minimum": 1, "type": "integer"},
+        "watertight": {"const": true}
+      },
+      "required": ["glbExists", "glbSha256", "glbHashMatches", "glbParserValid", "blenderReloadSucceeded", "vertexCount", "faceCount", "nonFiniteVertexCount", "degenerateFaceCount", "manifoldEdgeCount", "nonManifoldEdgeCount", "connectedComponentCount", "watertight", "largestComponentVolumeFractionPpm", "rawBoundingBoxDeclaredGlbUnits", "boundingBoxExtentsMicrounits", "perAxisExtentRatiosPpm", "topSilhouetteNonEmpty", "gameplayMetrics"],
+      "type": "object"
+    },
+    "decision": {
+      "properties": {
+        "automaticRetryCount": {"const": 0},
+        "authorizesAnotherTask": {"const": false},
+        "createsProviderTask": {"const": false},
+        "decision": {"enum": ["CONTINUE_SINGLE_VIEW", "ESCALATE_TWO_VIEW_ELIGIBLE", "ABORT_MESHY"]},
+        "decisionDigest": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+        "schemaVersion": {"const": "skyforge.track-s-experiment-decision.v1"},
+        "topIouPpm": {"minimum": 0, "type": "integer"}
+      },
+      "required": ["schemaVersion", "decision", "topIouPpm", "createsProviderTask", "authorizesAnotherTask", "automaticRetryCount", "decisionDigest"],
+      "type": "object"
+    },
+    "runPreregistration": {
+      "properties": {
+        "beautyImageSha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+        "committedAtCommit": {"minLength": 1, "type": "string"},
+        "preregistrationDigest": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+        "reconstructionInputDigest": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+        "schemaVersion": {"const": "skyforge.track-s-run-preregistration.v1"}
+      },
+      "required": ["schemaVersion", "reconstructionInputDigest", "beautyImageSha256", "committedAtCommit", "preregistrationDigest"],
+      "type": "object"
+    }
+  },
+  "type": "object"
+}

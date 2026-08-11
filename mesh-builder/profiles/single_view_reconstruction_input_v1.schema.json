@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://skyforge.invalid/schemas/single_view_reconstruction_input_v1.schema.json",
+  "additionalProperties": false,
+  "properties": {
+    "approval": {
+      "anyOf": [
+        {"type": "null"},
+        {
+          "additionalProperties": false,
+          "properties": {
+            "approvedAt": {"minLength": 1, "type": "string"},
+            "inputDigest": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+            "status": {"const": "APPROVED"},
+            "workflowId": {"minLength": 1, "type": "string"}
+          },
+          "required": ["status", "approvedAt", "workflowId", "inputDigest"],
+          "type": "object"
+        }
+      ]
+    },
+    "assetId": {"minLength": 1, "type": "string"},
+    "declaredRole": {"const": "beauty_three_quarter_reconstruction_reference"},
+    "importedAt": {"minLength": 1, "type": "string"},
+    "inputDigest": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+    "inputKind": {"const": "single_view_v1"},
+    "profileId": {"enum": ["enemy_gunship", "enemy_interceptor"]},
+    "schemaVersion": {"const": "skyforge.single-view-reconstruction-input.v1"},
+    "source": {
+      "additionalProperties": false,
+      "properties": {
+        "dimensions": {"items": {"minimum": 1, "type": "integer"}, "maxItems": 2, "minItems": 2, "type": "array"},
+        "mode": {"minLength": 1, "type": "string"},
+        "originalFilename": {"minLength": 1, "type": "string"},
+        "path": {"minLength": 1, "type": "string"},
+        "provenance": {"const": "human_approved_beauty_reference"},
+        "provenanceSourceType": {"minLength": 1, "type": "string"},
+        "sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"}
+      },
+      "required": ["path", "sha256", "dimensions", "mode", "provenance", "provenanceSourceType", "originalFilename"],
+      "type": "object"
+    },
+    "sourceCommit": {"minLength": 1, "type": "string"}
+  },
+  "required": ["schemaVersion", "inputKind", "assetId", "profileId", "declaredRole", "source", "importedAt", "sourceCommit", "approval", "inputDigest"],
+  "type": "object"
+}
