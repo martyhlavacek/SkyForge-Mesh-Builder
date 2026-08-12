@@ -9,6 +9,8 @@ from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from typing import Any, Mapping
 
+from jsonschema import Draft202012Validator, FormatChecker
+
 from common.canonical_json import canonicalize
 from common.schema_validation import ContractValidationError, load_json, validate_document
 
@@ -80,6 +82,9 @@ class VmpBuildMetadata:
     provider_evidence_package_sha256: str | None = None
     supersedes_package_content_digest: str | None = None
     supersession_reason_code: str | None = None
+    material_contract: str = "skyforge.mesh-material.v1"
+    package_schema: str = PACKAGE_SCHEMA
+    package_version: str = PACKAGE_VERSION
 
 
 @dataclass(frozen=True)
@@ -105,7 +110,11 @@ def build_vmp(payload: Mapping[str, bytes], metadata: VmpBuildMetadata, archive_
     manifest["packageContentDigest"] = package_digest
     manifest["packageId"] = f"sfmeshpack:{package_digest}"
     try:
-        validate_document("validated_mesh_package.schema.json", manifest)
+        _validate_contract_document(
+            "validated_mesh_package_v2.schema.json" if metadata.package_schema.endswith(".v2")
+            else "validated_mesh_package.schema.json",
+            manifest,
+        )
     except ContractValidationError as exc:
         raise VmpBuildError(str(exc)) from exc
 
@@ -147,10 +156,10 @@ def _manifest_without_identity(metadata: VmpBuildMetadata, content_index: dict[s
     if (metadata.supersedes_package_content_digest is None) != (metadata.supersession_reason_code is None):
         raise VmpBuildError("Supersession digest and reason must be provided together")
     manifest: dict[str, Any] = {
-        "schemaVersion": PACKAGE_SCHEMA,
+        "schemaVersion": metadata.package_schema,
         "packageId": "sfmeshpack:" + "0" * 64,
         "packageContentDigest": "0" * 64,
-        "packageVersion": PACKAGE_VERSION,
+        "packageVersion": metadata.package_version,
         "assetId": metadata.asset_id,
         "assetVersion": metadata.asset_version,
         "craftProfileId": metadata.craft_profile_id,
@@ -170,7 +179,7 @@ def _manifest_without_identity(metadata: VmpBuildMetadata, content_index: dict[s
             "coordinateContract": "skyforge.mesh-coordinate.v1",
             "assetRoleContract": "skyforge.asset-role.v1",
             "frameContract": "skyforge.render-frame-contract.v1",
-            "materialContract": "skyforge.mesh-material.v1",
+            "materialContract": metadata.material_contract,
             "minimumSpriteFoundryImporter": metadata.minimum_importer_version,
         },
         "source": {"authoritySetSha256": metadata.authority_set_sha256},
@@ -225,10 +234,10 @@ def _normalize_and_validate_payload(payload: Mapping[str, bytes]) -> dict[str, b
                 document = json.loads(raw_data)
             except (UnicodeDecodeError, json.JSONDecodeError) as exc:
                 raise VmpBuildError(f"Invalid JSON payload: {path}") from exc
-            schema = SCHEMA_BY_PATH.get(path)
+            schema = _schema_for_document(path, document)
             if schema:
                 try:
-                    validate_document(schema, document)
+                    _validate_contract_document(schema, document)
                 except ContractValidationError as exc:
                     raise VmpBuildError(f"{path}: {exc}") from exc
             raw_data = canonicalize(document)
@@ -236,6 +245,40 @@ def _normalize_and_validate_payload(payload: Mapping[str, bytes]) -> dict[str, b
             _reject_external_glb_references(raw_data)
         normalized[path] = raw_data
     return normalized
+
+
+def _schema_for_document(path: str, document: Any) -> str | None:
+    if isinstance(document, dict):
+        versioned = {
+            ("authorities/authority_manifest.json", "skyforge.source-artifact-manifest.v2"): "source_artifact_manifest_v2.schema.json",
+            ("materials/material_contract.json", "skyforge.mesh-material.v2"): "material_contract_v2.schema.json",
+            ("provenance/source_chain.json", "skyforge.source-chain.v2"): "source_chain_v2.schema.json",
+            ("mesh/semantic_identity.json", "skyforge.mesh-semantic-identity.v2"): "semantic_identity_v2.schema.json",
+            ("mesh/component_manifest.json", "skyforge.mesh-components.v2"): "component_manifest_v2.schema.json",
+        }
+        selected = versioned.get((path, document.get("schemaVersion")))
+        if selected:
+            return selected
+    return SCHEMA_BY_PATH.get(path)
+
+
+def _validate_contract_document(schema_name: str, document: Any) -> None:
+    if not schema_name.endswith("_v2.schema.json"):
+        validate_document(schema_name, document)
+        return
+    path = Path(__file__).resolve().parents[1] / "contracts/vmp/v2/schemas" / schema_name
+    try:
+        schema = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ContractValidationError(f"Unknown external-source schema: {schema_name}") from exc
+    errors = sorted(
+        Draft202012Validator(schema, format_checker=FormatChecker()).iter_errors(document),
+        key=lambda error: list(error.absolute_path),
+    )
+    if errors:
+        error = errors[0]
+        location = "/".join(str(item) for item in error.absolute_path) or "<root>"
+        raise ContractValidationError(f"{schema_name} rejected {location}: {error.message}")
 
 
 def _validate_cross_file_contracts(payload: Mapping[str, bytes], metadata: VmpBuildMetadata) -> None:
@@ -253,7 +296,7 @@ def _validate_cross_file_contracts(payload: Mapping[str, bytes], metadata: VmpBu
     if authority["authoritySetSha256"] != metadata.authority_set_sha256:
         raise VmpBuildError("Authority set identity does not match package metadata")
     permission = licensing["authorityRedistribution"]["permitted"]
-    for record in authority["authorities"]:
+    for record in authority.get("authorities", []):
         if record["embedded"]:
             embedded_path = record["embeddedPath"]
             if embedded_path not in payload:

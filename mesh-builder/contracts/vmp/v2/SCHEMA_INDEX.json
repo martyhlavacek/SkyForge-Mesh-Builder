@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "skyforge.vmp-contract-index.v2",
+  "packageVersion": "2.0.0",
+  "scope": "external_manual_glb_import",
+  "schemas": [
+    "component_manifest_v2.schema.json",
+    "material_contract_v2.schema.json",
+    "semantic_identity_v2.schema.json",
+    "source_artifact_manifest_v2.schema.json",
+    "source_chain_v2.schema.json",
+    "validated_mesh_package_v2.schema.json"
+  ],
+  "backwardCompatibility": "VMP v1 deterministic contracts remain frozen and unchanged"
+}

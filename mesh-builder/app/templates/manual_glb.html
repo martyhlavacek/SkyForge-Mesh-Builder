@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>Manual Textured GLB Import</title><link rel="stylesheet" href="/static/style.css"></head>
+<body><main>
+<header><div><h1>Manual Textured GLB Import</h1><p>External Meshy web asset ingestion — no Meshy API request or credential.</p></div></header>
+<section class="notice warn">The paid Meshy API / Track S pilot is paused and unchanged. This separate workflow preserves, inspects, normalizes, reviews, and packages a manually downloaded GLB.</section>
+<section>
+  <form id="form">
+    <label>Textured GLB<input type="file" name="glb" accept=".glb" required></label>
+    <div class="row three"><label>Asset ID<input name="assetId" required></label><label>Asset version<input name="assetVersion" value="1.0.0" required></label><label>Asset role<input name="assetRole" value="air_moving" readonly></label></div>
+    <label>Source provider<input value="meshy_web" readonly></label>
+    <label>Source forward / up (required only for Normalize)<select id="orientation" name="orientationMapping"><option value="">Inspect first; choose before Normalize…</option><option>+Y,+Z</option><option>-Y,+Z</option><option>+X,+Z</option><option>-X,+Z</option><option>+Y,-Z</option><option>-Y,-Z</option><option>+X,-Z</option><option>-X,-Z</option><option>+Z,+Y</option><option>+Z,-Y</option><option>-Z,+Y</option><option>-Z,-Y</option><option>+Z,+X</option><option>+Z,-X</option><option>-Z,+X</option><option>-Z,-X</option></select></label>
+    <label>Source notes<textarea name="sourceNotes"></textarea></label><button>Import and inspect</button>
+  </form>
+  <div id="status" class="status">Ready.</div>
+  <div id="inspection"></div>
+  <div id="actions" hidden><button id="normalize">Normalize and render QA</button><button id="approve">Approve exact artifacts</button><button id="reject">Reject</button><label>Terms/licence basis<input id="terms"></label><label><input type="checkbox" id="commercial"> Commercial use is permitted for this asset</label><button id="export">Export VMP through Import Probe</button></div>
+  <div id="qa" class="results"></div>
+</section></main>
+<script>
+const csrf={{ csrf_token|tojson }}; let jobId=null; const status=document.querySelector('#status'); const actions=document.querySelector('#actions');
+async function call(url,options={}){options.headers={...(options.headers||{}),'X-SkyForge-CSRF':csrf};const response=await fetch(url,options);const body=await response.json();status.textContent=body.ok?`State: ${body.job?.state||'exported'}`:body.error;return body}
+function showInspection(job){const report=job.inspection,f=report.facts,channels=[...new Set(f.material_texture_channels.flatMap(x=>Object.keys(x)))];document.querySelector('#inspection').innerHTML=`<h2>Inspection result</h2><dl><dt>Asset</dt><dd>${job.assetId} ${job.assetVersion}</dd><dt>Source</dt><dd>meshy_web — ${job.source.originalFilename}</dd><dt>SHA-256</dt><dd><code>${job.source.sha256}</code></dd><dt>File size</dt><dd>${job.source.byteSize} bytes</dd><dt>Meshes / primitives</dt><dd>${f.mesh_count} / ${f.primitive_count}</dd><dt>Vertices / triangles</dt><dd>${f.vertex_count} / ${f.triangle_count}</dd><dt>Materials / textures / images</dt><dd>${f.material_count} / ${f.texture_count} / ${f.image_count}</dd><dt>PBR channels</dt><dd>${channels.join(', ')||'none'}</dd><dt>UV / normals / tangents</dt><dd>${f.uv_primitive_count}/${f.primitive_count} · ${f.normal_primitive_count}/${f.primitive_count} · ${f.tangent_primitive_count}/${f.primitive_count}</dd><dt>Animations / skins</dt><dd>${f.animation_count} / ${f.skin_count}</dd><dt>Bounds</dt><dd>${JSON.stringify(f.bounds)}</dd><dt>Extensions</dt><dd>${f.extensions_used.join(', ')||'none'}</dd><dt>Warnings</dt><dd>${report.warnings.join('; ')||'none'}</dd></dl>`}
+document.querySelector('#form').onsubmit=async e=>{e.preventDefault();const body=await call('/api/import',{method:'POST',body:new FormData(e.target)});if(body.ok){jobId=body.jobId;actions.hidden=false;showInspection(body.job)}};
+document.querySelector('#normalize').onclick=async()=>{const body=await call(`/api/jobs/${jobId}/normalize`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orientationMapping:document.querySelector('#orientation').value})});if(body.ok){document.querySelector('#qa').innerHTML=body.job.qaOutputs.map(name=>`<figure><img src="/api/jobs/${jobId}/qa/${name}" alt="${name}"><figcaption>${name}</figcaption></figure>`).join('')}};
+document.querySelector('#approve').onclick=()=>call(`/api/jobs/${jobId}/decision`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({decision:'approve'})});
+document.querySelector('#reject').onclick=()=>call(`/api/jobs/${jobId}/decision`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({decision:'reject'})});
+document.querySelector('#export').onclick=()=>call(`/api/jobs/${jobId}/vmp`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({commercialUseAsserted:document.querySelector('#commercial').checked,termsBasis:document.querySelector('#terms').value})});
+</script></body></html>
