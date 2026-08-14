@@ -38,5 +38,16 @@ forward/up mapping.
 
 The manual UI binds to `127.0.0.1:8043` only. VMP v2 acceptance uses the independent sibling
 `import-probe-v2/` implementation and its independently hashed schema copies; the historical bound v1 probe remains
-unchanged. On the current test machine Blender 5.2.0 exits with signal 139 before the normalization script executes,
-so Import → Inspect is usable but normalization must continue to be reported as unavailable/failed there.
+unchanged.
+
+Normalize and QA use live Blender enum probing for the EEVEE engine and color-management look. Each attempted QA
+view records the selected engine, absolute intended path, Blender operator result, output existence, and byte size.
+The application also retains the scrubbed subprocess command, return code or signal identity, stdout, and stderr in
+a distinct `diagnostics/blender/attempt-*` directory. These records contain no provider credentials or inherited
+environment secrets.
+
+Normalize+QA advances lifecycle state atomically: the job remains `inspected` until Blender has returned, the
+normalized GLB has passed inspection and source-to-normalized texture-channel preservation checks, and all seven QA
+PNGs decode at their required dimensions. A failed attempt therefore remains retryable with the same immutable
+source and explicit orientation mapping; it cannot be approved. This avoids inventing backward state transitions or
+silently treating a partially rendered asset as validated.

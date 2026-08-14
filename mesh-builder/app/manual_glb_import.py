@@ -4,11 +4,14 @@ import hashlib
 import json
 import os
 import re
+import signal
 import subprocess
 from dataclasses import asdict
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, BinaryIO
+
+from PIL import Image, UnidentifiedImageError
 
 from common.glb_facts import GlbFactsError, parse_glb_facts
 
@@ -32,6 +35,7 @@ QA_FILES = (
     "gameplay_neutral.png", "bank_left.png", "bank_right.png", "top_ortho.png",
     "front.png", "side.png", "gameplay_scale_96.png",
 )
+QA_DIMENSIONS = {name: (96, 96) if name == "gameplay_scale_96.png" else (384, 384) for name in QA_FILES}
 
 
 class ManualGlbImportError(ValueError):
@@ -54,9 +58,86 @@ def _safe_token(value: str, label: str) -> str:
 
 
 def _write_json(path: Path, value: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
     temporary.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     os.replace(temporary, path)
+
+
+def _attempt_diagnostics(root: Path) -> Path:
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ")
+    path = root / "diagnostics/blender" / f"attempt-{stamp}"
+    path.mkdir(parents=True, exist_ok=False)
+    return path
+
+
+def _text(value: str | bytes | None) -> str:
+    if value is None:
+        return ""
+    return value.decode("utf-8", "replace") if isinstance(value, bytes) else value
+
+
+def _persist_execution(
+    directory: Path, *, blender: Path, command: list[str], returncode: int | None,
+    stdout: str | bytes | None, stderr: str | bytes | None, timed_out: bool = False,
+) -> dict[str, Any]:
+    stdout_text, stderr_text = _text(stdout), _text(stderr)
+    (directory / "stdout.txt").write_text(stdout_text, encoding="utf-8")
+    (directory / "stderr.txt").write_text(stderr_text, encoding="utf-8")
+    signal_number = -returncode if returncode is not None and returncode < 0 else None
+    try:
+        signal_name = signal.Signals(signal_number).name if signal_number else None
+    except ValueError:
+        signal_name = None
+    summary = {
+        "schemaVersion": "skyforge.blender-subprocess-diagnostics.v1",
+        "blenderExecutable": str(blender.resolve()),
+        "command": command,
+        "returnCode": returncode,
+        "timedOut": timed_out,
+        "terminatedBySignal": signal_number is not None,
+        "signalNumber": signal_number,
+        "signalName": signal_name,
+        "stdoutFile": "stdout.txt",
+        "stderrFile": "stderr.txt",
+    }
+    _write_json(directory / "execution.json", summary)
+    return summary
+
+
+def _validate_texture_preservation(source: dict[str, Any], normalized: Any) -> None:
+    source_channels = {name for item in source.get("material_texture_channels", []) for name in item}
+    normalized_channels = {name for item in normalized.material_texture_channels for name in item}
+    missing_channels = sorted(source_channels - normalized_channels)
+    if missing_channels:
+        raise ManualGlbImportError("normalization removed material texture channels: " + ", ".join(missing_channels))
+    for key in ("material_count", "texture_count", "image_count"):
+        if int(source.get(key, 0)) > 0 and int(getattr(normalized, key)) <= 0:
+            raise ManualGlbImportError(f"normalization removed required {key.replace('_', ' ')}")
+    for key, label in (("uv_primitive_count", "UVs"), ("normal_primitive_count", "normals"),
+                       ("tangent_primitive_count", "tangents")):
+        if int(source.get(key, 0)) > 0 and int(getattr(normalized, key)) <= 0:
+            raise ManualGlbImportError(f"normalization removed required {label}")
+
+
+def _validate_qa_outputs(root: Path) -> None:
+    for name, dimensions in QA_DIMENSIONS.items():
+        path = root / "output/qa" / name
+        if not path.is_file():
+            raise ManualGlbImportError(f"Blender did not produce required QA output: {name}")
+        if path.stat().st_size <= 0:
+            raise ManualGlbImportError(f"QA output is empty: {name}")
+        try:
+            with Image.open(path) as image:
+                image.verify()
+            with Image.open(path) as image:
+                actual = image.size
+        except (OSError, UnidentifiedImageError) as exc:
+            raise ManualGlbImportError(f"QA output is not a decodable PNG: {name}") from exc
+        if actual != dimensions:
+            raise ManualGlbImportError(
+                f"QA output has wrong dimensions: {name} is {actual[0]}x{actual[1]}, expected {dimensions[0]}x{dimensions[1]}"
+            )
 
 
 def create_manual_import(
@@ -184,21 +265,62 @@ def normalize_manual_import(root: Path, blender: Path, script: Path) -> dict[str
     verify_source_artifact(root, job)
     if job.get("orientationMapping") not in ORIENTATION_MAPPINGS:
         raise ManualGlbImportError("explicit source forward/up orientation is required before normalization")
-    completed = subprocess.run([
+    diagnostics = _attempt_diagnostics(root)
+    normalized_path = root / "output/normalized.glb"
+    normalized_path.unlink(missing_ok=True)
+    for name in QA_FILES:
+        (root / "output/qa" / name).unlink(missing_ok=True)
+    command = [
         str(blender), "--background", "--factory-startup", "--python", str(script), "--",
         "--job-root", str(root), "--orientation", job["orientationMapping"],
-    ], capture_output=True, text=True, timeout=600, check=False,
-       env={"PATH": "/usr/bin:/bin:/usr/sbin:/sbin"})
+        "--diagnostics", str(diagnostics),
+    ]
+    try:
+        completed = subprocess.run(
+            command, capture_output=True, text=True, timeout=600, check=False,
+            env={"PATH": "/usr/bin:/bin:/usr/sbin:/sbin"},
+        )
+    except subprocess.TimeoutExpired as exc:
+        _persist_execution(
+            diagnostics, blender=blender, command=command, returncode=None,
+            stdout=exc.stdout, stderr=exc.stderr, timed_out=True,
+        )
+        raise ManualGlbImportError("Blender normalization timed out after 600 seconds") from exc
+    execution = _persist_execution(
+        diagnostics, blender=blender, command=command, returncode=completed.returncode,
+        stdout=completed.stdout, stderr=completed.stderr,
+    )
     if completed.returncode:
         detail = "\n".join(value for value in (completed.stdout, completed.stderr) if value).strip()
-        raise ManualGlbImportError((detail or "Blender normalization failed")[-4000:])
-    normalized = root / "output/normalized.glb"
-    facts = parse_glb_facts(normalized.read_bytes())
-    job = transition(root, "normalized", normalized={"sha256": _sha(normalized.read_bytes()), "inspection": _facts_dict(facts)})
+        if execution["terminatedBySignal"]:
+            identity = f"signal {execution['signalNumber']}"
+            if execution["signalName"]:
+                identity += f" ({execution['signalName']})"
+            prefix = f"Blender terminated by {identity}"
+        else:
+            prefix = f"Blender normalization exited with code {completed.returncode}"
+        raise ManualGlbImportError((prefix + (f": {detail}" if detail else ""))[-4000:])
+    script_diagnostics_path = diagnostics / "blender_script.json"
+    if not script_diagnostics_path.is_file():
+        raise ManualGlbImportError("Blender exited successfully without producing script diagnostics")
+    try:
+        script_diagnostics = json.loads(script_diagnostics_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ManualGlbImportError("Blender script diagnostics are missing or malformed") from exc
+    if script_diagnostics.get("error"):
+        error_lines = [line.strip() for line in str(script_diagnostics["error"]).splitlines() if line.strip()]
+        raise ManualGlbImportError("Blender normalization script failed: " + (error_lines[-1] if error_lines else "unknown error"))
+    stages = [item.get("stage") for item in script_diagnostics.get("stageMarkers", []) if isinstance(item, dict)]
+    if not stages or stages[-1] != "script_completed":
+        raise ManualGlbImportError("Blender exited without completing the normalization script")
+    if not normalized_path.is_file():
+        raise ManualGlbImportError("Blender exited successfully without producing normalized.glb")
+    normalized_payload = normalized_path.read_bytes()
+    facts = parse_glb_facts(normalized_payload)
+    _validate_texture_preservation(job["inspection"]["facts"], facts)
+    _validate_qa_outputs(root)
+    job = transition(root, "normalized", normalized={"sha256": _sha(normalized_payload), "inspection": _facts_dict(facts)})
     job = transition(root, "validated", validation={"passed": True, "gates": _validation_gates(facts)})
-    missing = [name for name in QA_FILES if not (root / "output/qa" / name).is_file()]
-    if missing:
-        raise ManualGlbImportError("Blender did not produce required QA outputs: " + ", ".join(missing))
     return transition(root, "qa_ready", qaOutputs=list(QA_FILES))
 
 
