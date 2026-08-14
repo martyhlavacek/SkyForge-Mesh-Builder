@@ -9,7 +9,7 @@
     <label>Textured GLB<input type="file" name="glb" accept=".glb" required></label>
     <div class="row three"><label>Asset ID<input name="assetId" required></label><label>Asset version<input name="assetVersion" value="1.0.0" required></label><label>Asset role<input name="assetRole" value="air_moving" readonly></label></div>
     <label>Source provider<input value="meshy_web" readonly></label>
-    <label>Source forward / up (required only for Normalize)<select id="orientation" name="orientationMapping"><option value="">Inspect first; choose before Normalize…</option><option>+Y,+Z</option><option>-Y,+Z</option><option>+X,+Z</option><option>-X,+Z</option><option>+Y,-Z</option><option>-Y,-Z</option><option>+X,-Z</option><option>-X,-Z</option><option>+Z,+Y</option><option>+Z,-Y</option><option>-Z,+Y</option><option>-Z,-Y</option><option>+Z,+X</option><option>+Z,-X</option><option>-Z,+X</option><option>-Z,-X</option></select></label>
+    <label>Source forward / up (required only for Normalize)<select id="orientation" name="orientationMapping"><option value="">Inspect first; choose before Normalize…</option>{% for mapping in orientation_mappings %}<option value="{{ mapping }}">{{ mapping }}</option>{% endfor %}</select></label>
     <label>Source notes<textarea name="sourceNotes"></textarea></label><button>Import and inspect</button>
   </form>
   <div id="status" class="status">Ready.</div>

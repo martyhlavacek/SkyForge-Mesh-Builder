@@ -19,9 +19,10 @@ WORKFLOW_ID = "external_glb_import"
 SOURCE_PROVIDER = "meshy_web"
 MAX_UPLOAD_BYTES = 250 * 1024 * 1024
 _AXES = ("+X", "-X", "+Y", "-Y", "+Z", "-Z")
-ORIENTATION_MAPPINGS = frozenset(
+ORIENTATION_MAPPING_OPTIONS = tuple(
     f"{forward},{up}" for forward in _AXES for up in _AXES if forward[-1] != up[-1]
 )
+ORIENTATION_MAPPINGS = frozenset(ORIENTATION_MAPPING_OPTIONS)
 TRANSITIONS = {
     "imported": {"inspected", "rejected"},
     "inspected": {"normalized", "rejected"},

@@ -9,6 +9,7 @@ from flask import Flask, jsonify, render_template, request, send_file, session
 
 from .external_glb_vmp_export import export_manual_glb_vmp
 from .manual_glb_import import (
+    ORIENTATION_MAPPING_OPTIONS,
     QA_FILES,
     ManualGlbImportError,
     approve_manual_import,
@@ -49,7 +50,10 @@ def create_manual_glb_app(package_root: Path | None = None, workspace: Path | No
 
     @app.get("/")
     def index():
-        return render_template("manual_glb.html", csrf_token=csrf(), blender_available=resolve_blender_path(root) is not None)
+        return render_template(
+            "manual_glb.html", csrf_token=csrf(), blender_available=resolve_blender_path(root) is not None,
+            orientation_mappings=ORIENTATION_MAPPING_OPTIONS,
+        )
 
     @app.post("/api/import")
     def import_glb():
