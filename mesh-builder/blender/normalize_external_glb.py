@@ -149,7 +149,7 @@ def main() -> None:
     bpy.context.view_layer.objects.active = root_obj
     bpy.ops.export_scene.gltf(
         filepath=str(output / "normalized.glb"), export_format="GLB", use_selection=True,
-        export_materials="EXPORT", export_image_format="AUTO", export_animations=True,
+        export_materials="EXPORT", export_image_format="AUTO", export_animations=True, export_tangents=True,
     )
     mark(summary, diagnostics_path, "normalized_glb_exported")
     qa.mkdir(parents=True, exist_ok=True)

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import io
 import json
 import signal
@@ -101,6 +102,20 @@ def _mutate_glb(data: bytes, change) -> bytes:
 def test_live_engine_selector_prefers_blender_5_identifier():
     scene = _scene("BLENDER_EEVEE", "BLENDER_EEVEE_NEXT")
     assert select_eevee_engine(scene) == "BLENDER_EEVEE"
+
+
+def test_production_manual_export_explicitly_preserves_tangents():
+    script = Path(__file__).resolve().parents[1] / "blender/normalize_external_glb.py"
+    tree = ast.parse(script.read_text(encoding="utf-8"))
+    exports = [
+        node for node in ast.walk(tree) if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute) and node.func.attr == "gltf"
+        and isinstance(node.func.value, ast.Attribute) and node.func.value.attr == "export_scene"
+    ]
+    assert len(exports) == 1
+    keywords = {item.arg: item.value for item in exports[0].keywords}
+    assert isinstance(keywords.get("export_tangents"), ast.Constant)
+    assert keywords["export_tangents"].value is True
 
 
 def test_live_engine_selector_falls_back_to_eevee_next():
